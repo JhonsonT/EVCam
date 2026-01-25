@@ -443,8 +443,3 @@ gradlew.bat connectedAndroidTest
 - **wechat**: greenteacher46 (请备注来意)
 
 ---
-
-<div align="center">
-  <p>Made with ❤️ by EVCam Team</p>
-  <p>© 2026 EVCam. All rights reserved.</p>
-</div>
