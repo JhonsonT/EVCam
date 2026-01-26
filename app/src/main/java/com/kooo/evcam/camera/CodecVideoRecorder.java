@@ -68,7 +68,11 @@ public class CodecVideoRecorder {
     // 时间戳基准（用于计算相对时间戳，供输入端使用）
     private long firstFrameTimestampNs = -1;
     
-    // 编码器输出帧计数（用于计算正确的 PTS）
+    // 分段开始时间（用于计算 PTS，基于系统时间而非帧数）
+    // 这样可以准确反映实际录制时长，不受帧率波动影响
+    private long segmentStartTimeNs = 0;
+    
+    // 编码器输出帧计数（仅用于日志和统计，不再用于 PTS 计算）
     private long encodedOutputFrameCount = 0;
 
     // 分段录制相关
@@ -269,6 +273,10 @@ public class CodecVideoRecorder {
 
         AppLog.d(TAG, "Camera " + cameraId + " Starting codec recording");
 
+        // 记录分段开始时间（用于 PTS 计算）
+        segmentStartTimeNs = System.nanoTime();
+        encodedOutputFrameCount = 0;
+        
         isRecording = true;
 
         // 注意：不再使用单独的编码循环
@@ -533,18 +541,17 @@ public class CodecVideoRecorder {
                     if (!muxerStarted) {
                         AppLog.e(TAG, "Camera " + cameraId + " Muxer not started but got data");
                     } else {
-                        // 完全使用基于帧率计算的时间戳，不依赖设备返回的 presentationTimeUs
-                        // 这是最可靠的方案，确保在所有设备上都能正常工作
-                        // 原因：不同设备的 MediaCodec 返回的 presentationTimeUs 行为不一致
-                        //   - 有些返回系统绝对时间（导致视频时长显示为系统运行时间）
-                        //   - 有些返回 0
-                        //   - 有些返回正确的相对时间
-                        long calculatedPtsUs = encodedOutputFrameCount * 1000000L / FRAME_RATE;
+                        // 使用系统时间计算 PTS，而不是基于帧数和假设帧率
+                        // 优点：
+                        //   1. 视频时长精确反映实际录制时长
+                        //   2. 不受帧率波动影响（实际帧率可能是 25-30fps 不等）
+                        //   3. 掉帧时时间轴仍然正确（只是画面会卡顿）
+                        long currentTimeNs = System.nanoTime();
+                        long calculatedPtsUs = (currentTimeNs - segmentStartTimeNs) / 1000;
                         
                         // 调试日志（仅第一帧）
                         if (encodedOutputFrameCount == 0) {
-                            AppLog.d(TAG, "Camera " + cameraId + " First encoder PTS (ignored): " 
-                                + bufferInfo.presentationTimeUs + " us, using calculated: " + calculatedPtsUs + " us");
+                            AppLog.d(TAG, "Camera " + cameraId + " First frame PTS: " + calculatedPtsUs + " us");
                         }
                         
                         // 使用计算的时间戳
@@ -615,7 +622,8 @@ public class CodecVideoRecorder {
             String nextSegmentPath = generateSegmentPath();
             currentFilePath = nextSegmentPath;
             
-            // 重置帧计数（用于 Muxer 的 PTS）
+            // 重置分段开始时间和帧计数
+            segmentStartTimeNs = System.nanoTime();
             encodedOutputFrameCount = 0;
             // 不重置 firstFrameTimestampNs，保持 EGL 时间戳单调递增
 
@@ -714,7 +722,8 @@ public class CodecVideoRecorder {
                 createMuxer(nextSegmentPath);
             }
             
-            // 重置帧计数
+            // 重置分段开始时间和帧计数
+            segmentStartTimeNs = System.nanoTime();
             encodedOutputFrameCount = 0;
             
             // 恢复录制
