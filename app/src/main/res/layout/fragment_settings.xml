@@ -102,6 +102,49 @@
                 android:layout_marginBottom="24dp"
                 android:visibility="gone" />
 
+            <!-- 录制模式配置 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@color/card_background"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="录制模式"
+                        android:textColor="@color/text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_recording_mode_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="选择视频录制的编码方式"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <Spinner
+                    android:id="@+id/spinner_recording_mode"
+                    android:layout_width="180dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/spinner_background"
+                    android:popupBackground="@color/card_background" />
+            </LinearLayout>
+
             <!-- Debug mode switch -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -340,7 +383,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="• Debug 模式：开启后，应用的调试日志将以 Info 级别输出，便于在生产环境中查看\n\n• 保存日志：将当前应用日志导出到文件，方便问题排查和技术支持\n\n• 后台唤醒权限：允许应用在后台收到钉钉命令时自动唤醒屏幕并执行拍照/录制。如未授权，后台命令将无法正常工作\n\n• 保活服务（无障碍）：启用后应用进程优先级提高，防止被系统清理。本服务不会监控用户操作，仅用于提高后台稳定性\n\n• 开机自启动：启用后系统启动时自动运行应用（后台模式），适合车机系统无人值守场景\n\n• 定时保活任务：每15分钟自动唤醒一次，保持应用进程活跃，配合无障碍服务使用效果更佳"
+                android:text="• 车型配置：选择对应车型以适配摄像头布局和默认参数\n\n• 录制模式：\n  - 自动：根据车型自动选择最佳方案\n  - MediaRecorder：使用系统硬件编码，兼容性好\n  - OpenGL+MediaCodec：软编码方案，解决部分设备录制失败问题\n\n• Debug 模式：开启后，调试日志以 Info 级别输出\n\n• 后台唤醒权限：允许后台钉钉命令唤醒屏幕\n\n• 保活服务：防止应用被系统清理\n\n• 开机自启动：系统启动后自动运行应用\n\n• 定时保活：每15分钟唤醒一次保持活跃"
                 android:textColor="@color/text_secondary"
                 android:textSize="16sp"
                 android:lineSpacingExtra="4dp" />

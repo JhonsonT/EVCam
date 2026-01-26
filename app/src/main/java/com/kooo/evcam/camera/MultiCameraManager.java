@@ -31,17 +31,20 @@ public class MultiCameraManager {
     private final Context context;
     private final Map<String, SingleCamera> cameras = new LinkedHashMap<>();
     private final Map<String, VideoRecorder> recorders = new LinkedHashMap<>();
+    private final Map<String, CodecVideoRecorder> codecRecorders = new LinkedHashMap<>();  // 软编码录制器
     private final List<String> activeCameraKeys = new ArrayList<>();
     private int maxOpenCameras = DEFAULT_MAX_OPEN_CAMERAS;
 
     private boolean isRecording = false;
+    private boolean useCodecRecording = false;  // 是否使用软编码录制（用于 L6/L7）
     private StatusCallback statusCallback;
     private PreviewSizeCallback previewSizeCallback;
-    private int sessionConfiguredCount = 0;
-    private int expectedSessionCount = 0;
+    private volatile int sessionConfiguredCount = 0;
+    private volatile int expectedSessionCount = 0;
     private Runnable pendingRecordingStart = null;
     private android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable sessionTimeoutRunnable = null;
+    private final Object sessionLock = new Object();  // 用于同步 session 配置计数
 
     public interface StatusCallback {
         void onCameraStatusUpdate(String cameraId, String status);
@@ -65,6 +68,44 @@ public class MultiCameraManager {
 
     public void setMaxOpenCameras(int maxOpenCameras) {
         this.maxOpenCameras = Math.max(1, maxOpenCameras);
+    }
+
+    /**
+     * 设置单一输出模式（用于不支持多路输出的车机平台，如 L6/L7）
+     * 在此模式下，录制时只使用 MediaRecorder Surface，不使用 TextureView Surface
+     * 这会导致录制期间预览冻结，但能确保录制正常工作
+     * 
+     * @param enabled true 表示启用单一输出模式
+     * @deprecated 请使用 setCodecRecordingMode(true) 代替，它使用 OpenGL 渲染方案
+     */
+    @Deprecated
+    public void setSingleOutputMode(boolean enabled) {
+        AppLog.d(TAG, "Setting single output mode: " + (enabled ? "ENABLED" : "DISABLED"));
+        for (SingleCamera camera : cameras.values()) {
+            camera.setSingleOutputMode(enabled);
+        }
+    }
+
+    /**
+     * 设置软编码录制模式（用于 L6/L7 等不支持 MediaRecorder 直接录制的车机平台）
+     * 在此模式下，使用 OpenGL 渲染 + MediaCodec 编码 + MediaMuxer 写入文件
+     * 
+     * 优点：
+     * - 预览保持流畅，不会冻结
+     * - 不依赖硬件对 MediaRecorder Surface 的支持
+     * 
+     * @param enabled true 表示启用软编码录制模式
+     */
+    public void setCodecRecordingMode(boolean enabled) {
+        this.useCodecRecording = enabled;
+        AppLog.d(TAG, "Codec recording mode: " + (enabled ? "ENABLED" : "DISABLED"));
+    }
+
+    /**
+     * 检查是否使用软编码录制模式
+     */
+    public boolean isCodecRecordingMode() {
+        return useCodecRecording;
     }
 
     /**
@@ -168,25 +209,29 @@ public class MultiCameraManager {
                     }
                 }
 
-                // 检查是否所有会话都已配置完成
-                if (expectedSessionCount > 0) {
-                    sessionConfiguredCount++;
-                    AppLog.d(TAG, "Session configured: " + sessionConfiguredCount + "/" + expectedSessionCount);
+                // 检查是否所有会话都已配置完成（线程安全处理）
+                synchronized (sessionLock) {
+                    if (expectedSessionCount > 0) {
+                        sessionConfiguredCount++;
+                        AppLog.d(TAG, "Session configured: " + sessionConfiguredCount + "/" + expectedSessionCount);
 
-                    if (sessionConfiguredCount >= expectedSessionCount) {
-                        // 所有会话都已配置完成，执行待处理的录制启动
-                        if (pendingRecordingStart != null) {
-                            AppLog.d(TAG, "All sessions configured, starting recording...");
-                            // 取消超时任务
-                            if (sessionTimeoutRunnable != null) {
-                                mainHandler.removeCallbacks(sessionTimeoutRunnable);
-                                sessionTimeoutRunnable = null;
+                        if (sessionConfiguredCount >= expectedSessionCount) {
+                            // 所有会话都已配置完成，执行待处理的录制启动
+                            final Runnable recordingTask = pendingRecordingStart;
+                            if (recordingTask != null) {
+                                AppLog.d(TAG, "All sessions configured, starting recording...");
+                                // 取消超时任务
+                                if (sessionTimeoutRunnable != null) {
+                                    mainHandler.removeCallbacks(sessionTimeoutRunnable);
+                                    sessionTimeoutRunnable = null;
+                                }
+                                pendingRecordingStart = null;
+                                // 在主线程上执行录制启动，确保线程安全
+                                mainHandler.post(recordingTask);
                             }
-                            pendingRecordingStart.run();
-                            pendingRecordingStart = null;
+                            sessionConfiguredCount = 0;
+                            expectedSessionCount = 0;
                         }
-                        sessionConfiguredCount = 0;
-                        expectedSessionCount = 0;
                     }
                 }
             }
@@ -207,35 +252,39 @@ public class MultiCameraManager {
                     statusCallback.onCameraStatusUpdate(cameraId, "错误: " + errorMsg);
                 }
 
-                // 如果在等待会话配置期间发生错误，减少期望计数
-                if (expectedSessionCount > 0 && errorCode == -3) {
-                    expectedSessionCount--;
-                    AppLog.d(TAG, "Session configuration failed, adjusted expected count: " + sessionConfiguredCount + "/" + expectedSessionCount);
+                // 如果在等待会话配置期间发生错误，减少期望计数（线程安全处理）
+                synchronized (sessionLock) {
+                    if (expectedSessionCount > 0 && errorCode == -3) {
+                        expectedSessionCount--;
+                        AppLog.d(TAG, "Session configuration failed, adjusted expected count: " + sessionConfiguredCount + "/" + expectedSessionCount);
 
-                    // 检查是否所有剩余会话都已配置完成
-                    if (sessionConfiguredCount >= expectedSessionCount && expectedSessionCount > 0) {
-                        if (pendingRecordingStart != null) {
-                            AppLog.d(TAG, "Remaining sessions configured, starting recording...");
-                            // 取消超时任务
+                        // 检查是否所有剩余会话都已配置完成
+                        if (sessionConfiguredCount >= expectedSessionCount && expectedSessionCount > 0) {
+                            final Runnable recordingTask = pendingRecordingStart;
+                            if (recordingTask != null) {
+                                AppLog.d(TAG, "Remaining sessions configured, starting recording...");
+                                // 取消超时任务
+                                if (sessionTimeoutRunnable != null) {
+                                    mainHandler.removeCallbacks(sessionTimeoutRunnable);
+                                    sessionTimeoutRunnable = null;
+                                }
+                                pendingRecordingStart = null;
+                                // 在主线程上执行录制启动
+                                mainHandler.post(recordingTask);
+                            }
+                            sessionConfiguredCount = 0;
+                            expectedSessionCount = 0;
+                        } else if (expectedSessionCount == 0) {
+                            // 所有会话都失败了
+                            AppLog.e(TAG, "All sessions failed to configure");
                             if (sessionTimeoutRunnable != null) {
                                 mainHandler.removeCallbacks(sessionTimeoutRunnable);
                                 sessionTimeoutRunnable = null;
                             }
-                            pendingRecordingStart.run();
+                            sessionConfiguredCount = 0;
+                            expectedSessionCount = 0;
                             pendingRecordingStart = null;
                         }
-                        sessionConfiguredCount = 0;
-                        expectedSessionCount = 0;
-                    } else if (expectedSessionCount == 0) {
-                        // 所有会话都失败了
-                        AppLog.e(TAG, "All sessions failed to configure");
-                        if (sessionTimeoutRunnable != null) {
-                            mainHandler.removeCallbacks(sessionTimeoutRunnable);
-                            sessionTimeoutRunnable = null;
-                        }
-                        sessionConfiguredCount = 0;
-                        expectedSessionCount = 0;
-                        pendingRecordingStart = null;
                     }
                 }
             }
@@ -404,7 +453,19 @@ public class MultiCameraManager {
             return false;
         }
 
-        AppLog.d(TAG, "Starting recording with timestamp: " + timestamp);
+        // 根据模式选择录制方式
+        if (useCodecRecording) {
+            return startCodecRecording(timestamp);
+        } else {
+            return startMediaRecorderRecording(timestamp);
+        }
+    }
+
+    /**
+     * 使用 MediaRecorder 开始录制（标准模式）
+     */
+    private boolean startMediaRecorderRecording(String timestamp) {
+        AppLog.d(TAG, "Starting MediaRecorder recording with timestamp: " + timestamp);
 
         File saveDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "EVCam_Video");
         if (!saveDir.exists()) {
@@ -457,8 +518,10 @@ public class MultiCameraManager {
         }
 
         // 第二步：将录制 Surface 添加到摄像头会话并重新创建会话
-        sessionConfiguredCount = 0;
-        expectedSessionCount = keys.size();
+        synchronized (sessionLock) {
+            sessionConfiguredCount = 0;
+            expectedSessionCount = keys.size();
+        }
 
         for (String key : keys) {
             SingleCamera camera = cameras.get(key);
@@ -482,6 +545,8 @@ public class MultiCameraManager {
                     if (recorder.startRecording()) {
                         successCount++;
                         startSuccess = true;  // 至少有一个成功
+                    } else {
+                        AppLog.e(TAG, "Failed to start recording for " + key);
                     }
                 }
             }
@@ -505,12 +570,175 @@ public class MultiCameraManager {
         // 设置超时机制：如果 3 秒内没有所有会话配置完成，强制启动录制
         sessionTimeoutRunnable = () -> {
             AppLog.w(TAG, "Session configuration timeout, starting recording with available cameras");
-            if (pendingRecordingStart != null) {
-                pendingRecordingStart.run();
-                pendingRecordingStart = null;
+            synchronized (sessionLock) {
+                final Runnable recordingTask = pendingRecordingStart;
+                if (recordingTask != null) {
+                    pendingRecordingStart = null;
+                    recordingTask.run();
+                }
+                sessionConfiguredCount = 0;
+                expectedSessionCount = 0;
             }
+        };
+        mainHandler.postDelayed(sessionTimeoutRunnable, 3000);
+
+        return true;
+    }
+
+    /**
+     * 使用软编码开始录制（L6/L7 模式）
+     * 使用 OpenGL 渲染 + MediaCodec 编码 + MediaMuxer 写入
+     */
+    private boolean startCodecRecording(String timestamp) {
+        AppLog.d(TAG, "Starting CODEC recording with timestamp: " + timestamp);
+
+        File saveDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "EVCam_Video");
+        if (!saveDir.exists()) {
+            saveDir.mkdirs();
+        }
+
+        List<String> keys = getActiveCameraKeys();
+        if (keys.isEmpty()) {
+            AppLog.e(TAG, "No active cameras for codec recording");
+            return false;
+        }
+
+        // 清理之前的软编码录制器
+        for (CodecVideoRecorder recorder : codecRecorders.values()) {
+            recorder.release();
+        }
+        codecRecorders.clear();
+
+        // 为每个摄像头创建软编码录制器并准备
+        boolean prepareSuccess = true;
+        for (String key : keys) {
+            SingleCamera camera = cameras.get(key);
+            if (camera == null) {
+                continue;
+            }
+
+            // 获取摄像头的实际预览分辨率
+            Size previewSize = camera.getPreviewSize();
+            if (previewSize == null) {
+                AppLog.e(TAG, "Camera " + key + " preview size not available, using fallback 1280x800");
+                previewSize = new Size(1280, 800);
+            }
+
+            // 创建软编码录制器
+            CodecVideoRecorder codecRecorder = new CodecVideoRecorder(
+                    camera.getCameraId(), 
+                    previewSize.getWidth(), 
+                    previewSize.getHeight()
+            );
+
+            // 设置回调
+            codecRecorder.setCallback(new RecordCallback() {
+                @Override
+                public void onRecordStart(String cameraId) {
+                    AppLog.d(TAG, "Codec recording started for camera " + cameraId);
+                }
+
+                @Override
+                public void onRecordStop(String cameraId) {
+                    AppLog.d(TAG, "Codec recording stopped for camera " + cameraId);
+                }
+
+                @Override
+                public void onRecordError(String cameraId, String error) {
+                    AppLog.e(TAG, "Codec recording error for camera " + cameraId + ": " + error);
+                }
+
+                @Override
+                public void onSegmentSwitch(String cameraId, int newSegmentIndex) {
+                    AppLog.d(TAG, "Codec segment switch for camera " + cameraId + " to segment " + newSegmentIndex);
+                }
+            });
+
+            // 准备录制
+            String path = new File(saveDir, timestamp + "_" + key + ".mp4").getAbsolutePath();
+            AppLog.d(TAG, "Preparing codec recording for " + key + " with size: " + previewSize.getWidth() + "x" + previewSize.getHeight());
+
+            android.graphics.SurfaceTexture surfaceTexture = codecRecorder.prepareRecording(path);
+            if (surfaceTexture == null) {
+                AppLog.e(TAG, "Failed to prepare codec recording for " + key);
+                prepareSuccess = false;
+                break;
+            }
+
+            // 将 SurfaceTexture 设置给 Camera（通过 Surface）
+            android.view.Surface recordSurface = new android.view.Surface(surfaceTexture);
+            camera.setRecordSurface(recordSurface);
+
+            codecRecorders.put(key, codecRecorder);
+        }
+
+        if (!prepareSuccess) {
+            AppLog.e(TAG, "Failed to prepare codec recording");
+            // 清理已准备的录制器
+            for (CodecVideoRecorder recorder : codecRecorders.values()) {
+                recorder.release();
+            }
+            codecRecorders.clear();
+            return false;
+        }
+
+        // 重新创建摄像头会话
+        synchronized (sessionLock) {
             sessionConfiguredCount = 0;
-            expectedSessionCount = 0;
+            expectedSessionCount = keys.size();
+        }
+
+        for (String key : keys) {
+            SingleCamera camera = cameras.get(key);
+            if (camera != null) {
+                camera.recreateSession();
+            }
+        }
+
+        // 设置待处理的录制启动任务
+        pendingRecordingStart = () -> {
+            AppLog.d(TAG, "Attempting to start codec recording...");
+            boolean startSuccess = false;
+            int successCount = 0;
+
+            for (String key : keys) {
+                CodecVideoRecorder codecRecorder = codecRecorders.get(key);
+                if (codecRecorder != null) {
+                    if (codecRecorder.startRecording()) {
+                        successCount++;
+                        startSuccess = true;
+                    } else {
+                        AppLog.e(TAG, "Failed to start codec recording for " + key);
+                    }
+                }
+            }
+
+            if (startSuccess) {
+                isRecording = true;
+                AppLog.d(TAG, successCount + " camera(s) started codec recording successfully");
+            } else {
+                AppLog.e(TAG, "Failed to start codec recording on all cameras");
+                isRecording = false;
+                // 清理所有录制器
+                for (CodecVideoRecorder recorder : codecRecorders.values()) {
+                    recorder.release();
+                }
+                codecRecorders.clear();
+            }
+        };
+
+        // 设置超时机制
+        sessionTimeoutRunnable = () -> {
+            AppLog.w(TAG, "Session configuration timeout, starting codec recording with available cameras");
+            synchronized (sessionLock) {
+                final Runnable recordingTask = pendingRecordingStart;
+                if (recordingTask != null) {
+                    pendingRecordingStart = null;
+                    recordingTask.run();
+                }
+                sessionConfiguredCount = 0;
+                expectedSessionCount = 0;
+            }
         };
         mainHandler.postDelayed(sessionTimeoutRunnable, 3000);
 
@@ -521,12 +749,18 @@ public class MultiCameraManager {
      * 停止录制所有摄像头
      */
     public void stopRecording() {
-        AppLog.d(TAG, "stopRecording called, isRecording=" + isRecording);
+        AppLog.d(TAG, "stopRecording called, isRecording=" + isRecording + ", useCodecRecording=" + useCodecRecording);
 
-        // 清理待处理的录制启动任务
-        if (pendingRecordingStart != null) {
-            AppLog.d(TAG, "Cancelling pending recording start");
-            pendingRecordingStart = null;
+        // 清理待处理的录制启动任务和会话计数器（线程安全处理）
+        synchronized (sessionLock) {
+            if (pendingRecordingStart != null) {
+                AppLog.d(TAG, "Cancelling pending recording start");
+                pendingRecordingStart = null;
+            }
+
+            // 重置会话计数器
+            sessionConfiguredCount = 0;
+            expectedSessionCount = 0;
         }
 
         // 清理超时任务
@@ -535,24 +769,42 @@ public class MultiCameraManager {
             sessionTimeoutRunnable = null;
         }
 
-        // 重置会话计数器
-        sessionConfiguredCount = 0;
-        expectedSessionCount = 0;
+        List<String> keys = getActiveCameraKeys();
 
         if (!isRecording) {
             AppLog.w(TAG, "Not recording, but cleaning up anyway");
             // 即使不在录制状态，也尝试清理录制器
-            List<String> keys = getActiveCameraKeys();
             for (String key : keys) {
                 VideoRecorder recorder = recorders.get(key);
                 if (recorder != null) {
                     recorder.release();
                 }
+                CodecVideoRecorder codecRecorder = codecRecorders.get(key);
+                if (codecRecorder != null) {
+                    codecRecorder.release();
+                }
             }
+            codecRecorders.clear();
             return;
         }
 
-        List<String> keys = getActiveCameraKeys();
+        // 停止软编码录制
+        if (!codecRecorders.isEmpty()) {
+            AppLog.d(TAG, "Stopping codec recorders...");
+            for (String key : keys) {
+                CodecVideoRecorder codecRecorder = codecRecorders.get(key);
+                if (codecRecorder != null && codecRecorder.isRecording()) {
+                    codecRecorder.stopRecording();
+                }
+            }
+            // 释放软编码录制器
+            for (CodecVideoRecorder recorder : codecRecorders.values()) {
+                recorder.release();
+            }
+            codecRecorders.clear();
+        }
+
+        // 停止 MediaRecorder 录制
         for (String key : keys) {
             VideoRecorder recorder = recorders.get(key);
             if (recorder != null && recorder.isRecording()) {
@@ -560,6 +812,7 @@ public class MultiCameraManager {
             }
         }
 
+        // 清理摄像头会话
         for (String key : keys) {
             SingleCamera camera = cameras.get(key);
             if (camera != null) {
@@ -583,8 +836,13 @@ public class MultiCameraManager {
             recorder.release();
         }
 
+        for (CodecVideoRecorder codecRecorder : codecRecorders.values()) {
+            codecRecorder.release();
+        }
+
         cameras.clear();
         recorders.clear();
+        codecRecorders.clear();
         AppLog.d(TAG, "All resources released");
     }
 

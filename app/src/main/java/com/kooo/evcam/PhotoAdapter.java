@@ -17,7 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.File;
@@ -91,7 +91,7 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
 
         // 删除按钮
         holder.btnDelete.setOnClickListener(v -> {
-            new AlertDialog.Builder(context, androidx.appcompat.R.style.Theme_AppCompat_DayNight_Dialog_Alert)
+            new MaterialAlertDialogBuilder(context, R.style.Theme_Cam_MaterialAlertDialog)
                     .setTitle("确认删除")
                     .setMessage("确定要删除 " + photoFile.getName() + " 吗？")
                     .setPositiveButton("删除", (dialog, which) -> {

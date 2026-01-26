@@ -14,6 +14,12 @@ public class AppConfig {
     // 配置项键名
     private static final String KEY_AUTO_START_ON_BOOT = "auto_start_on_boot";  // 开机自启动
     private static final String KEY_KEEP_ALIVE_ENABLED = "keep_alive_enabled";  // 保活服务
+    private static final String KEY_RECORDING_MODE = "recording_mode";  // 录制模式
+    
+    // 录制模式常量
+    public static final String RECORDING_MODE_AUTO = "auto";  // 自动（根据车型决定）
+    public static final String RECORDING_MODE_MEDIA_RECORDER = "media_recorder";  // MediaRecorder（硬件编码）
+    public static final String RECORDING_MODE_CODEC = "codec";  // OpenGL + MediaCodec（软编码）
     
     // 车型配置相关键名
     private static final String KEY_CAR_MODEL = "car_model";  // 车型（galaxy_e5 / custom）
@@ -78,6 +84,41 @@ public class AppConfig {
     public boolean isKeepAliveEnabled() {
         // 默认启用保活服务
         return prefs.getBoolean(KEY_KEEP_ALIVE_ENABLED, true);
+    }
+    
+    /**
+     * 设置录制模式
+     * @param mode 录制模式（auto/media_recorder/codec）
+     */
+    public void setRecordingMode(String mode) {
+        prefs.edit().putString(KEY_RECORDING_MODE, mode).apply();
+        AppLog.d(TAG, "录制模式设置: " + mode);
+    }
+    
+    /**
+     * 获取录制模式
+     * @return 录制模式，默认为自动
+     */
+    public String getRecordingMode() {
+        return prefs.getString(KEY_RECORDING_MODE, RECORDING_MODE_AUTO);
+    }
+    
+    /**
+     * 判断是否应该使用 Codec 录制模式
+     * @return true 表示应该使用 CodecVideoRecorder
+     */
+    public boolean shouldUseCodecRecording() {
+        String mode = getRecordingMode();
+        if (RECORDING_MODE_CODEC.equals(mode)) {
+            // 强制使用 Codec 模式
+            return true;
+        } else if (RECORDING_MODE_MEDIA_RECORDER.equals(mode)) {
+            // 强制使用 MediaRecorder 模式
+            return false;
+        } else {
+            // 自动模式：只有 L6/L7 车型使用 Codec 模式
+            return CAR_MODEL_L7.equals(getCarModel());
+        }
     }
     
     /**

@@ -46,4 +46,14 @@
     <style name="NavigationMenuTextAppearance" parent="TextAppearance.AppCompat.Body1">
         <item name="android:textSize">18sp</item>
     </style>
+
+    <!-- 日间模式对话框主题 -->
+    <style name="Theme.Cam.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        <!-- 对话框背景 -->
+        <item name="colorSurface">#FFFFFF</item>
+        <!-- 标题和内容文字颜色 -->
+        <item name="colorOnSurface">#1A1A1A</item>
+        <!-- 按钮颜色 -->
+        <item name="colorPrimary">#1976D2</item>
+    </style>
 </resources>

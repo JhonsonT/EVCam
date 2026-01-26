@@ -56,6 +56,7 @@ public class SingleCamera {
     private Surface recordSurface;  // 录制Surface
     private Surface previewSurface;  // 预览Surface（缓存以避免重复创建）
     private ImageReader imageReader;  // 用于拍照的ImageReader
+    private boolean singleOutputMode = false;  // 单一输出模式（用于不支持多路输出的车机平台）
 
     // 调试：帧捕获监控
     private long frameCount = 0;  // 总帧数
@@ -64,7 +65,7 @@ public class SingleCamera {
 
     private boolean shouldReconnect = false;  // 是否应该重连
     private int reconnectAttempts = 0;  // 重连尝试次数
-    private static final int MAX_RECONNECT_ATTEMPTS = 30;  // 最大重连次数（30次 = 1分钟）
+    private static final int MAX_RECONNECT_ATTEMPTS = 90;  // 最大重连次数（90次 × 2秒 = 3分钟）
     private static final long RECONNECT_DELAY_MS = 2000;  // 重连延迟（毫秒）
     private Runnable reconnectRunnable;  // 重连任务
     private boolean isPausedByLifecycle = false;  // 是否因生命周期暂停（用于区分主动关闭和系统剥夺）
@@ -188,6 +189,23 @@ public class SingleCamera {
      */
     public Size getPreviewSize() {
         return previewSize;
+    }
+
+    /**
+     * 设置单一输出模式（用于不支持多路输出的车机平台，如 L6/L7）
+     * 在此模式下，录制时只使用 MediaRecorder Surface，不使用 TextureView Surface
+     * 这会导致录制期间预览冻结，但能确保录制正常工作
+     */
+    public void setSingleOutputMode(boolean enabled) {
+        this.singleOutputMode = enabled;
+        AppLog.d(TAG, "Camera " + cameraId + " single output mode: " + (enabled ? "ENABLED" : "DISABLED"));
+    }
+
+    /**
+     * 检查是否启用了单一输出模式
+     */
+    public boolean isSingleOutputMode() {
+        return singleOutputMode;
     }
 
     /**
@@ -549,11 +567,18 @@ public class SingleCamera {
                     callback.onCameraError(cameraId, -4); // 自定义错误码：断开连接
                 }
 
-                // 启动自动重连（如果没有正在重连）
-                if (shouldReconnect && !isReconnecting) {
+                // 断开连接可能发生在重连过程中（openCamera 后但配置 session 前）
+                // 需要重置 isReconnecting 标志以允许继续重试
+                if (isReconnecting) {
+                    AppLog.d(TAG, "Camera " + cameraId + " disconnected during reconnect, resetting flag");
+                    isReconnecting = false;
+                }
+                
+                // 启动自动重连
+                if (shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                     scheduleReconnect();
-                } else if (isReconnecting) {
-                    AppLog.d(TAG, "Camera " + cameraId + " already reconnecting, skipping");
+                } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                    AppLog.e(TAG, "Camera " + cameraId + " max reconnect attempts reached, giving up");
                 }
             }
         }
@@ -617,11 +642,18 @@ public class SingleCamera {
                     return;
                 }
 
-                // 如果应该重试且允许重连，且没有正在重连，则启动自动重连
-                if (shouldRetry && shouldReconnect && !isReconnecting) {
+                // 重连过程中收到错误，说明 openCamera 已经执行完毕（通过回调返回了错误）
+                // 需要重置 isReconnecting 标志，以便可以继续下一次重连尝试
+                if (isReconnecting) {
+                    AppLog.d(TAG, "Camera " + cameraId + " reconnect attempt completed with error, resetting flag");
+                    isReconnecting = false;
+                }
+                
+                // 如果应该重试且允许重连，则启动自动重连
+                if (shouldRetry && shouldReconnect && reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                     scheduleReconnect();
-                } else if (isReconnecting) {
-                    AppLog.d(TAG, "Camera " + cameraId + " already reconnecting, skipping");
+                } else if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                    AppLog.e(TAG, "Camera " + cameraId + " max reconnect attempts reached, giving up");
                 }
             }
         }
@@ -679,27 +711,39 @@ public class SingleCamera {
             AppLog.d(TAG, "Camera " + cameraId + " Creating capture request...");
             int template = (recordSurface != null) ? CameraDevice.TEMPLATE_RECORD : CameraDevice.TEMPLATE_PREVIEW;
             final CaptureRequest.Builder previewRequestBuilder = cameraDevice.createCaptureRequest(template);
-            previewRequestBuilder.addTarget(surface);
-            AppLog.d(TAG, "Camera " + cameraId + " Added preview surface to request");
-
+            
             // 准备所有输出Surface
             java.util.List<Surface> surfaces = new java.util.ArrayList<>();
-            surfaces.add(surface);
 
-            // 如果有录制Surface，也添加到输出目标
-            if (recordSurface != null) {
-                // 诊断：检查 recordSurface 有效性
-                boolean isValid = recordSurface.isValid();
-                AppLog.d(TAG, "Camera " + cameraId + " recordSurface check: " + recordSurface + ", isValid=" + isValid);
-                
-                if (!isValid) {
-                    AppLog.e(TAG, "Camera " + cameraId + " CRITICAL: recordSurface is INVALID! Recording will likely fail!");
-                    // 如果录制 Surface 无效，不添加到会话中，避免配置失败
-                    AppLog.w(TAG, "Camera " + cameraId + " Skipping invalid record surface to avoid session configuration failure");
-                } else {
-                    surfaces.add(recordSurface);
-                    previewRequestBuilder.addTarget(recordSurface);
-                    AppLog.d(TAG, "Added record surface to camera " + cameraId + " (isValid=" + isValid + ")");
+            // 单一输出模式处理（用于 L6/L7 等不支持多路输出的车机平台）
+            if (singleOutputMode && recordSurface != null && recordSurface.isValid()) {
+                // 单一输出模式：录制时只使用 recordSurface，不使用预览 Surface
+                // 这会导致预览冻结，但能确保录制正常工作
+                AppLog.d(TAG, "Camera " + cameraId + " SINGLE OUTPUT MODE: Using ONLY record surface");
+                surfaces.add(recordSurface);
+                previewRequestBuilder.addTarget(recordSurface);
+                AppLog.d(TAG, "Camera " + cameraId + " Added record surface ONLY: " + recordSurface);
+            } else {
+                // 正常模式：添加预览 Surface
+                previewRequestBuilder.addTarget(surface);
+                surfaces.add(surface);
+                AppLog.d(TAG, "Camera " + cameraId + " Added preview surface to request");
+
+                // 如果有录制Surface且不是单一输出模式，也添加到输出目标
+                if (recordSurface != null) {
+                    // 诊断：检查 recordSurface 有效性
+                    boolean isValid = recordSurface.isValid();
+                    AppLog.d(TAG, "Camera " + cameraId + " recordSurface check: " + recordSurface + ", isValid=" + isValid);
+                    
+                    if (!isValid) {
+                        AppLog.e(TAG, "Camera " + cameraId + " CRITICAL: recordSurface is INVALID! Recording will likely fail!");
+                        // 如果录制 Surface 无效，不添加到会话中，避免配置失败
+                        AppLog.w(TAG, "Camera " + cameraId + " Skipping invalid record surface to avoid session configuration failure");
+                    } else {
+                        surfaces.add(recordSurface);
+                        previewRequestBuilder.addTarget(recordSurface);
+                        AppLog.d(TAG, "Added record surface to camera " + cameraId + " (isValid=" + isValid + ")");
+                    }
                 }
             }
 

@@ -874,6 +874,13 @@ public class MainActivity extends AppCompatActivity {
                     // 银河E5：使用固定映射
                     initCamerasForGalaxyE5(cameraIds);
                 }
+                
+                // 根据设置决定录制模式（支持用户手动选择）
+                boolean useCodecRecording = appConfig.shouldUseCodecRecording();
+                cameraManager.setCodecRecordingMode(useCodecRecording);
+                String recordingMode = appConfig.getRecordingMode();
+                String modeDesc = useCodecRecording ? "OpenGL + MediaCodec" : "MediaRecorder";
+                AppLog.d(TAG, "录制模式: " + modeDesc + " (设置: " + recordingMode + ")");
 
                 // 打开所有摄像头
                 cameraManager.openAllCameras();

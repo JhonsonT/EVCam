@@ -47,6 +47,13 @@ public class SettingsFragment extends Fragment {
     private static final String[] CAR_MODEL_OPTIONS = {"银河E5", "银河L6/L7", "手机", "自定义车型"};
     private boolean isInitializingCarModel = false;  // 标志位：是否正在初始化车型配置
     private String lastAppliedCarModel = null;  // 记录上次已应用的车型，避免初始化触发
+    
+    // 录制模式配置相关
+    private Spinner recordingModeSpinner;
+    private TextView recordingModeDescText;
+    private static final String[] RECORDING_MODE_OPTIONS = {"自动（推荐）", "MediaRecorder", "OpenGL+MediaCodec"};
+    private boolean isInitializingRecordingMode = false;
+    private String lastAppliedRecordingMode = null;
 
     @Nullable
     @Override
@@ -80,6 +87,9 @@ public class SettingsFragment extends Fragment {
             
             // 初始化车型配置
             initCarModelConfig(view);
+            
+            // 初始化录制模式配置
+            initRecordingModeConfig(view);
         }
 
         // 设置Debug开关监听器
@@ -381,6 +391,103 @@ public class SettingsFragment extends Fragment {
     private void updateCustomConfigButtonVisibility(boolean visible) {
         if (customCameraConfigButton != null) {
             customCameraConfigButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+        }
+    }
+    
+    /**
+     * 初始化录制模式配置
+     */
+    private void initRecordingModeConfig(View view) {
+        recordingModeSpinner = view.findViewById(R.id.spinner_recording_mode);
+        recordingModeDescText = view.findViewById(R.id.tv_recording_mode_desc);
+        
+        if (recordingModeSpinner == null || getContext() == null) {
+            return;
+        }
+        
+        isInitializingRecordingMode = true;
+        lastAppliedRecordingMode = (appConfig != null) ? appConfig.getRecordingMode() : null;
+        
+        // 设置下拉选择框适配器
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                getContext(),
+                R.layout.spinner_item,
+                RECORDING_MODE_OPTIONS
+        );
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        recordingModeSpinner.setAdapter(adapter);
+        
+        // 设置下拉选择监听器
+        recordingModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String newMode;
+                String modeName;
+                String modeDesc;
+                
+                if (position == 0) {
+                    newMode = AppConfig.RECORDING_MODE_AUTO;
+                    modeName = "自动";
+                    modeDesc = "L6/L7用软编码，其他用硬编码";
+                } else if (position == 1) {
+                    newMode = AppConfig.RECORDING_MODE_MEDIA_RECORDER;
+                    modeName = "MediaRecorder";
+                    modeDesc = "使用系统硬件编码器，兼容性好";
+                } else {
+                    newMode = AppConfig.RECORDING_MODE_CODEC;
+                    modeName = "OpenGL+MediaCodec";
+                    modeDesc = "软编码方案，解决部分设备兼容问题";
+                }
+                
+                // 更新描述文字
+                updateRecordingModeDescription(modeDesc);
+                
+                // 初始化阶段不保存
+                if (isInitializingRecordingMode) {
+                    return;
+                }
+                
+                // 与当前已保存模式相同，不重复写入
+                if (newMode.equals(lastAppliedRecordingMode)) {
+                    return;
+                }
+                
+                lastAppliedRecordingMode = newMode;
+                appConfig.setRecordingMode(newMode);
+                
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "已切换为「" + modeName + "」模式，下次录制生效", Toast.LENGTH_SHORT).show();
+                }
+            }
+            
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // 不处理
+            }
+        });
+        
+        // 根据当前配置设置选中项
+        String currentMode = appConfig.getRecordingMode();
+        int selectedIndex = 0;  // 默认自动
+        if (AppConfig.RECORDING_MODE_MEDIA_RECORDER.equals(currentMode)) {
+            selectedIndex = 1;
+        } else if (AppConfig.RECORDING_MODE_CODEC.equals(currentMode)) {
+            selectedIndex = 2;
+        }
+        recordingModeSpinner.setSelection(selectedIndex);
+        
+        // 延迟重置标志位
+        recordingModeSpinner.post(() -> {
+            isInitializingRecordingMode = false;
+        });
+    }
+    
+    /**
+     * 更新录制模式描述文字
+     */
+    private void updateRecordingModeDescription(String desc) {
+        if (recordingModeDescText != null) {
+            recordingModeDescText.setText(desc);
         }
     }
     
