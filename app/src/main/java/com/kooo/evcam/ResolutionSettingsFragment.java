@@ -329,7 +329,7 @@ public class ResolutionSettingsFragment extends Fragment {
         bitrateSpinner.setAdapter(adapter);
 
         // 设置当前选中项
-        String currentLevel = (appConfig != null) ? appConfig.getBitrateLevel() : AppConfig.BITRATE_MEDIUM;
+        String currentLevel = appConfig.getBitrateLevel();
         selectedBitrateLevel = currentLevel;
         int selectedIndex = 1;  // 默认标准
         if (AppConfig.BITRATE_LOW.equals(currentLevel)) {
@@ -388,7 +388,7 @@ public class ResolutionSettingsFragment extends Fragment {
         framerateSpinner.setAdapter(adapter);
 
         // 设置当前选中项
-        String currentLevel = (appConfig != null) ? appConfig.getFramerateLevel() : AppConfig.FRAMERATE_STANDARD;
+        String currentLevel = appConfig.getFramerateLevel();
         selectedFramerateLevel = currentLevel;
         int selectedIndex = 0;  // 默认标准
         if (AppConfig.FRAMERATE_LOW.equals(currentLevel)) {
@@ -535,10 +535,6 @@ public class ResolutionSettingsFragment extends Fragment {
         }
         
         // 当前配置
-        if (appConfig == null) {
-            currentParamsText.setText("配置未初始化");
-            return;
-        }
         String targetRes = appConfig.getTargetResolution();
         String bitrateLevel = AppConfig.getBitrateLevelDisplayName(appConfig.getBitrateLevel());
         String framerateLevel = AppConfig.getFramerateLevelDisplayName(appConfig.getFramerateLevel());
