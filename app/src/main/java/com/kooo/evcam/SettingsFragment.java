@@ -302,7 +302,6 @@ public class SettingsFragment extends Fragment {
         // density: mdpi=1.0, hdpi=1.5, xhdpi=2.0, xxhdpi=3.0, xxxhdpi=4.0
         int qrcodeSizePx;
         if (density <= 1.0f) {
-<<<<<<< Current (Your changes)
             // mdpi 或更低密度（大屏低DPI设备）：使用屏幕宽度的25%
             qrcodeSizePx = (int) (screenWidthPx * 0.25f);
         } else if (density <= 1.5f) {
@@ -314,19 +313,6 @@ public class SettingsFragment extends Fragment {
         } else {
             // xxhdpi 及以上（高密度设备）：使用屏幕宽度的18%
             qrcodeSizePx = (int) (screenWidthPx * 0.18f);
-=======
-            // mdpi 或更低密度（大屏低DPI设备）：使用屏幕宽度的50%
-            qrcodeSizePx = (int) (screenWidthPx * 0.50f);
-        } else if (density <= 1.5f) {
-            // hdpi：使用屏幕宽度的45%
-            qrcodeSizePx = (int) (screenWidthPx * 0.45f);
-        } else if (density <= 2.0f) {
-            // xhdpi：使用屏幕宽度的40%
-            qrcodeSizePx = (int) (screenWidthPx * 0.40f);
-        } else {
-            // xxhdpi 及以上（高密度设备）：使用屏幕宽度的35%
-            qrcodeSizePx = (int) (screenWidthPx * 0.35f);
->>>>>>> Incoming (Background Agent changes)
         }
         
         // 设置ImageView尺寸
