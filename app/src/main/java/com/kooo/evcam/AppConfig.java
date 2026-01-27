@@ -46,6 +46,12 @@ public class AppConfig {
     // 时间角标配置
     private static final String KEY_TIMESTAMP_WATERMARK_ENABLED = "timestamp_watermark_enabled";  // 时间角标开关
     
+    // 录制摄像头选择配置
+    private static final String KEY_RECORDING_CAMERA_FRONT_ENABLED = "recording_camera_front_enabled";  // 前摄像头参与录制
+    private static final String KEY_RECORDING_CAMERA_BACK_ENABLED = "recording_camera_back_enabled";    // 后摄像头参与录制
+    private static final String KEY_RECORDING_CAMERA_LEFT_ENABLED = "recording_camera_left_enabled";    // 左摄像头参与录制
+    private static final String KEY_RECORDING_CAMERA_RIGHT_ENABLED = "recording_camera_right_enabled";  // 右摄像头参与录制
+    
     // 分段时长常量（分钟）
     public static final int SEGMENT_DURATION_1_MIN = 1;
     public static final int SEGMENT_DURATION_3_MIN = 3;
@@ -253,9 +259,31 @@ public class AppConfig {
     
     /**
      * 获取摄像头数量
-     * @return 摄像头数量，默认为4
+     * 对于预设车型返回固定数量，对于自定义车型返回用户设置的数量
+     * @return 摄像头数量
      */
     public int getCameraCount() {
+        String carModel = getCarModel();
+        // 预设车型返回固定的摄像头数量
+        switch (carModel) {
+            case CAR_MODEL_PHONE:
+                return 2;  // 手机：2摄
+            case CAR_MODEL_GALAXY_E5:
+            case CAR_MODEL_L7:
+            case CAR_MODEL_L7_MULTI:
+                return 4;  // 银河E5/L7：4摄
+            case CAR_MODEL_CUSTOM:
+            default:
+                // 自定义车型使用用户设置的数量
+                return prefs.getInt(KEY_CAMERA_COUNT, 4);
+        }
+    }
+    
+    /**
+     * 获取用户设置的摄像头数量（仅用于自定义车型）
+     * @return 用户设置的摄像头数量，默认为4
+     */
+    public int getCustomCameraCount() {
         return prefs.getInt(KEY_CAMERA_COUNT, 4);
     }
     
@@ -365,33 +393,72 @@ public class AppConfig {
     
     /**
      * 获取摄像头名称
+     * 对于预设车型返回默认名称，对于自定义车型返回用户设置的名称
      * @param position 位置（front/back/left/right）
      * @return 摄像头名称
      */
     public String getCameraName(String position) {
+        // 预设车型返回默认名称
+        if (!isCustomCarModel()) {
+            return getDefaultCameraName(position);
+        }
+        
+        // 自定义车型返回用户设置的名称
         String key;
-        String defaultValue;
+        String defaultValue = getDefaultCameraName(position);
         switch (position) {
             case "front":
                 key = KEY_CAMERA_FRONT_NAME;
-                defaultValue = "前";
                 break;
             case "back":
                 key = KEY_CAMERA_BACK_NAME;
-                defaultValue = "后";
                 break;
             case "left":
                 key = KEY_CAMERA_LEFT_NAME;
-                defaultValue = "左";
                 break;
             case "right":
                 key = KEY_CAMERA_RIGHT_NAME;
-                defaultValue = "右";
                 break;
             default:
                 return "未知";
         }
         return prefs.getString(key, defaultValue);
+    }
+    
+    /**
+     * 获取预设车型的默认摄像头名称
+     * 新增预设车型时，如果名称不同于默认值，在此添加
+     * @param position 位置（front/back/left/right）
+     * @return 默认名称
+     */
+    public String getDefaultCameraName(String position) {
+        String carModel = getCarModel();
+        
+        // 特定车型的自定义名称（与布局文件保持一致）
+        // 示例：L7-多按钮车型使用不同的名称
+        // if (CAR_MODEL_L7_MULTI.equals(carModel)) {
+        //     switch (position) {
+        //         case "front": return "前111";
+        //         case "back": return "后";
+        //         case "left": return "左";
+        //         case "right": return "右";
+        //         default: return "未知";
+        //     }
+        // }
+        
+        // 默认名称（适用于大多数预设车型）
+        switch (position) {
+            case "front":
+                return "前";
+            case "back":
+                return "后";
+            case "left":
+                return "左";
+            case "right":
+                return "右";
+            default:
+                return "未知";
+        }
     }
 
     /**
@@ -732,5 +799,119 @@ public class AppConfig {
     public boolean isTimestampWatermarkEnabled() {
         // 默认关闭时间角标
         return prefs.getBoolean(KEY_TIMESTAMP_WATERMARK_ENABLED, false);
+    }
+    
+    // ==================== 录制摄像头选择配置相关方法 ====================
+    
+    /**
+     * 设置某个摄像头是否参与主界面录制
+     * @param position 位置（front/back/left/right）
+     * @param enabled true 表示参与录制
+     */
+    public void setRecordingCameraEnabled(String position, boolean enabled) {
+        String key;
+        switch (position) {
+            case "front":
+                key = KEY_RECORDING_CAMERA_FRONT_ENABLED;
+                break;
+            case "back":
+                key = KEY_RECORDING_CAMERA_BACK_ENABLED;
+                break;
+            case "left":
+                key = KEY_RECORDING_CAMERA_LEFT_ENABLED;
+                break;
+            case "right":
+                key = KEY_RECORDING_CAMERA_RIGHT_ENABLED;
+                break;
+            default:
+                AppLog.w(TAG, "未知的摄像头位置: " + position);
+                return;
+        }
+        prefs.edit().putBoolean(key, enabled).apply();
+        AppLog.d(TAG, "录制摄像头设置: " + position + " = " + (enabled ? "启用" : "禁用"));
+    }
+    
+    /**
+     * 获取某个摄像头是否参与主界面录制
+     * @param position 位置（front/back/left/right）
+     * @return true 表示参与录制，默认为 true
+     */
+    public boolean isRecordingCameraEnabled(String position) {
+        String key;
+        switch (position) {
+            case "front":
+                key = KEY_RECORDING_CAMERA_FRONT_ENABLED;
+                break;
+            case "back":
+                key = KEY_RECORDING_CAMERA_BACK_ENABLED;
+                break;
+            case "left":
+                key = KEY_RECORDING_CAMERA_LEFT_ENABLED;
+                break;
+            case "right":
+                key = KEY_RECORDING_CAMERA_RIGHT_ENABLED;
+                break;
+            default:
+                return true;  // 未知位置默认启用
+        }
+        // 默认启用（全选）
+        return prefs.getBoolean(key, true);
+    }
+    
+    /**
+     * 获取所有启用录制的摄像头位置集合
+     * 仅返回当前车型配置中存在的摄像头
+     * @return 启用的摄像头位置集合（如 ["front", "back"]）
+     */
+    public java.util.Set<String> getEnabledRecordingCameras() {
+        java.util.Set<String> enabled = new java.util.HashSet<>();
+        int cameraCount = getCameraCount();
+        
+        // 根据摄像头数量判断哪些位置存在
+        if (cameraCount >= 1 && isRecordingCameraEnabled("front")) {
+            enabled.add("front");
+        }
+        if (cameraCount >= 2 && isRecordingCameraEnabled("back")) {
+            enabled.add("back");
+        }
+        if (cameraCount >= 4) {
+            if (isRecordingCameraEnabled("left")) {
+                enabled.add("left");
+            }
+            if (isRecordingCameraEnabled("right")) {
+                enabled.add("right");
+            }
+        }
+        
+        return enabled;
+    }
+    
+    /**
+     * 重置录制摄像头选择为全选
+     */
+    public void resetRecordingCameraSelection() {
+        prefs.edit()
+            .putBoolean(KEY_RECORDING_CAMERA_FRONT_ENABLED, true)
+            .putBoolean(KEY_RECORDING_CAMERA_BACK_ENABLED, true)
+            .putBoolean(KEY_RECORDING_CAMERA_LEFT_ENABLED, true)
+            .putBoolean(KEY_RECORDING_CAMERA_RIGHT_ENABLED, true)
+            .apply();
+        AppLog.d(TAG, "录制摄像头选择已重置为全选");
+    }
+    
+    /**
+     * 获取用于显示的摄像头名称（用于录制摄像头选择等设置界面）
+     * 使用配置中的名称，如果为空则返回"位置N"
+     * @param position 位置（front/back/left/right）
+     * @param index 位置索引（1-4）
+     * @return 显示名称
+     */
+    public String getRecordingCameraDisplayName(String position, int index) {
+        String name = getCameraName(position);
+        // 如果名称为空或仅为空白，使用位置名称
+        if (name == null || name.trim().isEmpty()) {
+            return "位置" + index;
+        }
+        return name;
     }
 }

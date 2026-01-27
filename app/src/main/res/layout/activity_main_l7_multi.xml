@@ -181,7 +181,7 @@
                         android:layout_marginTop="8dp"
                         android:background="@drawable/camera_label_background"
                         android:gravity="center"
-                        android:text="前"
+                        android:text="前111"
                         android:textColor="#FFFFFF"
                         android:textSize="16sp" />
                 </FrameLayout>

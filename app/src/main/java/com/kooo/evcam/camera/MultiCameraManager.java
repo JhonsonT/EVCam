@@ -472,16 +472,37 @@ public class MultiCameraManager {
 
         // 根据模式选择录制方式
         if (useCodecRecording) {
-            return startCodecRecording(timestamp);
+            return startCodecRecording(timestamp, null);
         } else {
-            return startMediaRecorderRecording(timestamp);
+            return startMediaRecorderRecording(timestamp, null);
+        }
+    }
+
+    /**
+     * 开始录制指定的摄像头（使用指定的时间戳和摄像头列表）
+     * @param timestamp 统一的时间戳，用于所有摄像头的文件命名
+     * @param enabledCameras 要录制的摄像头位置集合（如 ["front", "back"]），为 null 时录制所有摄像头
+     */
+    public boolean startRecording(String timestamp, Set<String> enabledCameras) {
+        if (isRecording) {
+            AppLog.w(TAG, "Already recording");
+            return false;
+        }
+
+        // 根据模式选择录制方式
+        if (useCodecRecording) {
+            return startCodecRecording(timestamp, enabledCameras);
+        } else {
+            return startMediaRecorderRecording(timestamp, enabledCameras);
         }
     }
 
     /**
      * 使用 MediaRecorder 开始录制（标准模式）
+     * @param timestamp 时间戳
+     * @param enabledCameras 要录制的摄像头位置集合，为 null 时录制所有摄像头
      */
-    private boolean startMediaRecorderRecording(String timestamp) {
+    private boolean startMediaRecorderRecording(String timestamp, Set<String> enabledCameras) {
         AppLog.d(TAG, "Starting MediaRecorder recording with timestamp: " + timestamp);
 
         File saveDir = StorageHelper.getVideoDir(context);
@@ -489,9 +510,29 @@ public class MultiCameraManager {
             saveDir.mkdirs();
         }
 
-        List<String> keys = getActiveCameraKeys();
-        if (keys.isEmpty()) {
+        List<String> allKeys = getActiveCameraKeys();
+        if (allKeys.isEmpty()) {
             AppLog.e(TAG, "No active cameras for recording");
+            return false;
+        }
+
+        // 如果指定了摄像头列表，过滤 keys
+        final List<String> keys;
+        if (enabledCameras != null && !enabledCameras.isEmpty()) {
+            List<String> filteredKeys = new ArrayList<>();
+            for (String key : allKeys) {
+                if (enabledCameras.contains(key)) {
+                    filteredKeys.add(key);
+                }
+            }
+            keys = filteredKeys;
+            AppLog.d(TAG, "Filtered recording cameras: " + keys);
+        } else {
+            keys = allKeys;
+        }
+
+        if (keys.isEmpty()) {
+            AppLog.e(TAG, "No enabled cameras for recording after filtering");
             return false;
         }
 
@@ -613,8 +654,10 @@ public class MultiCameraManager {
     /**
      * 使用软编码开始录制（L6/L7 模式）
      * 使用 OpenGL 渲染 + MediaCodec 编码 + MediaMuxer 写入
+     * @param timestamp 时间戳
+     * @param enabledCameras 要录制的摄像头位置集合，为 null 时录制所有摄像头
      */
-    private boolean startCodecRecording(String timestamp) {
+    private boolean startCodecRecording(String timestamp, Set<String> enabledCameras) {
         AppLog.d(TAG, "Starting CODEC recording with timestamp: " + timestamp);
 
         File saveDir = StorageHelper.getVideoDir(context);
@@ -622,9 +665,29 @@ public class MultiCameraManager {
             saveDir.mkdirs();
         }
 
-        List<String> keys = getActiveCameraKeys();
-        if (keys.isEmpty()) {
+        List<String> allKeys = getActiveCameraKeys();
+        if (allKeys.isEmpty()) {
             AppLog.e(TAG, "No active cameras for codec recording");
+            return false;
+        }
+
+        // 如果指定了摄像头列表，过滤 keys
+        final List<String> keys;
+        if (enabledCameras != null && !enabledCameras.isEmpty()) {
+            List<String> filteredKeys = new ArrayList<>();
+            for (String key : allKeys) {
+                if (enabledCameras.contains(key)) {
+                    filteredKeys.add(key);
+                }
+            }
+            keys = filteredKeys;
+            AppLog.d(TAG, "Filtered codec recording cameras: " + keys);
+        } else {
+            keys = allKeys;
+        }
+
+        if (keys.isEmpty()) {
+            AppLog.e(TAG, "No enabled cameras for codec recording after filtering");
             return false;
         }
 

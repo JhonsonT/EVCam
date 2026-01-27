@@ -277,6 +277,89 @@
                     android:popupBackground="@color/card_background" />
             </LinearLayout>
 
+            <!-- 录制摄像头选择 -->
+            <LinearLayout
+                android:id="@+id/layout_recording_camera_selection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp"
+                android:background="@color/card_background"
+                android:layout_marginBottom="16dp">
+
+                <!-- 左侧：标题和描述 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="录制摄像头"
+                        android:textColor="@color/text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="不影响拍照和钉钉指令"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <!-- 右侧：勾选框横向排列 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <CheckBox
+                        android:id="@+id/cb_record_camera_front"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="前"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:checked="true" />
+
+                    <CheckBox
+                        android:id="@+id/cb_record_camera_back"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="后"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:checked="true"
+                        android:visibility="gone" />
+
+                    <CheckBox
+                        android:id="@+id/cb_record_camera_left"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="左"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:checked="true"
+                        android:visibility="gone" />
+
+                    <CheckBox
+                        android:id="@+id/cb_record_camera_right"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="右"
+                        android:textColor="@color/text_primary"
+                        android:textSize="14sp"
+                        android:checked="true"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- 存储位置配置 -->
             <LinearLayout
                 android:layout_width="match_parent"

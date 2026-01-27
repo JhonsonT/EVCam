@@ -547,13 +547,10 @@ public class MainActivity extends AppCompatActivity {
     }
     
     /**
-     * 更新摄像头标签（自定义车型时使用自定义名称）
+     * 更新摄像头标签
+     * 统一使用 AppConfig.getCameraName() 的值，确保主界面和设置界面显示一致
      */
     private void updateCameraLabels() {
-        if (!appConfig.isCustomCarModel()) {
-            return;
-        }
-        
         // 获取标签控件（根据布局可能存在或不存在）
         TextView labelFront = findViewById(R.id.label_front);
         TextView labelBack = findViewById(R.id.label_back);
@@ -1518,7 +1515,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void startRecording() {
         if (cameraManager != null && !cameraManager.isRecording()) {
-            boolean success = cameraManager.startRecording();
+            // 从配置读取启用的录制摄像头
+            AppConfig appConfig = new AppConfig(this);
+            java.util.Set<String> enabledCameras = appConfig.getEnabledRecordingCameras();
+            
+            if (enabledCameras.isEmpty()) {
+                Toast.makeText(this, "请至少选择一个录制摄像头", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // 生成统一时间戳
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
+                    .format(new java.util.Date());
+            
+            // 使用指定的摄像头进行录制
+            boolean success = cameraManager.startRecording(timestamp, enabledCameras);
             if (success) {
                 isRecording = true;
 
@@ -1534,8 +1545,11 @@ public class MainActivity extends AppCompatActivity {
                 // 发送录制状态广播（通知悬浮窗）
                 FloatingWindowService.sendRecordingStateChanged(this, true);
 
-                Toast.makeText(this, "开始录制（每1分钟自动分段）", Toast.LENGTH_SHORT).show();
-                AppLog.d(TAG, "Recording started with foreground service protection");
+                // 显示录制的摄像头数量
+                int cameraCount = enabledCameras.size();
+                String cameraText = cameraCount == appConfig.getCameraCount() ? "全部" : cameraCount + "个";
+                Toast.makeText(this, "开始录制 " + cameraText + " 摄像头（每1分钟自动分段）", Toast.LENGTH_SHORT).show();
+                AppLog.d(TAG, "Recording started with " + cameraCount + " camera(s): " + enabledCameras);
             } else {
                 Toast.makeText(this, "录制失败", Toast.LENGTH_SHORT).show();
             }

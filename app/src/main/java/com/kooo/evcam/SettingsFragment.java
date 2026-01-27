@@ -88,6 +88,13 @@ public class SettingsFragment extends Fragment {
     private TextView videoUsedSizeText;
     private TextView photoUsedSizeText;
     private boolean isInitializingStorageCleanup = false;
+    
+    // 录制摄像头选择配置相关
+    private android.widget.CheckBox cbRecordCameraFront;
+    private android.widget.CheckBox cbRecordCameraBack;
+    private android.widget.CheckBox cbRecordCameraLeft;
+    private android.widget.CheckBox cbRecordCameraRight;
+    private boolean isInitializingRecordingCameraSelection = false;
 
     @Nullable
     @Override
@@ -127,6 +134,9 @@ public class SettingsFragment extends Fragment {
             
             // 初始化分段时长配置
             initSegmentDurationConfig(view);
+            
+            // 初始化录制摄像头选择配置
+            initRecordingCameraSelectionConfig(view);
             
             // 初始化存储位置配置
             initStorageLocationConfig(view);
@@ -715,6 +725,9 @@ public class SettingsFragment extends Fragment {
                 lastAppliedCarModel = newModel;
                 appConfig.setCarModel(newModel);
                 
+                // 更新录制摄像头选择的 UI（摄像头数量由 AppConfig.getCameraCount() 自动根据车型返回）
+                updateRecordingCameraSelectionUI();
+                
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "已切换为「" + modelName + "」，重启应用后生效", Toast.LENGTH_SHORT).show();
                 }
@@ -917,6 +930,153 @@ public class SettingsFragment extends Fragment {
         segmentDurationSpinner.post(() -> {
             isInitializingSegmentDuration = false;
         });
+    }
+    
+    /**
+     * 初始化录制摄像头选择配置
+     */
+    private void initRecordingCameraSelectionConfig(View view) {
+        cbRecordCameraFront = view.findViewById(R.id.cb_record_camera_front);
+        cbRecordCameraBack = view.findViewById(R.id.cb_record_camera_back);
+        cbRecordCameraLeft = view.findViewById(R.id.cb_record_camera_left);
+        cbRecordCameraRight = view.findViewById(R.id.cb_record_camera_right);
+        
+        if (cbRecordCameraFront == null || getContext() == null || appConfig == null) {
+            return;
+        }
+        
+        isInitializingRecordingCameraSelection = true;
+        
+        // 根据摄像头数量显示/隐藏对应的 CheckBox
+        int cameraCount = appConfig.getCameraCount();
+        
+        // 前摄像头（1摄及以上都有）
+        cbRecordCameraFront.setVisibility(cameraCount >= 1 ? View.VISIBLE : View.GONE);
+        cbRecordCameraFront.setText(appConfig.getRecordingCameraDisplayName("front", 1));
+        cbRecordCameraFront.setChecked(appConfig.isRecordingCameraEnabled("front"));
+        
+        // 后摄像头（2摄及以上才有）
+        cbRecordCameraBack.setVisibility(cameraCount >= 2 ? View.VISIBLE : View.GONE);
+        cbRecordCameraBack.setText(appConfig.getRecordingCameraDisplayName("back", 2));
+        cbRecordCameraBack.setChecked(appConfig.isRecordingCameraEnabled("back"));
+        
+        // 左摄像头（4摄才有）
+        cbRecordCameraLeft.setVisibility(cameraCount >= 4 ? View.VISIBLE : View.GONE);
+        cbRecordCameraLeft.setText(appConfig.getRecordingCameraDisplayName("left", 3));
+        cbRecordCameraLeft.setChecked(appConfig.isRecordingCameraEnabled("left"));
+        
+        // 右摄像头（4摄才有）
+        cbRecordCameraRight.setVisibility(cameraCount >= 4 ? View.VISIBLE : View.GONE);
+        cbRecordCameraRight.setText(appConfig.getRecordingCameraDisplayName("right", 4));
+        cbRecordCameraRight.setChecked(appConfig.isRecordingCameraEnabled("right"));
+        
+        // 设置监听器
+        android.widget.CompoundButton.OnCheckedChangeListener listener = (buttonView, isChecked) -> {
+            if (isInitializingRecordingCameraSelection) {
+                return;
+            }
+            
+            // 检查是否至少有一个勾选
+            if (!isChecked && !hasAtLeastOneRecordingCameraEnabled(buttonView)) {
+                // 恢复勾选状态
+                buttonView.setChecked(true);
+                Toast.makeText(getContext(), "至少需要选择一个摄像头", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            // 保存设置
+            String position = getPositionFromCheckBox(buttonView);
+            if (position != null) {
+                appConfig.setRecordingCameraEnabled(position, isChecked);
+                String cameraName = ((android.widget.CheckBox) buttonView).getText().toString();
+                String message = isChecked ? "已启用「" + cameraName + "」录制" : "已禁用「" + cameraName + "」录制";
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        };
+        
+        cbRecordCameraFront.setOnCheckedChangeListener(listener);
+        cbRecordCameraBack.setOnCheckedChangeListener(listener);
+        cbRecordCameraLeft.setOnCheckedChangeListener(listener);
+        cbRecordCameraRight.setOnCheckedChangeListener(listener);
+        
+        // 延迟结束初始化标记
+        cbRecordCameraFront.post(() -> {
+            isInitializingRecordingCameraSelection = false;
+        });
+    }
+    
+    /**
+     * 更新录制摄像头选择的 UI（车型切换时调用）
+     */
+    private void updateRecordingCameraSelectionUI() {
+        if (cbRecordCameraFront == null || getContext() == null || appConfig == null) {
+            return;
+        }
+        
+        isInitializingRecordingCameraSelection = true;
+        
+        // 根据摄像头数量显示/隐藏对应的 CheckBox
+        int cameraCount = appConfig.getCameraCount();
+        
+        // 前摄像头（1摄及以上都有）
+        cbRecordCameraFront.setVisibility(cameraCount >= 1 ? View.VISIBLE : View.GONE);
+        cbRecordCameraFront.setText(appConfig.getRecordingCameraDisplayName("front", 1));
+        cbRecordCameraFront.setChecked(appConfig.isRecordingCameraEnabled("front"));
+        
+        // 后摄像头（2摄及以上才有）
+        cbRecordCameraBack.setVisibility(cameraCount >= 2 ? View.VISIBLE : View.GONE);
+        cbRecordCameraBack.setText(appConfig.getRecordingCameraDisplayName("back", 2));
+        cbRecordCameraBack.setChecked(appConfig.isRecordingCameraEnabled("back"));
+        
+        // 左摄像头（4摄才有）
+        cbRecordCameraLeft.setVisibility(cameraCount >= 4 ? View.VISIBLE : View.GONE);
+        cbRecordCameraLeft.setText(appConfig.getRecordingCameraDisplayName("left", 3));
+        cbRecordCameraLeft.setChecked(appConfig.isRecordingCameraEnabled("left"));
+        
+        // 右摄像头（4摄才有）
+        cbRecordCameraRight.setVisibility(cameraCount >= 4 ? View.VISIBLE : View.GONE);
+        cbRecordCameraRight.setText(appConfig.getRecordingCameraDisplayName("right", 4));
+        cbRecordCameraRight.setChecked(appConfig.isRecordingCameraEnabled("right"));
+        
+        // 延迟结束初始化标记
+        cbRecordCameraFront.post(() -> {
+            isInitializingRecordingCameraSelection = false;
+        });
+    }
+    
+    /**
+     * 检查除了当前按钮外，是否还有至少一个摄像头被勾选
+     */
+    private boolean hasAtLeastOneRecordingCameraEnabled(View excludeButton) {
+        if (cbRecordCameraFront != excludeButton && cbRecordCameraFront.getVisibility() == View.VISIBLE && cbRecordCameraFront.isChecked()) {
+            return true;
+        }
+        if (cbRecordCameraBack != excludeButton && cbRecordCameraBack.getVisibility() == View.VISIBLE && cbRecordCameraBack.isChecked()) {
+            return true;
+        }
+        if (cbRecordCameraLeft != excludeButton && cbRecordCameraLeft.getVisibility() == View.VISIBLE && cbRecordCameraLeft.isChecked()) {
+            return true;
+        }
+        if (cbRecordCameraRight != excludeButton && cbRecordCameraRight.getVisibility() == View.VISIBLE && cbRecordCameraRight.isChecked()) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 根据 CheckBox 获取对应的摄像头位置
+     */
+    private String getPositionFromCheckBox(View checkBox) {
+        if (checkBox == cbRecordCameraFront) {
+            return "front";
+        } else if (checkBox == cbRecordCameraBack) {
+            return "back";
+        } else if (checkBox == cbRecordCameraLeft) {
+            return "left";
+        } else if (checkBox == cbRecordCameraRight) {
+            return "right";
+        }
+        return null;
     }
     
     /**
