@@ -6,39 +6,66 @@ REM EVCam 自动化发布脚本
 REM 用途：构建签名的 Release APK 并发布到 GitHub Releases
 REM ====================================================
 
+set GRADLE_FILE=app\build.gradle.kts
+
 echo.
 echo ====================================================
 echo   EVCam 发布助手
 echo ====================================================
 echo.
 
-REM 检查版本号参数
-if "%1"=="" (
-    echo [提示] 请输入版本号（例如: v1.0.0）
-    echo.
-    set /p VERSION="请输入版本号: "
-    
-    REM 检查用户是否输入了版本号
-    if "!VERSION!"=="" (
-        echo.
-        echo [错误] 未输入版本号，退出。
-        echo.
-        pause
-        exit /b 1
-    )
-    
-    REM 如果用户没有输入 v 前缀，自动添加
-    echo !VERSION! | findstr /b "v" >nul
-    if errorlevel 1 (
-        set VERSION=v!VERSION!
-    )
-) else (
-    set VERSION=%1
+REM ====================================================
+REM 读取当前版本信息
+REM ====================================================
+echo [信息] 读取当前版本信息...
+
+REM 读取当前 versionCode
+set CURRENT_VERSION_CODE=0
+for /f "tokens=3 delims== " %%a in ('findstr /r "versionCode.*=" "%GRADLE_FILE%"') do (
+    set CURRENT_VERSION_CODE=%%a
+)
+echo [信息] 当前 versionCode: !CURRENT_VERSION_CODE!
+
+REM 读取当前 versionName
+set CURRENT_VERSION_NAME=
+for /f "tokens=3 delims== " %%a in ('findstr /r "versionName.*=" "%GRADLE_FILE%"') do (
+    set CURRENT_VERSION_NAME=%%~a
+)
+REM 去除引号
+set CURRENT_VERSION_NAME=!CURRENT_VERSION_NAME:"=!
+echo [信息] 当前 versionName: !CURRENT_VERSION_NAME!
+echo.
+
+REM ====================================================
+REM 自动递增 versionCode
+REM ====================================================
+set /a NEW_VERSION_CODE=!CURRENT_VERSION_CODE!+1
+echo [自动] 新 versionCode: !NEW_VERSION_CODE! (自动递增)
+
+REM ====================================================
+REM 用户输入 versionName
+REM ====================================================
+echo.
+echo [提示] 请输入新的 versionName（例如: 1.0.3）
+echo        直接按回车将使用当前版本: !CURRENT_VERSION_NAME!
+set /p NEW_VERSION_NAME="versionName: "
+
+if "!NEW_VERSION_NAME!"=="" (
+    set NEW_VERSION_NAME=!CURRENT_VERSION_NAME!
+    echo [信息] 使用当前版本名: !NEW_VERSION_NAME!
 )
 
-REM 确认版本号
+REM 设置 Git Tag 版本号（添加 v 前缀）
+set VERSION=v!NEW_VERSION_NAME!
+
 echo.
-echo [确认] 将要发布版本: !VERSION!
+echo ====================================================
+echo   版本确认
+echo ====================================================
+echo   versionCode: !CURRENT_VERSION_CODE! -^> !NEW_VERSION_CODE!
+echo   versionName: !CURRENT_VERSION_NAME! -^> !NEW_VERSION_NAME!
+echo   Git Tag:     !VERSION!
+echo ====================================================
 echo.
 set /p CONFIRM="确认继续？(Y/N): "
 if /i not "!CONFIRM!"=="Y" (
@@ -48,9 +75,31 @@ if /i not "!CONFIRM!"=="Y" (
     pause
     exit /b 0
 )
+
+REM ====================================================
+REM 更新 build.gradle.kts 文件
+REM ====================================================
+echo.
+echo [更新] 正在更新 %GRADLE_FILE%...
+
+REM 使用 PowerShell 更新文件内容
+powershell -Command "(Get-Content '%GRADLE_FILE%') -replace 'versionCode = %CURRENT_VERSION_CODE%', 'versionCode = %NEW_VERSION_CODE%' | Set-Content '%GRADLE_FILE%' -Encoding UTF8"
+if errorlevel 1 (
+    echo [错误] 更新 versionCode 失败！
+    pause
+    exit /b 1
+)
+
+powershell -Command "(Get-Content '%GRADLE_FILE%') -replace 'versionName = \"%CURRENT_VERSION_NAME%\"', 'versionName = \"%NEW_VERSION_NAME%\"' | Set-Content '%GRADLE_FILE%' -Encoding UTF8"
+if errorlevel 1 (
+    echo [错误] 更新 versionName 失败！
+    pause
+    exit /b 1
+)
+
+echo [完成] build.gradle.kts 已更新
 echo.
 echo [信息] 版本号: !VERSION!
-echo.
 
 REM 步骤0: 检查是否有未提交的更改
 echo [0/6] 检查 Git 状态...
@@ -184,25 +233,24 @@ echo.
 REM 步骤5: 准备 Release Notes
 echo [5/6] 准备发布说明...
 echo.
-echo [提示] 请输入发布说明（按回车使用默认说明）
+echo [提示] 请输入发布说明（直接按回车则留空）
 set /p RELEASE_NOTES="发布说明: "
 
 if "!RELEASE_NOTES!"=="" (
-    set "RELEASE_NOTES=## EVCam !VERSION! Release%nl%%nl%### 更新内容%nl%%nl%- 版本更新至 !VERSION!%nl%%nl%### 下载%nl%%nl%- [EVCam-!VERSION!-release.apk]%nl%%nl%### 签名信息%nl%%nl%- 使用 AOSP 公共测试签名%nl%- 可以覆盖安装之前的测试版本%nl%%nl%### 安装说明%nl%%nl%1. 下载 APK 文件%nl%2. 在 Android 设备上启用「未知来源」安装%nl%3. 安装并授予必要权限（相机、麦克风、存储）"
-    echo [信息] 使用默认发布说明
+    set "RELEASE_NOTES="
+    echo [信息] 发布说明为空
 ) else (
-    set "RELEASE_NOTES=## EVCam !VERSION! Release%nl%%nl%### 更新内容%nl%%nl%!RELEASE_NOTES!%nl%%nl%### 下载%nl%%nl%- [EVCam-!VERSION!-release.apk]%nl%%nl%### 签名信息%nl%%nl%- 使用 AOSP 公共测试签名%nl%"
+    echo [信息] 发布说明: !RELEASE_NOTES!
 )
-
-echo [完成] 发布说明准备完成
 echo.
 
 REM 步骤6: 创建 GitHub Release
 echo [6/6] 创建 GitHub Release...
-gh release create !VERSION! ^
-  "!RENAMED_APK!" ^
-  --title "EVCam !VERSION!" ^
-  --notes "!RELEASE_NOTES!"
+if "!RELEASE_NOTES!"=="" (
+    gh release create !VERSION! "!RENAMED_APK!" --title "EVCam !VERSION!" --notes ""
+) else (
+    gh release create !VERSION! "!RENAMED_APK!" --title "EVCam !VERSION!" --notes "!RELEASE_NOTES!"
+)
 
 if errorlevel 1 (
     echo [错误] 创建 Release 失败！

@@ -543,7 +543,7 @@
                     android:layout_marginStart="16dp" />
             </LinearLayout>
 
-            <!-- 定时保活任务 -->
+            <!-- 定时保活 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -562,7 +562,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="定时保活任务"
+                        android:text="定时保活"
                         android:textColor="@color/text_primary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -583,7 +583,7 @@
                     android:layout_marginStart="16dp" />
             </LinearLayout>
 
-            <!-- 防止休眠 -->
+            <!-- 阻止休眠 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -602,7 +602,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="防止休眠"
+                        android:text="阻止休眠（Beta）"
                         android:textColor="@color/text_primary"
                         android:textSize="20sp"
                         android:textStyle="bold" />
@@ -610,7 +610,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="阻止系统进入深度休眠，确保熄火后能接收消息（增加功耗）"
+                        android:text="阻止系统进入深度休眠，熄火后能接收消息（增加功耗）"
                         android:textColor="@color/text_secondary"
                         android:textSize="16sp"
                         android:layout_marginTop="4dp" />
