@@ -49,12 +49,9 @@ public class TransparentBootActivity extends Activity {
             "应用已在后台运行");
         AppLog.d(TAG, "前台服务已启动");
         
-        // 2. 启动 WorkManager 保活任务
-        AppConfig appConfig = new AppConfig(this);
-        if (appConfig.isKeepAliveEnabled()) {
-            KeepAliveManager.startKeepAliveWork(this);
-            AppLog.d(TAG, "WorkManager 保活任务已启动");
-        }
+        // 2. 启动 WorkManager 保活任务（车机必需，始终开启）
+        KeepAliveManager.startKeepAliveWork(this);
+        AppLog.d(TAG, "WorkManager 保活任务已启动");
         
         // 3. 检查是否需要启动远程查看服务
         DingTalkConfig dingTalkConfig = new DingTalkConfig(this);

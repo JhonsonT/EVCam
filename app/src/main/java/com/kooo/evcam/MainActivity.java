@@ -191,20 +191,18 @@ public class MainActivity extends AppCompatActivity {
             startDingTalkService();
         }
 
-        // 启动定时保活任务（如果用户启用了）
-        if (appConfig.isKeepAliveEnabled()) {
-            KeepAliveManager.startKeepAliveWork(this);
-            AppLog.d(TAG, "定时保活任务已启动");
-        } else {
-            AppLog.d(TAG, "定时保活任务已禁用，跳过启动");
-        }
+        // 启动定时保活任务（车机必需，始终开启）
+        KeepAliveManager.startKeepAliveWork(this);
+        AppLog.d(TAG, "定时保活任务已启动");
         
-        // 启动防止休眠（如果用户启用了）
-        if (appConfig.isPreventSleepEnabled()) {
+        // 防止休眠（仅当开启"开机自启动"时）
+        // WakeLock 主要在 CameraForegroundService 中维护
+        // 这里作为备份，确保 Activity 存在时也有 WakeLock
+        if (appConfig.isAutoStartOnBoot()) {
             WakeUpHelper.acquirePersistentWakeLock(this);
-            AppLog.d(TAG, "防止休眠已启用，系统将不会进入深度休眠");
+            AppLog.d(TAG, "WakeLock 已获取（开机自启动已开启）");
         } else {
-            AppLog.d(TAG, "防止休眠已禁用，系统可正常休眠");
+            AppLog.d(TAG, "WakeLock 未获取（开机自启动未开启）");
         }
         
         // 启动存储清理任务（如果用户设置了限制）
@@ -1934,6 +1932,16 @@ public class MainActivity extends AppCompatActivity {
         
         AppLog.d(TAG, "亮屏后将在10秒后恢复录制...");
         
+        // 如果摄像头已关闭，先重新打开
+        if (cameraManager != null && !cameraManager.hasConnectedCameras()) {
+            AppLog.d(TAG, "摄像头已关闭，先重新打开摄像头");
+            try {
+                cameraManager.openAllCameras();
+            } catch (Exception e) {
+                AppLog.e(TAG, "重新打开摄像头失败: " + e.getMessage(), e);
+            }
+        }
+        
         screenOnStartRunnable = () -> {
             // 再次检查是否仍然亮屏
             if (isScreenOff) {
@@ -1964,7 +1972,23 @@ public class MainActivity extends AppCompatActivity {
             
             // 检查摄像头是否就绪
             if (cameraManager == null || !cameraManager.hasConnectedCameras()) {
-                AppLog.w(TAG, "摄像头未就绪，无法恢复录制");
+                AppLog.w(TAG, "摄像头未就绪，尝试重新打开...");
+                // 再次尝试打开摄像头
+                if (cameraManager != null) {
+                    try {
+                        cameraManager.openAllCameras();
+                        // 延迟2秒后再次尝试恢复录制
+                        screenStateHandler.postDelayed(() -> {
+                            if (!isScreenOff && !isRecording && cameraManager.hasConnectedCameras()) {
+                                AppLog.d(TAG, "摄像头已就绪，开始恢复录制");
+                                startRecording();
+                                Toast.makeText(MainActivity.this, "已自动恢复录制", Toast.LENGTH_SHORT).show();
+                            }
+                        }, 2000);
+                    } catch (Exception e) {
+                        AppLog.e(TAG, "打开摄像头失败: " + e.getMessage(), e);
+                    }
+                }
                 return;
             }
             

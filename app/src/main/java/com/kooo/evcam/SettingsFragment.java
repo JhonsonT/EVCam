@@ -45,8 +45,9 @@ public class SettingsFragment extends Fragment {
     private SwitchMaterial autoStartRecordingSwitch;
     private SwitchMaterial screenOffRecordingSwitch;
     private LinearLayout screenOffRecordingLayout;
-    private SwitchMaterial keepAliveSwitch;
-    private SwitchMaterial preventSleepSwitch;
+    // 定时保活和防止休眠已改为始终开启，无需用户设置（车机必需）
+    // private SwitchMaterial keepAliveSwitch;
+    // private SwitchMaterial preventSleepSwitch;
     private SwitchMaterial recordingStatsSwitch;
     private SwitchMaterial timestampWatermarkSwitch;
     private AppConfig appConfig;
@@ -303,51 +304,31 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        // 初始化保活服务开关
-        keepAliveSwitch = view.findViewById(R.id.switch_keep_alive);
-        if (getContext() != null && appConfig != null) {
-            keepAliveSwitch.setChecked(appConfig.isKeepAliveEnabled());
+        // 定时保活已改为始终开启（车机必需），无需设置开关
+        // 隐藏定时保活开关
+        View keepAliveSwitch = view.findViewById(R.id.switch_keep_alive);
+        if (keepAliveSwitch != null) {
+            View parent = (View) keepAliveSwitch.getParent();
+            if (parent != null) {
+                parent.setVisibility(View.GONE);
+            }
+        }
+        // 确保定时保活任务已启动
+        if (getContext() != null) {
+            KeepAliveManager.startKeepAliveWork(getContext());
         }
 
-        // 设置保活服务开关监听器
-        keepAliveSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (getContext() != null && appConfig != null) {
-                appConfig.setKeepAliveEnabled(isChecked);
-                
-                if (isChecked) {
-                    KeepAliveManager.startKeepAliveWork(getContext());
-                    Toast.makeText(getContext(), "定时保活任务已启动", Toast.LENGTH_SHORT).show();
-                    AppLog.d("SettingsFragment", "定时保活任务已启动");
-                } else {
-                    KeepAliveManager.stopKeepAliveWork(getContext());
-                    Toast.makeText(getContext(), "定时保活任务已停止", Toast.LENGTH_SHORT).show();
-                    AppLog.d("SettingsFragment", "定时保活任务已停止");
-                }
+        // 防止休眠已改为始终开启（车机必需），无需设置开关
+        // WakeLock 在 CameraForegroundService 中自动获取
+        // 隐藏防止休眠开关
+        View preventSleepLayout = view.findViewById(R.id.switch_prevent_sleep);
+        if (preventSleepLayout != null) {
+            // 隐藏整个布局（包括开关和说明文字）
+            View parent = (View) preventSleepLayout.getParent();
+            if (parent != null) {
+                parent.setVisibility(View.GONE);
             }
-        });
-
-        // 初始化防止休眠开关
-        preventSleepSwitch = view.findViewById(R.id.switch_prevent_sleep);
-        if (getContext() != null && appConfig != null) {
-            preventSleepSwitch.setChecked(appConfig.isPreventSleepEnabled());
         }
-
-        // 设置防止休眠开关监听器
-        preventSleepSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (getContext() != null && appConfig != null) {
-                appConfig.setPreventSleepEnabled(isChecked);
-                
-                if (isChecked) {
-                    WakeUpHelper.acquirePersistentWakeLock(getContext());
-                    Toast.makeText(getContext(), "防止休眠已启用，系统将不会进入深度休眠", Toast.LENGTH_SHORT).show();
-                    AppLog.d("SettingsFragment", "防止休眠已启用");
-                } else {
-                    WakeUpHelper.releasePersistentWakeLock();
-                    Toast.makeText(getContext(), "防止休眠已禁用，系统可正常休眠", Toast.LENGTH_SHORT).show();
-                    AppLog.d("SettingsFragment", "防止休眠已禁用");
-                }
-            }
-        });
 
         // 初始化悬浮窗设置
         initFloatingWindowSettings(view);

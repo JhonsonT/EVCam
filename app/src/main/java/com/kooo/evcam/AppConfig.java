@@ -315,8 +315,11 @@ public class AppConfig {
      * @return true 表示启用防止休眠
      */
     public boolean isPreventSleepEnabled() {
-        // 默认禁用防止休眠（因为会增加功耗）
-        return prefs.getBoolean(KEY_PREVENT_SLEEP_ENABLED, false);
+        // 车机应用默认启用防止休眠
+        // 原因：1. 车机使用车辆供电，不影响电池
+        //       2. 摄像头应用需要在息屏时继续录制
+        //       3. 远程控制需要后台运行
+        return prefs.getBoolean(KEY_PREVENT_SLEEP_ENABLED, true);
     }
     
     /**
