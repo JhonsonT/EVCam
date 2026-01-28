@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
@@ -1695,6 +1696,9 @@ public class SettingsFragment extends Fragment {
         inputEditText.setInputType(InputType.TYPE_CLASS_TEXT);
         inputEditText.setHint("例如：张三的银河E5");
         inputEditText.setPadding(48, 32, 48, 32);
+        // 适配夜间模式
+        inputEditText.setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+        inputEditText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.text_secondary));
         
         new AlertDialog.Builder(getContext())
                 .setTitle("设置设备识别名称")
@@ -1747,26 +1751,30 @@ public class SettingsFragment extends Fragment {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(48, 24, 48, 8);
         
-        // 名称显示
+        // 名称显示 - 适配夜间模式
         TextView nicknameLabel = new TextView(getContext());
         nicknameLabel.setText("上传身份：「" + nickname + "」");
         nicknameLabel.setTextSize(16);
         nicknameLabel.setPadding(0, 0, 0, 24);
+        nicknameLabel.setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
         layout.addView(nicknameLabel);
         
-        // 问题描述标签
+        // 问题描述标签 - 适配夜间模式
         TextView descLabel = new TextView(getContext());
         descLabel.setText("问题描述：");
         descLabel.setTextSize(14);
         descLabel.setPadding(0, 0, 0, 8);
+        descLabel.setTextColor(ContextCompat.getColor(getContext(), R.color.text_secondary));
         layout.addView(descLabel);
         
-        // 问题描述输入框
+        // 问题描述输入框 - 适配夜间模式
         EditText inputEditText = new EditText(getContext());
         inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         inputEditText.setMinLines(3);
         inputEditText.setMaxLines(6);
         inputEditText.setHint("请描述遇到的问题...");
+        inputEditText.setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+        inputEditText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.text_secondary));
         inputEditText.setBackgroundResource(android.R.drawable.edit_text);
         layout.addView(inputEditText);
         
