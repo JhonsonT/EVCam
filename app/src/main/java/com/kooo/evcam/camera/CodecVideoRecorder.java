@@ -15,7 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -80,6 +82,7 @@ public class CodecVideoRecorder {
     // 分段录制相关
     private long segmentDurationMs = 60000;  // 分段时长，默认1分钟，可通过 setSegmentDuration 配置
     private static final long SEGMENT_DURATION_COMPENSATION_MS = 1000;  // 分段时长补偿（补偿编码器初始化和停止延迟）
+    private static final long MIN_VALID_FILE_SIZE = 10 * 1024;  // 最小有效文件大小 10KB
     private Handler segmentHandler;
     private Runnable segmentRunnable;
     private int segmentIndex = 0;
@@ -89,6 +92,7 @@ public class CodecVideoRecorder {
     private static final long FILE_SIZE_CHECK_INTERVAL_MS = 5000;
     private Runnable fileSizeCheckRunnable;
     private long recordedFrameCount = 0;
+    private List<String> recordedFilePaths = new ArrayList<>();  // 本次录制的所有文件路径
     
     // 快速恢复机制
     private static final long RECOVERY_RETRY_INTERVAL_MS = 5000;  // 恢复重试间隔：5秒
@@ -202,6 +206,10 @@ public class CodecVideoRecorder {
         this.recordedFrameCount = 0;
         this.firstFrameTimestampNs = -1;  // 重置时间戳基准
         this.encodedOutputFrameCount = 0;  // 重置编码输出帧计数
+
+        // 清空并初始化本次录制的文件列表
+        recordedFilePaths.clear();
+        recordedFilePaths.add(filePath);
 
         // 从文件路径中提取保存目录和摄像头位置
         File file = new File(filePath);
@@ -433,14 +441,20 @@ public class CodecVideoRecorder {
             muxerStarted = false;
         }
 
-        // 验证文件
-        validateAndCleanupFile(currentFilePath);
+        // 验证并清理所有录制的文件
+        List<String> deletedFiles = validateAndCleanupAllFiles();
 
         AppLog.d(TAG, "Camera " + cameraId + " Codec recording stopped, frames recorded: " + recordedFrameCount);
 
         if (callback != null) {
             callback.onRecordStop(cameraId);
+            // 通知损坏文件被删除
+            if (!deletedFiles.isEmpty()) {
+                callback.onCorruptedFilesDeleted(cameraId, deletedFiles);
+            }
         }
+        
+        recordedFilePaths.clear();
     }
 
     /**
@@ -709,6 +723,7 @@ public class CodecVideoRecorder {
             segmentIndex++;
             String nextSegmentPath = generateSegmentPath();
             currentFilePath = nextSegmentPath;
+            recordedFilePaths.add(nextSegmentPath);  // 记录新分段文件
             
             // 重置分段开始时间和帧计数
             segmentStartTimeNs = System.nanoTime();
@@ -729,7 +744,8 @@ public class CodecVideoRecorder {
 
             if (callback != null) {
                 final int newIndex = segmentIndex;
-                segmentHandler.post(() -> callback.onSegmentSwitch(cameraId, newIndex));
+                final String completedPath = previousFilePath;  // 已完成的文件路径
+                segmentHandler.post(() -> callback.onSegmentSwitch(cameraId, newIndex, completedPath));
             }
 
         } catch (Exception e) {
@@ -961,26 +977,51 @@ public class CodecVideoRecorder {
     }
 
     /**
-     * 验证并清理损坏的文件
+     * 验证并清理所有录制的文件
+     * @return 被删除的文件名列表
      */
-    private void validateAndCleanupFile(String filePath) {
+    private List<String> validateAndCleanupAllFiles() {
+        List<String> deletedFiles = new ArrayList<>();
+        
+        AppLog.d(TAG, "Camera " + cameraId + " validating " + recordedFilePaths.size() + " recorded files");
+        
+        for (String filePath : recordedFilePaths) {
+            String deletedFileName = validateAndCleanupFile(filePath);
+            if (deletedFileName != null) {
+                deletedFiles.add(deletedFileName);
+            }
+        }
+        
+        if (!deletedFiles.isEmpty()) {
+            AppLog.w(TAG, "Camera " + cameraId + " deleted " + deletedFiles.size() + " corrupted files: " + deletedFiles);
+        }
+        
+        return deletedFiles;
+    }
+
+    /**
+     * 验证并清理损坏的文件
+     * @return 如果文件被删除，返回文件名；否则返回 null
+     */
+    private String validateAndCleanupFile(String filePath) {
         if (filePath == null) {
-            return;
+            return null;
         }
 
         File file = new File(filePath);
         if (!file.exists()) {
-            return;
+            return null;
         }
 
-        final long MIN_VALID_SIZE = 50 * 1024;  // 50KB
         long fileSize = file.length();
 
-        if (fileSize < MIN_VALID_SIZE) {
+        if (fileSize < MIN_VALID_FILE_SIZE) {
             AppLog.w(TAG, "Camera " + cameraId + " Video file too small: " + filePath + " (" + fileSize + " bytes). Deleting...");
             file.delete();
+            return file.getName();
         } else {
             AppLog.d(TAG, "Camera " + cameraId + " Video file validated: " + filePath + " (" + (fileSize / 1024) + " KB)");
+            return null;
         }
     }
 }

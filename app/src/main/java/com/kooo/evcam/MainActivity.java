@@ -303,9 +303,17 @@ public class MainActivity extends AppCompatActivity {
         // 标记有待处理的远程命令
         pendingRemoteCommand = true;
         
-        // 标记这是远程唤醒，完成后需要自动退回后台
-        isRemoteWakeUp = true;
-        AppLog.d(TAG, "Remote wake-up flag set, will return to background after completion");
+        // 判断是否应该在完成后返回后台
+        // 只有当应用是从真正的后台被唤醒时才返回后台
+        // 如果应用正在录制（非远程录制），说明用户正在使用，不应该返回后台
+        boolean shouldReturnToBackground = isInBackground && !isRecording;
+        if (shouldReturnToBackground) {
+            isRemoteWakeUp = true;
+            AppLog.d(TAG, "Remote wake-up flag set, will return to background after completion");
+        } else {
+            isRemoteWakeUp = false;
+            AppLog.d(TAG, "App was active (recording or in foreground), will stay in foreground after completion");
+        }
 
         // 延迟执行命令，等待摄像头准备好
         // 如果从后台唤醒，摄像头需要时间重新连接
@@ -1093,6 +1101,11 @@ public class MainActivity extends AppCompatActivity {
             onSegmentSwitch(newSegmentIndex);
         });
 
+        // 设置损坏文件删除回调
+        cameraManager.setCorruptedFilesCallback(deletedFiles -> {
+            showCorruptedFilesDeletedDialog(deletedFiles);
+        });
+
         // 设置预览尺寸回调
         cameraManager.setPreviewSizeCallback((cameraKey, cameraId, previewSize) -> {
             AppLog.d(TAG, "摄像头 " + cameraId + " 预览尺寸: " + previewSize.getWidth() + "x" + previewSize.getHeight());
@@ -1274,6 +1287,9 @@ public class MainActivity extends AppCompatActivity {
                 if (AppConfig.CAR_MODEL_L7.equals(carModel) || AppConfig.CAR_MODEL_L7_MULTI.equals(carModel)) {
                     // 银河L6/L7 / L7-多按钮：使用固定映射
                     initCamerasForL7(cameraIds);
+                } else if (AppConfig.CAR_MODEL_PHONE.equals(carModel)) {
+                    // 手机模式：2摄像头（前+后）
+                    initCamerasForPhone(cameraIds);
                 } else if (appConfig.isCustomCarModel()) {
                     // 自定义车型：使用用户配置的摄像头映射
                     initCamerasForCustomModel(cameraIds);
@@ -1368,6 +1384,35 @@ public class MainActivity extends AppCompatActivity {
                     cameraIds[0], textureLeft,
                     cameraIds[0], textureRight
             );
+        } else {
+            Toast.makeText(this, "没有可用的摄像头", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * 手机模式：使用前后2个摄像头
+     * 与银河E5不同，手机布局只有 textureFront 和 textureBack
+     */
+    private void initCamerasForPhone(String[] cameraIds) {
+        if (cameraIds.length >= 2) {
+            // 有2个或更多摄像头：使用前后两个摄像头
+            // 通常 cameraIds[0] 是后置摄像头，cameraIds[1] 是前置摄像头
+            cameraManager.initCameras(
+                    cameraIds[1], textureFront,  // 前置摄像头（通常 ID=1）
+                    cameraIds[0], textureBack,   // 后置摄像头（通常 ID=0）
+                    null, null,
+                    null, null
+            );
+            AppLog.d(TAG, "手机模式初始化：前置=" + cameraIds[1] + ", 后置=" + cameraIds[0]);
+        } else if (cameraIds.length == 1) {
+            // 只有1个摄像头，前后使用同一个
+            cameraManager.initCameras(
+                    cameraIds[0], textureFront,
+                    cameraIds[0], textureBack,
+                    null, null,
+                    null, null
+            );
+            AppLog.d(TAG, "手机模式初始化：单摄像头=" + cameraIds[0]);
         } else {
             Toast.makeText(this, "没有可用的摄像头", Toast.LENGTH_SHORT).show();
         }
@@ -2018,8 +2063,14 @@ public class MainActivity extends AppCompatActivity {
         if (blinkHandler != null && blinkRunnable != null) {
             blinkHandler.removeCallbacks(blinkRunnable);
         }
-        // 恢复红色
-        btnStartRecord.setTextColor(0xFFFF0000);
+        // 恢复红色（确保在主线程执行，且按钮不为空）
+        if (btnStartRecord != null) {
+            runOnUiThread(() -> {
+                if (btnStartRecord != null) {
+                    btnStartRecord.setTextColor(0xFFFF0000);
+                }
+            });
+        }
     }
 
     private void takePicture() {
@@ -2080,12 +2131,8 @@ public class MainActivity extends AppCompatActivity {
             // 停止手动录制的计时器
             stopRecordingTimer();
             
-            // 更新UI状态
-            runOnUiThread(() -> {
-                if (btnStartRecord != null) {
-                    btnStartRecord.setText("录制");
-                }
-            });
+            // 停止闪烁动画，恢复按钮状态
+            stopBlinkAnimation();
             
             try {
                 Thread.sleep(500);  // 等待停止完成
@@ -2111,7 +2158,8 @@ public class MainActivity extends AppCompatActivity {
             // 设置指定时长后自动停止
             autoStopRunnable = () -> {
                 AppLog.d(TAG, durationSeconds + " 秒录制完成，正在停止...");
-                cameraManager.stopRecording();
+                // 跳过自动传输，等上传完成后再传输（从临时目录上传更快）
+                cameraManager.stopRecording(true);
 
                 // 停止前台服务
                 CameraForegroundService.stop(this);
@@ -2122,20 +2170,32 @@ public class MainActivity extends AppCompatActivity {
                 // 标记远程录制结束
                 isRemoteRecording = false;
 
-                // 等待录制完全停止后上传视频
+                // 等待录制完全停止后上传视频（从临时目录上传，无需等待文件传输）
                 new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                    uploadRecordedVideos();
+                    // 先保存恢复录制的标志，因为 uploadRecordedVideos 可能会 return
+                    final boolean shouldResumeRecording = wasManualRecordingBeforeRemote;
+                    wasManualRecordingBeforeRemote = false;  // 重置标志
                     
-                    // 上传完成后，如果之前有手动录制在进行，恢复手动录制
-                    if (wasManualRecordingBeforeRemote) {
+                    // 尝试上传视频（可能因为找不到文件而提前返回）
+                    try {
+                        uploadRecordedVideos();
+                    } catch (Exception e) {
+                        AppLog.e(TAG, "上传视频时发生异常: " + e.getMessage());
+                    }
+                    
+                    // 【重要】无论上传是否成功，都要检查是否需要恢复手动录制
+                    if (shouldResumeRecording) {
                         AppLog.d(TAG, "远程录制任务完成，恢复之前的手动录制");
-                        wasManualRecordingBeforeRemote = false;
                         
                         // 延迟一点时间再恢复，确保上传逻辑不受影响
                         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
                             // 再次检查：确保此时不是远程录制状态，且没有正在录制
                             if (!isRemoteRecording && !cameraManager.isRecording()) {
+                                AppLog.d(TAG, "正在恢复手动录制...");
                                 startRecording();
+                            } else {
+                                AppLog.d(TAG, "跳过恢复录制：isRemoteRecording=" + isRemoteRecording + 
+                                        ", isRecording=" + cameraManager.isRecording());
                             }
                         }, 500);
                     }
@@ -2210,6 +2270,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 上传录制的视频到钉钉
+     * 优先从临时目录上传（内部存储，速度快），上传后再传输到最终存储位置
      */
     private void uploadRecordedVideos() {
         AppLog.d(TAG, "开始上传视频到钉钉...");
@@ -2222,39 +2283,62 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // 获取录制的视频文件
-        File videoDir = StorageHelper.getVideoDir(this);
-
-        if (!videoDir.exists() || !videoDir.isDirectory()) {
-            AppLog.e(TAG, "视频目录不存在");
-            sendErrorToRemote("视频目录不存在");
-            returnToBackgroundIfRemoteWakeUp();
-            return;
+        // 【优化】优先从临时目录查找文件（内部存储，读取快）
+        File tempDir = new File(getCacheDir(), FileTransferManager.TEMP_VIDEO_DIR);
+        File[] tempFiles = null;
+        if (tempDir.exists() && tempDir.isDirectory()) {
+            tempFiles = tempDir.listFiles((dir, name) -> 
+                name.endsWith(".mp4") && name.startsWith(remoteRecordingTimestamp + "_") && new File(dir, name).length() > 0
+            );
         }
 
-        // 直接过滤：只获取本次录制的视频文件（文件名格式: 20260124_235933_front.mp4）
-        File[] files = videoDir.listFiles((dir, name) -> 
-            name.endsWith(".mp4") && name.startsWith(remoteRecordingTimestamp + "_")
-        );
+        List<File> filesToUpload;
+        final boolean uploadFromTempDir;
 
-        if (files == null || files.length == 0) {
-            AppLog.e(TAG, "没有找到时间戳为 " + remoteRecordingTimestamp + " 的视频文件（录制可能失败）");
-            sendErrorToRemote("录制失败：未生成视频文件");
-            returnToBackgroundIfRemoteWakeUp();
-            return;
+        if (tempFiles != null && tempFiles.length > 0) {
+            // 从临时目录上传
+            filesToUpload = new ArrayList<>(Arrays.asList(tempFiles));
+            uploadFromTempDir = true;
+            AppLog.d(TAG, "从临时目录上传 " + filesToUpload.size() + " 个视频文件（更快）");
+        } else {
+            // 临时目录没有文件，从最终存储目录上传（可能已经传输完成）
+            File videoDir = StorageHelper.getVideoDir(this);
+            if (!videoDir.exists() || !videoDir.isDirectory()) {
+                AppLog.e(TAG, "视频目录不存在");
+                sendErrorToRemote("视频目录不存在");
+                returnToBackgroundIfRemoteWakeUp();
+                return;
+            }
+
+            File[] files = videoDir.listFiles((dir, name) -> 
+                name.endsWith(".mp4") && name.startsWith(remoteRecordingTimestamp + "_")
+            );
+
+            if (files == null || files.length == 0) {
+                AppLog.e(TAG, "没有找到时间戳为 " + remoteRecordingTimestamp + " 的视频文件（录制可能失败）");
+                sendErrorToRemote("录制失败：未生成视频文件");
+                returnToBackgroundIfRemoteWakeUp();
+                return;
+            }
+
+            filesToUpload = new ArrayList<>(Arrays.asList(files));
+            uploadFromTempDir = false;
+            AppLog.d(TAG, "从最终目录上传 " + filesToUpload.size() + " 个视频文件");
         }
 
-        // 转换为 List 并记录日志
-        List<File> recentFiles = new ArrayList<>(Arrays.asList(files));
-        AppLog.d(TAG, "找到 " + recentFiles.size() + " 个时间戳为 " + remoteRecordingTimestamp + " 的视频文件");
-        for (File file : recentFiles) {
-            AppLog.d(TAG, "  - " + file.getName());
+        // 记录日志
+        AppLog.d(TAG, "找到 " + filesToUpload.size() + " 个时间戳为 " + remoteRecordingTimestamp + " 的视频文件");
+        for (File file : filesToUpload) {
+            AppLog.d(TAG, "  - " + file.getName() + " (" + (file.length() / 1024) + " KB)");
         }
+
+        // 保存文件列表的副本，用于上传后传输
+        final List<File> uploadedFiles = new ArrayList<>(filesToUpload);
 
         // 使用 Activity 级别的 API 客户端
         if (dingTalkApiClient != null && remoteConversationId != null) {
             VideoUploadService uploadService = new VideoUploadService(this, dingTalkApiClient);
-            uploadService.uploadVideos(recentFiles, remoteConversationId, remoteConversationType, remoteUserId, new VideoUploadService.UploadCallback() {
+            uploadService.uploadVideos(filesToUpload, remoteConversationId, remoteConversationType, remoteUserId, new VideoUploadService.UploadCallback() {
                 @Override
                 public void onProgress(String message) {
                     AppLog.d(TAG, message);
@@ -2263,6 +2347,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(String message) {
                     AppLog.d(TAG, message);
+                    
+                    // 如果是从临时目录上传的，上传成功后传输到最终存储位置
+                    if (uploadFromTempDir) {
+                        transferTempFilesToFinalDir(uploadedFiles);
+                    }
+                    
                     runOnUiThread(() -> {
                         Toast.makeText(MainActivity.this, "视频上传成功", Toast.LENGTH_SHORT).show();
                         // 上传完成后自动退回后台
@@ -2273,6 +2363,12 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onError(String error) {
                     AppLog.e(TAG, "上传失败: " + error);
+                    
+                    // 即使上传失败，也要传输文件到最终存储位置（保留视频）
+                    if (uploadFromTempDir) {
+                        transferTempFilesToFinalDir(uploadedFiles);
+                    }
+                    
                     sendErrorToRemote("上传失败: " + error);
                     // 即使失败也退回后台
                     runOnUiThread(() -> returnToBackgroundIfRemoteWakeUp());
@@ -2280,8 +2376,53 @@ public class MainActivity extends AppCompatActivity {
             });
         } else {
             AppLog.e(TAG, "钉钉服务未启动");
+            
+            // 即使钉钉服务未启动，也要传输文件到最终存储位置（保留视频）
+            if (uploadFromTempDir) {
+                transferTempFilesToFinalDir(uploadedFiles);
+            }
+            
             sendErrorToRemote("钉钉服务未启动");
             returnToBackgroundIfRemoteWakeUp();
+        }
+    }
+
+    /**
+     * 将临时目录的视频文件传输到最终存储位置
+     * 在上传完成后异步执行
+     */
+    private void transferTempFilesToFinalDir(List<File> tempFiles) {
+        if (tempFiles == null || tempFiles.isEmpty()) {
+            return;
+        }
+
+        File finalDir = StorageHelper.getVideoDir(this);
+        if (!finalDir.exists()) {
+            finalDir.mkdirs();
+        }
+
+        AppLog.d(TAG, "开始传输 " + tempFiles.size() + " 个临时文件到最终存储位置...");
+
+        FileTransferManager transferManager = FileTransferManager.getInstance(this);
+        for (File tempFile : tempFiles) {
+            // 检查文件是否还存在（可能已经被其他逻辑传输了）
+            if (!tempFile.exists()) {
+                AppLog.d(TAG, "文件已不存在（可能已传输）: " + tempFile.getName());
+                continue;
+            }
+
+            File targetFile = new File(finalDir, tempFile.getName());
+            transferManager.addTransferTask(tempFile, targetFile, new FileTransferManager.TransferCallback() {
+                @Override
+                public void onTransferComplete(File sourceFile, File targetFile) {
+                    AppLog.d(TAG, "视频已保存到: " + targetFile.getAbsolutePath());
+                }
+
+                @Override
+                public void onTransferFailed(File sourceFile, File targetFile, String error) {
+                    AppLog.e(TAG, "视频保存失败: " + sourceFile.getName() + " - " + error);
+                }
+            });
         }
     }
 
@@ -2685,6 +2826,21 @@ public class MainActivity extends AppCompatActivity {
         
         // 重置自动录制触发标志（下次启动时可以再次触发）
         autoStartRecordingTriggered = false;
+    }
+
+    /**
+     * 显示损坏文件已删除的提示（自动消失）
+     */
+    private void showCorruptedFilesDeletedDialog(List<String> deletedFiles) {
+        if (deletedFiles == null || deletedFiles.isEmpty()) {
+            return;
+        }
+
+        runOnUiThread(() -> {
+            String message = "已清理 " + deletedFiles.size() + " 个异常视频文件";
+            android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show();
+            AppLog.w(TAG, "Showed corrupted files toast: " + deletedFiles.size() + " files - " + deletedFiles);
+        });
     }
 
     @Override

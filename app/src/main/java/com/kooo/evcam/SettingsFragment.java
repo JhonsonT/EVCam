@@ -1,8 +1,10 @@
 package com.kooo.evcam;
 
+import android.app.AlertDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +38,8 @@ public class SettingsFragment extends Fragment {
 
     private SwitchMaterial debugSwitch;
     private Button saveLogsButton;
+    private Button uploadLogsButton;
+    private LinearLayout logButtonsLayout;
     private SwitchMaterial autoStartSwitch;
     private SwitchMaterial autoStartRecordingSwitch;
     private SwitchMaterial screenOffRecordingSwitch;
@@ -108,6 +112,8 @@ public class SettingsFragment extends Fragment {
         // 初始化控件
         debugSwitch = view.findViewById(R.id.switch_debug_to_info);
         saveLogsButton = view.findViewById(R.id.btn_save_logs);
+        uploadLogsButton = view.findViewById(R.id.btn_upload_logs);
+        logButtonsLayout = view.findViewById(R.id.layout_log_buttons);
         Button menuButton = view.findViewById(R.id.btn_menu);
         Button homeButton = view.findViewById(R.id.btn_home);
 
@@ -175,6 +181,20 @@ public class SettingsFragment extends Fragment {
                     Toast.makeText(getContext(), "Logs saved to: " + logFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
                 } else {
                     Toast.makeText(getContext(), "Failed to save logs", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // 设置一键上传日志按钮监听器
+        uploadLogsButton.setOnClickListener(v -> {
+            if (getContext() != null && appConfig != null) {
+                // 检查是否已设置设备名称
+                if (!appConfig.hasDeviceNickname()) {
+                    // 首次上传，显示输入框
+                    showDeviceNicknameInputDialog();
+                } else {
+                    // 已有设备名称，显示确认对话框
+                    showUploadConfirmDialog(appConfig.getDeviceNickname());
                 }
             }
         });
@@ -818,6 +838,9 @@ public class SettingsFragment extends Fragment {
 
                 lastAppliedCarModel = newModel;
                 appConfig.setCarModel(newModel);
+                
+                // 切换车型时重置录制摄像头选择为全选（避免之前的设置导致无法录制）
+                appConfig.resetRecordingCameraSelection();
                 
                 // 更新录制摄像头选择的 UI（摄像头数量由 AppConfig.getCameraCount() 自动根据车型返回）
                 updateRecordingCameraSelectionUI();
@@ -1624,11 +1647,11 @@ public class SettingsFragment extends Fragment {
     }
     
     /**
-     * 更新保存日志按钮的可见性（仅 Debug 开启时显示）
+     * 更新日志按钮区域的可见性（仅 Debug 开启时显示）
      */
     private void updateSaveLogsButtonVisibility(boolean visible) {
-        if (saveLogsButton != null) {
-            saveLogsButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+        if (logButtonsLayout != null) {
+            logButtonsLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
         }
     }
     
@@ -1658,5 +1681,144 @@ public class SettingsFragment extends Fragment {
         transaction.replace(R.id.fragment_container, new ResolutionSettingsFragment());
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+    
+    // ==================== 日志上传相关方法 ====================
+    
+    /**
+     * 显示设备名称输入对话框（首次上传时）
+     */
+    private void showDeviceNicknameInputDialog() {
+        if (getContext() == null) return;
+        
+        EditText inputEditText = new EditText(getContext());
+        inputEditText.setInputType(InputType.TYPE_CLASS_TEXT);
+        inputEditText.setHint("例如：张三的银河E5");
+        inputEditText.setPadding(48, 32, 48, 32);
+        
+        new AlertDialog.Builder(getContext())
+                .setTitle("设置设备识别名称")
+                .setMessage("请输入一个便于识别的名称，用于区分不同用户的日志：")
+                .setView(inputEditText)
+                .setPositiveButton("确认", (dialog, which) -> {
+                    String nickname = inputEditText.getText().toString().trim();
+                    if (nickname.isEmpty()) {
+                        Toast.makeText(getContext(), "名称不能为空", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    // 显示二次确认
+                    showNicknameConfirmDialog(nickname);
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+    
+    /**
+     * 显示设备名称二次确认对话框（首次设置名称后）
+     */
+    private void showNicknameConfirmDialog(String nickname) {
+        if (getContext() == null) return;
+        
+        new AlertDialog.Builder(getContext())
+                .setTitle("确认设备名称")
+                .setMessage("您输入的设备名称是：\n\n「" + nickname + "」\n\n确认使用此名称吗？")
+                .setPositiveButton("确认", (dialog, which) -> {
+                    // 保存名称，然后显示上传确认框
+                    if (appConfig != null) {
+                        appConfig.setDeviceNickname(nickname);
+                    }
+                    showUploadConfirmDialog(nickname);
+                })
+                .setNegativeButton("重新输入", (dialog, which) -> {
+                    // 重新显示输入框
+                    showDeviceNicknameInputDialog();
+                })
+                .show();
+    }
+    
+    /**
+     * 显示上传确认对话框（包含名称确认和问题描述输入）
+     */
+    private void showUploadConfirmDialog(String nickname) {
+        if (getContext() == null) return;
+        
+        // 创建包含名称显示和问题描述输入的布局
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 24, 48, 8);
+        
+        // 名称显示
+        TextView nicknameLabel = new TextView(getContext());
+        nicknameLabel.setText("上传身份：「" + nickname + "」");
+        nicknameLabel.setTextSize(16);
+        nicknameLabel.setPadding(0, 0, 0, 24);
+        layout.addView(nicknameLabel);
+        
+        // 问题描述标签
+        TextView descLabel = new TextView(getContext());
+        descLabel.setText("问题描述：");
+        descLabel.setTextSize(14);
+        descLabel.setPadding(0, 0, 0, 8);
+        layout.addView(descLabel);
+        
+        // 问题描述输入框
+        EditText inputEditText = new EditText(getContext());
+        inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
+        inputEditText.setMinLines(3);
+        inputEditText.setMaxLines(6);
+        inputEditText.setHint("请描述遇到的问题...");
+        inputEditText.setBackgroundResource(android.R.drawable.edit_text);
+        layout.addView(inputEditText);
+        
+        new AlertDialog.Builder(getContext())
+                .setTitle("上传日志")
+                .setView(layout)
+                .setPositiveButton("上传", (dialog, which) -> {
+                    String problemDesc = inputEditText.getText().toString().trim();
+                    if (problemDesc.isEmpty()) {
+                        problemDesc = "（用户未填写问题描述）";
+                    }
+                    performLogUpload(nickname, problemDesc);
+                })
+                .setNeutralButton("修改名称", (dialog, which) -> {
+                    showDeviceNicknameInputDialog();
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+    
+    /**
+     * 执行日志上传
+     */
+    private void performLogUpload(String deviceNickname, String problemDescription) {
+        if (getContext() == null) return;
+        
+        // 禁用按钮防止重复点击
+        uploadLogsButton.setEnabled(false);
+        uploadLogsButton.setText("上传中...");
+        
+        AppLog.uploadLogsToServer(getContext(), deviceNickname, problemDescription, new AppLog.UploadCallback() {
+            @Override
+            public void onSuccess() {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        uploadLogsButton.setEnabled(true);
+                        uploadLogsButton.setText("一键上传");
+                        Toast.makeText(getContext(), "作者已收到本次运行log", Toast.LENGTH_LONG).show();
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        uploadLogsButton.setEnabled(true);
+                        uploadLogsButton.setText("一键上传");
+                        Toast.makeText(getContext(), "上传失败: " + error, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
     }
 }

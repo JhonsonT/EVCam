@@ -13,6 +13,7 @@ public class AppConfig {
     
     // 配置项键名
     private static final String KEY_FIRST_LAUNCH = "first_launch";  // 首次启动标记
+    private static final String KEY_DEVICE_NICKNAME = "device_nickname";  // 设备识别名称（用于日志上传）
     private static final String KEY_AUTO_START_ON_BOOT = "auto_start_on_boot";  // 开机自启动
     private static final String KEY_AUTO_START_RECORDING = "auto_start_recording";  // 启动自动录制
     private static final String KEY_SCREEN_OFF_RECORDING = "screen_off_recording";  // 息屏录制（锁车录制）
@@ -147,6 +148,34 @@ public class AppConfig {
     public void setFirstLaunchCompleted() {
         prefs.edit().putBoolean(KEY_FIRST_LAUNCH, false).apply();
         AppLog.d(TAG, "首次启动标记已设置为完成");
+    }
+    
+    // ==================== 设备识别名称相关方法 ====================
+    
+    /**
+     * 获取设备识别名称（用于日志上传）
+     * @return 设备名称，如果未设置返回 null
+     */
+    public String getDeviceNickname() {
+        return prefs.getString(KEY_DEVICE_NICKNAME, null);
+    }
+    
+    /**
+     * 设置设备识别名称
+     * @param nickname 设备名称
+     */
+    public void setDeviceNickname(String nickname) {
+        prefs.edit().putString(KEY_DEVICE_NICKNAME, nickname).apply();
+        AppLog.d(TAG, "设备识别名称已设置: " + nickname);
+    }
+    
+    /**
+     * 检查是否已设置设备识别名称
+     * @return true 表示已设置
+     */
+    public boolean hasDeviceNickname() {
+        String nickname = getDeviceNickname();
+        return nickname != null && !nickname.trim().isEmpty();
     }
     
     // ==================== 开机自启动相关方法 ====================
@@ -1218,6 +1247,19 @@ public class AppConfig {
             if (isRecordingCameraEnabled("right")) {
                 enabled.add("right");
             }
+        }
+        
+        // 安全检查：如果结果为空，返回所有可用摄像头（防止无法录制）
+        if (enabled.isEmpty()) {
+            AppLog.w(TAG, "没有启用的录制摄像头，自动启用所有可用摄像头");
+            if (cameraCount >= 1) enabled.add("front");
+            if (cameraCount >= 2) enabled.add("back");
+            if (cameraCount >= 4) {
+                enabled.add("left");
+                enabled.add("right");
+            }
+            // 同时重置配置
+            resetRecordingCameraSelection();
         }
         
         return enabled;

@@ -42,6 +42,7 @@ public class MultiCameraManager {
     private boolean useCodecRecording = false;  // 是否使用软编码录制（用于 L6/L7）
     private boolean useRelayWrite = false;      // 是否使用中转写入（录制到内部存储，异步传输到U盘）
     private File finalSaveDir = null;           // 最终存储目录（用于中转写入模式）
+    private volatile int lastNotifiedSegmentIndex = -1;  // 已通知的分段索引，避免重复通知
     private StatusCallback statusCallback;
     private PreviewSizeCallback previewSizeCallback;
     private volatile int sessionConfiguredCount = 0;
@@ -63,11 +64,19 @@ public class MultiCameraManager {
         void onSegmentSwitch(int newSegmentIndex);
     }
 
+    /**
+     * 损坏文件删除回调
+     */
+    public interface CorruptedFilesCallback {
+        void onCorruptedFilesDeleted(List<String> deletedFiles);
+    }
+
     public MultiCameraManager(Context context) {
         this.context = context;
     }
     
     private SegmentSwitchCallback segmentSwitchCallback;
+    private CorruptedFilesCallback corruptedFilesCallback;
 
     public void setStatusCallback(StatusCallback callback) {
         this.statusCallback = callback;
@@ -75,6 +84,10 @@ public class MultiCameraManager {
 
     public void setPreviewSizeCallback(PreviewSizeCallback callback) {
         this.previewSizeCallback = callback;
+    }
+    
+    public void setCorruptedFilesCallback(CorruptedFilesCallback callback) {
+        this.corruptedFilesCallback = callback;
     }
     
     public void setSegmentSwitchCallback(SegmentSwitchCallback callback) {
@@ -356,7 +369,7 @@ public class MultiCameraManager {
             }
 
             @Override
-            public void onSegmentSwitch(String cameraId, int newSegmentIndex) {
+            public void onSegmentSwitch(String cameraId, int newSegmentIndex, String completedFilePath) {
                 AppLog.d(TAG, "Segment switch for camera " + cameraId + " to segment " + newSegmentIndex);
                 // 找到对应的 camera key 和 camera
                 for (Map.Entry<String, SingleCamera> entry : cameras.entrySet()) {
@@ -367,10 +380,9 @@ public class MultiCameraManager {
 
                         if (camera != null && recorder != null) {
                             // 如果使用中转写入，将上一个分段的文件传输到最终目录
-                            if (useRelayWrite && finalSaveDir != null && newSegmentIndex > 0) {
-                                // 获取上一个分段的文件路径（注意：VideoRecorder 内部已经切换到新路径）
-                                // 通过文件名模式查找临时目录中的文件
-                                scheduleRelayTransfer(key);
+                            if (useRelayWrite && finalSaveDir != null && newSegmentIndex > 0 && completedFilePath != null) {
+                                // 传输已完成的文件（由回调提供确切路径，避免传输正在录制的新文件）
+                                scheduleRelayTransfer(completedFilePath);
                             }
                             
                             // 更新录制 Surface 并重新创建会话
@@ -379,11 +391,26 @@ public class MultiCameraManager {
                             AppLog.d(TAG, "Recreated session for camera " + cameraId + " after segment switch");
                         }
                         
-                        // 通知分段切换回调（只通知一次，使用第一个摄像头的分段）
-                        if ("front".equals(key) && segmentSwitchCallback != null) {
+                        // 通知分段切换回调（只通知一次，第一个触发的摄像头会通知）
+                        if (segmentSwitchCallback != null && newSegmentIndex > lastNotifiedSegmentIndex) {
+                            lastNotifiedSegmentIndex = newSegmentIndex;
                             segmentSwitchCallback.onSegmentSwitch(newSegmentIndex);
                         }
                         break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCorruptedFilesDeleted(String cameraId, List<String> deletedFiles) {
+                if (deletedFiles != null && !deletedFiles.isEmpty()) {
+                    AppLog.w(TAG, "Corrupted files deleted for camera " + cameraId + ": " + deletedFiles.size() + " file(s)");
+                    for (String file : deletedFiles) {
+                        AppLog.d(TAG, "  Deleted: " + file);
+                    }
+                    // 通知 MainActivity 显示弹窗
+                    if (corruptedFilesCallback != null) {
+                        mainHandler.post(() -> corruptedFilesCallback.onCorruptedFilesDeleted(deletedFiles));
                     }
                 }
             }
@@ -660,6 +687,7 @@ public class MultiCameraManager {
             }
 
             if (startSuccess) {
+                lastNotifiedSegmentIndex = -1;  // 重置分段通知计数
                 isRecording = true;
                 AppLog.d(TAG, successCount + " camera(s) started recording successfully");
             } else {
@@ -822,17 +850,33 @@ public class MultiCameraManager {
                 }
 
                 @Override
-                public void onSegmentSwitch(String cameraId, int newSegmentIndex) {
+                public void onSegmentSwitch(String cameraId, int newSegmentIndex, String completedFilePath) {
                     AppLog.d(TAG, "Codec segment switch for camera " + cameraId + " to segment " + newSegmentIndex);
                     
                     // 如果使用中转写入，将上一个分段的文件传输到最终目录
-                    if (useRelayWrite && finalSaveDir != null && newSegmentIndex > 0) {
-                        scheduleRelayTransfer(key);
+                    if (useRelayWrite && finalSaveDir != null && newSegmentIndex > 0 && completedFilePath != null) {
+                        // 传输已完成的文件（由回调提供确切路径，避免传输正在录制的新文件）
+                        scheduleRelayTransfer(completedFilePath);
                     }
                     
-                    // 通知分段切换回调（只通知一次，使用第一个摄像头的分段）
-                    if ("front".equals(key) && segmentSwitchCallback != null) {
+                    // 通知分段切换回调（只通知一次，第一个触发的摄像头会通知）
+                    if (segmentSwitchCallback != null && newSegmentIndex > lastNotifiedSegmentIndex) {
+                        lastNotifiedSegmentIndex = newSegmentIndex;
                         segmentSwitchCallback.onSegmentSwitch(newSegmentIndex);
+                    }
+                }
+
+                @Override
+                public void onCorruptedFilesDeleted(String cameraId, List<String> deletedFiles) {
+                    if (deletedFiles != null && !deletedFiles.isEmpty()) {
+                        AppLog.w(TAG, "Corrupted files deleted for codec camera " + cameraId + ": " + deletedFiles.size() + " file(s)");
+                        for (String file : deletedFiles) {
+                            AppLog.d(TAG, "  Deleted: " + file);
+                        }
+                        // 通知 MainActivity 显示弹窗
+                        if (corruptedFilesCallback != null) {
+                            mainHandler.post(() -> corruptedFilesCallback.onCorruptedFilesDeleted(deletedFiles));
+                        }
                     }
                 }
             });
@@ -897,6 +941,7 @@ public class MultiCameraManager {
             }
 
             if (startSuccess) {
+                lastNotifiedSegmentIndex = -1;  // 重置分段通知计数
                 isRecording = true;
                 AppLog.d(TAG, successCount + " camera(s) started codec recording successfully");
             } else {
@@ -932,7 +977,15 @@ public class MultiCameraManager {
      * 停止录制所有摄像头
      */
     public void stopRecording() {
-        AppLog.d(TAG, "stopRecording called, isRecording=" + isRecording + ", useCodecRecording=" + useCodecRecording);
+        stopRecording(false);
+    }
+
+    /**
+     * 停止录制所有摄像头
+     * @param skipRelayTransfer 是否跳过自动传输（用于远程录制，上传完成后再传输）
+     */
+    public void stopRecording(boolean skipRelayTransfer) {
+        AppLog.d(TAG, "stopRecording called, isRecording=" + isRecording + ", useCodecRecording=" + useCodecRecording + ", skipRelayTransfer=" + skipRelayTransfer);
 
         // 清理待处理的录制启动任务和会话计数器（线程安全处理）
         synchronized (sessionLock) {
@@ -1005,14 +1058,27 @@ public class MultiCameraManager {
         }
 
         // 如果使用中转写入，将临时目录中的所有文件传输到最终目录
-        if (useRelayWrite && finalSaveDir != null) {
+        // 如果 skipRelayTransfer=true（远程录制），则跳过自动传输，由上传逻辑负责传输
+        if (useRelayWrite && finalSaveDir != null && !skipRelayTransfer) {
             AppLog.d(TAG, "Scheduling relay transfer for remaining files...");
             // 保存引用，因为 finalSaveDir 会在延迟执行前被清空
             final File savedFinalDir = finalSaveDir;
+            
+            // 【重要】立即收集当前需要传输的文件列表，避免延迟执行时误传输新创建的文件
+            File tempDir = new File(context.getCacheDir(), FileTransferManager.TEMP_VIDEO_DIR);
+            final File[] filesToTransfer;
+            if (tempDir.exists()) {
+                filesToTransfer = tempDir.listFiles((dir, name) -> name.endsWith(".mp4"));
+            } else {
+                filesToTransfer = null;
+            }
+            
             // 延迟一点执行，确保文件已经写入完成
             mainHandler.postDelayed(() -> {
-                transferAllTempFiles(savedFinalDir);
+                transferSpecificTempFiles(savedFinalDir, filesToTransfer);
             }, 500);
+        } else if (useRelayWrite && skipRelayTransfer) {
+            AppLog.d(TAG, "Skipping relay transfer (will be handled after upload)");
         }
 
         isRecording = false;
@@ -1022,48 +1088,44 @@ public class MultiCameraManager {
     }
     
     /**
-     * 调度将指定摄像头的临时文件传输到最终目录
-     * @param cameraKey 摄像头位置（front/back/left/right）
+     * 调度将指定的已完成文件传输到最终目录
+     * @param completedFilePath 已完成录制的文件完整路径
      */
-    private void scheduleRelayTransfer(String cameraKey) {
-        if (finalSaveDir == null) {
+    private void scheduleRelayTransfer(String completedFilePath) {
+        if (finalSaveDir == null || completedFilePath == null) {
             return;
         }
         
-        File tempDir = StorageHelper.getRecordingDir(context);
-        if (tempDir == null || !tempDir.exists()) {
+        File tempFile = new File(completedFilePath);
+        if (!tempFile.exists()) {
+            AppLog.w(TAG, "Completed file does not exist: " + completedFilePath);
             return;
         }
         
-        // 查找该摄像头的临时文件（文件名包含 _cameraKey.mp4）
-        File[] files = tempDir.listFiles((dir, name) -> 
-                name.endsWith("_" + cameraKey + ".mp4"));
-        
-        if (files == null || files.length == 0) {
+        // 检查文件大小，避免传输空文件或损坏文件
+        if (tempFile.length() < 1024) {
+            AppLog.w(TAG, "Completed file too small, skipping transfer: " + completedFilePath + " (" + tempFile.length() + " bytes)");
             return;
         }
+        
+        File targetFile = new File(finalSaveDir, tempFile.getName());
+        
+        AppLog.d(TAG, "Scheduling relay transfer: " + tempFile.getName() + 
+                " -> " + targetFile.getAbsolutePath());
         
         FileTransferManager transferManager = FileTransferManager.getInstance(context);
-        
-        for (File tempFile : files) {
-            File targetFile = new File(finalSaveDir, tempFile.getName());
+        transferManager.addTransferTask(tempFile, targetFile, 
+                new FileTransferManager.TransferCallback() {
+            @Override
+            public void onTransferComplete(File sourceFile, File targetFile) {
+                AppLog.d(TAG, "Relay transfer complete: " + targetFile.getName());
+            }
             
-            AppLog.d(TAG, "Scheduling relay transfer: " + tempFile.getName() + 
-                    " -> " + targetFile.getAbsolutePath());
-            
-            transferManager.addTransferTask(tempFile, targetFile, 
-                    new FileTransferManager.TransferCallback() {
-                @Override
-                public void onTransferComplete(File sourceFile, File targetFile) {
-                    AppLog.d(TAG, "Relay transfer complete: " + targetFile.getName());
-                }
-                
-                @Override
-                public void onTransferFailed(File sourceFile, File targetFile, String error) {
-                    AppLog.e(TAG, "Relay transfer failed: " + sourceFile.getName() + " - " + error);
-                }
-            });
-        }
+            @Override
+            public void onTransferFailed(File sourceFile, File targetFile, String error) {
+                AppLog.e(TAG, "Relay transfer failed: " + sourceFile.getName() + " - " + error);
+            }
+        });
     }
     
     /**
@@ -1083,6 +1145,21 @@ public class MultiCameraManager {
         }
         
         File[] files = tempDir.listFiles((dir, name) -> name.endsWith(".mp4"));
+        transferSpecificTempFiles(targetDir, files);
+    }
+    
+    /**
+     * 将指定的临时视频文件传输到最终目录
+     * 【重要】此方法只传输预先指定的文件列表，避免传输在调用后新创建的文件
+     * @param targetDir 目标目录
+     * @param files 要传输的文件列表（在调用前收集）
+     */
+    private void transferSpecificTempFiles(File targetDir, File[] files) {
+        if (targetDir == null) {
+            AppLog.w(TAG, "Target directory is null, skipping transfer");
+            return;
+        }
+        
         if (files == null || files.length == 0) {
             AppLog.d(TAG, "No temp files to transfer");
             return;
@@ -1093,6 +1170,18 @@ public class MultiCameraManager {
         FileTransferManager transferManager = FileTransferManager.getInstance(context);
         
         for (File tempFile : files) {
+            // 检查文件是否仍然存在（可能已经被删除或移动）
+            if (!tempFile.exists()) {
+                AppLog.d(TAG, "Skipping non-existent file: " + tempFile.getName());
+                continue;
+            }
+            
+            // 跳过空文件（可能是正在被其他录制使用的新文件）
+            if (tempFile.length() == 0) {
+                AppLog.d(TAG, "Skipping empty file (may be in use): " + tempFile.getName());
+                continue;
+            }
+            
             File targetFile = new File(targetDir, tempFile.getName());
             
             transferManager.addTransferTask(tempFile, targetFile, 
