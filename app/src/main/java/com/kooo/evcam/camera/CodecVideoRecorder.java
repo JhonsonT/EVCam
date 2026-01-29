@@ -901,6 +901,12 @@ public class CodecVideoRecorder {
      * - 失败时：使用5秒快速重试，最多重试6次（30秒内），之后回到正常1分钟间隔
      */
     private void switchToNextSegment() {
+        // 检查是否仍在录制状态（防止与 stopRecording 竞态）
+        if (!isRecording.get() || isReleased) {
+            AppLog.w(TAG, "Camera " + cameraId + " Skipping segment switch (not recording or released)");
+            return;
+        }
+        
         AppLog.d(TAG, "Camera " + cameraId + " Starting segment switch on encoder thread");
         
         boolean switchSuccess = false;

@@ -2677,6 +2677,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                     
                     sendErrorToRemote("上传失败: " + error);
+                    
+                    // 如果是 413 错误（文件太大），额外发送提示
+                    if (error.contains("413")) {
+                        sendErrorToRemote("提示：钉钉限制上传文件不能超过20MB，该文件大小已超出，可能会上传失败。");
+                    }
+                    
                     // 即使失败也退回后台
                     runOnUiThread(() -> returnToBackgroundIfRemoteWakeUp());
                 }
