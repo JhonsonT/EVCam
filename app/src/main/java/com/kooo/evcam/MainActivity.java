@@ -1406,12 +1406,13 @@ public class MainActivity extends AppCompatActivity {
                     cameraIds[0], textureRight   // 右摄像头使用 cameraIds[0]
             );
         } else if (cameraIds.length >= 2) {
-            // 只有2个摄像头，使用前两个位置
+            // 只有2个摄像头，复用到四个位置
+            // 注意：参数顺序必须与 initCameras(frontId, frontView, backId, backView, leftId, leftView, rightId, rightView) 对应
             cameraManager.initCameras(
-                    cameraIds[0], textureLeft,
-                    cameraIds[1], textureRight,
-                    cameraIds[0], textureFront,
-                    cameraIds[1], textureBack
+                    cameraIds[0], textureFront,  // front位置使用 textureFront
+                    cameraIds[1], textureBack,   // back位置使用 textureBack
+                    cameraIds[0], textureLeft,   // left位置使用 textureLeft
+                    cameraIds[1], textureRight   // right位置使用 textureRight
             );
         } else if (cameraIds.length == 1) {
             // 只有1个摄像头，所有位置使用同一个
