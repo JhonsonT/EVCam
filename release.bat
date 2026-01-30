@@ -1,4 +1,4 @@
-./@echo off
+@echo off
 setlocal enabledelayedexpansion
 
 REM Set JAVA_HOME if not already set
