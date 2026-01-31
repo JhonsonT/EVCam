@@ -100,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
     private static final long RECORDING_ERROR_TOAST_INTERVAL = 20000;  // 最小显示间隔（20秒）
     private boolean shouldMoveToBackgroundOnReady = false;  // 开机自启动后，窗口准备好时移到后台
     private boolean autoStartRecordingTriggered = false;  // 标记自动录制是否已触发（避免重复触发）
+    private boolean isAutoRecordingPending = false;  // 标记自动录制已计划但尚未开始（防止 onPause 关闭摄像头）
     
     // 主题切换后恢复录制相关
     private boolean shouldResumeRecordingAfterRecreate = false;  // 主题切换后是否需要恢复录制
@@ -348,14 +349,21 @@ public class MainActivity extends AppCompatActivity {
         // 检查是否是开机自启动
         boolean autoStartFromBoot = getIntent().getBooleanExtra("auto_start_from_boot", false);
         if (autoStartFromBoot) {
-            AppLog.d(TAG, "开机自启动模式：等待窗口准备好后移到后台");
-            
             // 清除标志，避免后续重复检测
             getIntent().removeExtra("auto_start_from_boot");
             
-            // 设置标志，等待 onWindowFocusChanged 时再移到后台
-            // 这确保 Activity 完全初始化后再执行，避免中断初始化过程
-            shouldMoveToBackgroundOnReady = true;
+            // 判断是否需要移到后台：
+            // - 如果开启了自动录制：不移到后台，显示主界面并开始录制
+            // - 如果未开启自动录制（只开启悬浮窗/推送等）：移到后台
+            if (appConfig.isAutoStartRecording()) {
+                AppLog.d(TAG, "开机自启动模式：已开启自动录制，保持前台显示");
+                shouldMoveToBackgroundOnReady = false;
+            } else {
+                AppLog.d(TAG, "开机自启动模式：未开启自动录制，等待窗口准备好后移到后台");
+                // 设置标志，等待 onWindowFocusChanged 时再移到后台
+                // 这确保 Activity 完全初始化后再执行，避免中断初始化过程
+                shouldMoveToBackgroundOnReady = true;
+            }
         }
 
         // 检查是否有启动时传入的远程命令（冷启动）
@@ -2333,10 +2341,14 @@ public class MainActivity extends AppCompatActivity {
         
         // 标记已触发
         autoStartRecordingTriggered = true;
+        isAutoRecordingPending = true;  // 标记自动录制正在等待中（防止 onPause 关闭摄像头）
         AppLog.d(TAG, "检测到启用了启动自动录制，将在2秒后自动开始录制...");
         
         // 延迟2秒后开始录制，确保所有摄像头都已准备就绪
         new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            // 自动录制等待结束
+            isAutoRecordingPending = false;
+            
             // 再次检查是否已经在录制（可能用户手动开始了）
             if (isRecording) {
                 AppLog.d(TAG, "已在录制中，跳过自动录制");
@@ -3572,6 +3584,9 @@ public class MainActivity extends AppCompatActivity {
             if (isRecording) {
                 // 正在录制：保持摄像头连接（有前台服务保护）
                 AppLog.d(TAG, "Recording in progress, keeping cameras connected (protected by foreground service)");
+            } else if (isAutoRecordingPending) {
+                // 自动录制正在等待中：保持摄像头连接（开机自启动场景）
+                AppLog.d(TAG, "Auto recording pending, keeping cameras connected for startup recording");
             } else {
                 // 未录制：主动断开摄像头，避免后台拍照黑屏问题
                 AppLog.d(TAG, "Not recording, closing all cameras to avoid background issues");
