@@ -11,7 +11,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background">
 
@@ -20,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="☰"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             android:layout_marginEnd="8dp"
@@ -42,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="刷新"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -52,7 +55,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="多选"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/button_background"
@@ -63,7 +66,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="⌂"
-            android:textSize="22sp"
+            android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             android:layout_marginStart="8dp"
@@ -77,7 +80,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background"
         android:visibility="gone">
@@ -87,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="全选"
-            android:textSize="16sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -99,7 +105,7 @@
             android:layout_weight="1"
             android:text="已选择 0 项"
             android:textColor="@color/text_primary"
-            android:textSize="16sp"
+            android:textSize="20sp"
             android:gravity="center" />
 
         <Button
@@ -107,7 +113,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="删除"
-            android:textSize="16sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:backgroundTint="@android:color/holo_red_dark"
             android:textColor="@android:color/white" />
@@ -117,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="取消"
-            android:textSize="16sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/button_background"

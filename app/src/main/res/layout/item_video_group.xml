@@ -148,11 +148,13 @@
         </LinearLayout>
 
         <!-- 选中指示器（多选模式用） -->
-        <ImageView
+        <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/check_indicator"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/checkbox_on_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:checked="true"
             android:visibility="gone"
             android:contentDescription="选中" />
     </LinearLayout>

@@ -271,6 +271,12 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 dingTalkApiClient = RemoteServiceManager.getInstance().getDingTalkApiClient();
                 dingTalkStreamManager = RemoteServiceManager.getInstance().getDingTalkStreamManager();
                 
+                // 【修复】立即同步到 RemoteCommandDispatcher（如果已初始化且获取成功）
+                if (dingTalkApiClient != null && remoteCommandDispatcher != null) {
+                    remoteCommandDispatcher.setDingTalkApiClient(dingTalkApiClient);
+                    AppLog.d(TAG, "钉钉 API 客户端已同步到 RemoteCommandDispatcher");
+                }
+                
                 // 如果服务正在启动中，延迟获取实例
                 if (dingTalkApiClient == null || dingTalkStreamManager == null) {
                     AppLog.d(TAG, "钉钉服务正在启动中，延迟 500ms 后获取实例");
@@ -279,6 +285,11 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                         dingTalkStreamManager = RemoteServiceManager.getInstance().getDingTalkStreamManager();
                         AppLog.d(TAG, "延迟获取钉钉实例: apiClient=" + (dingTalkApiClient != null) + 
                                      ", streamManager=" + (dingTalkStreamManager != null));
+                        // 【修复】延迟获取后也需要同步到 RemoteCommandDispatcher
+                        if (dingTalkApiClient != null && remoteCommandDispatcher != null) {
+                            remoteCommandDispatcher.setDingTalkApiClient(dingTalkApiClient);
+                            AppLog.d(TAG, "钉钉 API 客户端已延迟同步到 RemoteCommandDispatcher");
+                        }
                     }, 500);
                 }
             } else {
@@ -294,6 +305,12 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 telegramApiClient = RemoteServiceManager.getInstance().getTelegramApiClient();
                 telegramBotManager = RemoteServiceManager.getInstance().getTelegramBotManager();
                 
+                // 【修复】立即同步到 RemoteCommandDispatcher
+                if (telegramApiClient != null && remoteCommandDispatcher != null) {
+                    remoteCommandDispatcher.setTelegramApiClient(telegramApiClient);
+                    AppLog.d(TAG, "Telegram API 客户端已同步到 RemoteCommandDispatcher");
+                }
+                
                 // 如果服务正在启动中，延迟获取实例
                 if (telegramApiClient == null || telegramBotManager == null) {
                     AppLog.d(TAG, "Telegram 服务正在启动中，延迟 500ms 后获取实例");
@@ -302,6 +319,11 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                         telegramBotManager = RemoteServiceManager.getInstance().getTelegramBotManager();
                         AppLog.d(TAG, "延迟获取 Telegram 实例: apiClient=" + (telegramApiClient != null) + 
                                      ", botManager=" + (telegramBotManager != null));
+                        // 【修复】延迟获取后也需要同步
+                        if (telegramApiClient != null && remoteCommandDispatcher != null) {
+                            remoteCommandDispatcher.setTelegramApiClient(telegramApiClient);
+                            AppLog.d(TAG, "Telegram API 客户端已延迟同步到 RemoteCommandDispatcher");
+                        }
                     }, 500);
                 }
             } else {
@@ -316,6 +338,12 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 feishuApiClient = RemoteServiceManager.getInstance().getFeishuApiClient();
                 feishuBotManager = RemoteServiceManager.getInstance().getFeishuBotManager();
                 
+                // 【修复】立即同步到 RemoteCommandDispatcher
+                if (feishuApiClient != null && remoteCommandDispatcher != null) {
+                    remoteCommandDispatcher.setFeishuApiClient(feishuApiClient);
+                    AppLog.d(TAG, "飞书 API 客户端已同步到 RemoteCommandDispatcher");
+                }
+                
                 if (feishuApiClient == null || feishuBotManager == null) {
                     AppLog.d(TAG, "飞书服务正在启动中，延迟 500ms 后获取实例");
                     new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
@@ -323,6 +351,11 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                         feishuBotManager = RemoteServiceManager.getInstance().getFeishuBotManager();
                         AppLog.d(TAG, "延迟获取飞书实例: apiClient=" + (feishuApiClient != null) + 
                                      ", botManager=" + (feishuBotManager != null));
+                        // 【修复】延迟获取后也需要同步
+                        if (feishuApiClient != null && remoteCommandDispatcher != null) {
+                            remoteCommandDispatcher.setFeishuApiClient(feishuApiClient);
+                            AppLog.d(TAG, "飞书 API 客户端已延迟同步到 RemoteCommandDispatcher");
+                        }
                     }, 500);
                 }
             } else {

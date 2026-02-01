@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 大屏竖屏布局：上方预览区，下方列表 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
@@ -46,10 +47,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="12dp"
             android:text=""
             android:textColor="@color/text_secondary"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:gravity="start|center_vertical" />
 
         <Button
@@ -69,7 +70,7 @@
             android:text="多选"
             android:textSize="20sp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
 
@@ -81,7 +82,7 @@
             android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
     </LinearLayout>
@@ -137,25 +138,306 @@
             android:text="取消"
             android:textSize="20sp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
     </LinearLayout>
 
-    <!-- 主内容区：左右分栏（车机大屏使用权重比例） -->
+    <!-- 主内容区：上下分栏（竖屏） -->
     <LinearLayout
         android:id="@+id/content_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <!-- 左侧：图片列表（权重比例 2:8） -->
+        <!-- 上方：预览区 -->
+        <LinearLayout
+            android:id="@+id/preview_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
+            android:orientation="vertical"
+            android:background="@color/preview_background">
+
+            <!-- 四宫格预览区（居中显示） -->
+            <FrameLayout
+                android:id="@+id/grid_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <!-- 多路模式：四宫格 -->
+                <LinearLayout
+                    android:id="@+id/multi_view_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:background="@color/preview_grid_divider">
+
+                    <!-- 上排：前、后 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                    <com.kooo.evcam.AspectRatioFrameLayout
+                        android:id="@+id/frame_front"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="6dp"
+                        android:background="@color/preview_frame_background">
+
+                        <ImageView
+                            android:id="@+id/image_front"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter" />
+
+                        <TextView
+                            android:id="@+id/label_front"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_margin="6dp"
+                            android:background="#80000000"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="3dp"
+                            android:text="前"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/placeholder_front"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="无图片"
+                            android:textColor="@color/preview_placeholder_text"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </com.kooo.evcam.AspectRatioFrameLayout>
+
+                    <com.kooo.evcam.AspectRatioFrameLayout
+                        android:id="@+id/frame_back"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="6dp"
+                        android:background="@color/preview_frame_background">
+
+                        <ImageView
+                            android:id="@+id/image_back"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter" />
+
+                        <TextView
+                            android:id="@+id/label_back"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_margin="6dp"
+                            android:background="#80000000"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="3dp"
+                            android:text="后"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/placeholder_back"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="无图片"
+                            android:textColor="@color/preview_placeholder_text"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </com.kooo.evcam.AspectRatioFrameLayout>
+                </LinearLayout>
+
+                    <!-- 下排：左、右 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                    <com.kooo.evcam.AspectRatioFrameLayout
+                        android:id="@+id/frame_left"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="0dp"
+                        android:background="@color/preview_frame_background">
+
+                        <ImageView
+                            android:id="@+id/image_left"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter" />
+
+                        <TextView
+                            android:id="@+id/label_left"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_margin="6dp"
+                            android:background="#80000000"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="3dp"
+                            android:text="左"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/placeholder_left"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="无图片"
+                            android:textColor="@color/preview_placeholder_text"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </com.kooo.evcam.AspectRatioFrameLayout>
+
+                    <com.kooo.evcam.AspectRatioFrameLayout
+                        android:id="@+id/frame_right"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="0dp"
+                        android:background="@color/preview_frame_background">
+
+                        <ImageView
+                            android:id="@+id/image_right"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="fitCenter" />
+
+                        <TextView
+                            android:id="@+id/label_right"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|start"
+                            android:layout_margin="6dp"
+                            android:background="#80000000"
+                            android:paddingHorizontal="6dp"
+                            android:paddingVertical="3dp"
+                            android:text="右"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/placeholder_right"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            android:text="无图片"
+                            android:textColor="@color/preview_placeholder_text"
+                            android:textSize="12sp"
+                            android:visibility="gone" />
+                    </com.kooo.evcam.AspectRatioFrameLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 单路模式 -->
+                <FrameLayout
+                    android:id="@+id/single_view_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:background="@color/preview_frame_background">
+
+                    <ImageView
+                        android:id="@+id/image_single"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="fitCenter" />
+
+                    <TextView
+                        android:id="@+id/label_single"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_margin="10dp"
+                        android:background="#80000000"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
+                        android:text="前"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp" />
+                </FrameLayout>
+
+                <!-- 无选中状态提示 -->
+                <LinearLayout
+                    android:id="@+id/no_selection_hint"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="请从下方列表选择照片"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="双击画面可放大切换"
+                        android:textColor="@color/text_hint"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- 底部控制栏：摄像头切换按钮 -->
+            <LinearLayout
+                android:id="@+id/controls_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="6dp"
+                android:gravity="center"
+                android:background="@color/preview_controls_background"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/btn_view_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:minWidth="60dp"
+                    android:text="多路"
+                    android:textSize="14sp"
+                    android:backgroundTint="@color/button_background"
+                    android:textColor="@color/button_text" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 下方：图片列表 -->
         <FrameLayout
             android:id="@+id/list_container"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
             android:background="@color/page_background">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -175,284 +457,6 @@
                 android:textSize="16sp"
                 android:visibility="gone" />
         </FrameLayout>
-
-        <!-- 右侧：预览区（权重增大） -->
-        <LinearLayout
-            android:id="@+id/preview_container"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="8"
-            android:orientation="vertical"
-            android:background="@color/preview_background">
-
-            <!-- 四宫格预览区（居中显示） -->
-            <FrameLayout
-                android:id="@+id/grid_container"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="4dp"
-                android:layout_marginBottom="4dp"
-                android:gravity="center">
-
-                <!-- 多路模式：四宫格 -->
-                <LinearLayout
-                    android:id="@+id/multi_view_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:baselineAligned="false"
-                    android:gravity="center_horizontal"
-                    android:background="@color/preview_grid_divider">
-
-                        <!-- 上排：前、后 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:baselineAligned="false">
-
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_front"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_margin="5dp"
-                                android:background="@color/preview_frame_background">
-
-                        <ImageView
-                            android:id="@+id/image_front"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="fitCenter" />
-
-                        <TextView
-                            android:id="@+id/label_front"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="top|start"
-                            android:layout_margin="8dp"
-                            android:background="#80000000"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="前"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/placeholder_front"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="无图片"
-                            android:textColor="@color/preview_placeholder_text"
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </com.kooo.evcam.AspectRatioFrameLayout>
-
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_back"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_margin="5dp"
-                                android:background="@color/preview_frame_background">
-
-                        <ImageView
-                            android:id="@+id/image_back"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="fitCenter" />
-
-                        <TextView
-                            android:id="@+id/label_back"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="top|start"
-                            android:layout_margin="8dp"
-                            android:background="#80000000"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="后"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/placeholder_back"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="无图片"
-                            android:textColor="@color/preview_placeholder_text"
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </com.kooo.evcam.AspectRatioFrameLayout>
-                </LinearLayout>
-
-                        <!-- 下排：左、右 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:orientation="horizontal"
-                            android:gravity="center"
-                            android:baselineAligned="false">
-
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_left"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_margin="5dp"
-                                android:background="@color/preview_frame_background">
-
-                        <ImageView
-                            android:id="@+id/image_left"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="fitCenter" />
-
-                        <TextView
-                            android:id="@+id/label_left"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="top|start"
-                            android:layout_margin="8dp"
-                            android:background="#80000000"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="左"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/placeholder_left"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="无图片"
-                            android:textColor="@color/preview_placeholder_text"
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </com.kooo.evcam.AspectRatioFrameLayout>
-
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_right"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:layout_margin="5dp"
-                                android:background="@color/preview_frame_background">
-
-                        <ImageView
-                            android:id="@+id/image_right"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="fitCenter" />
-
-                        <TextView
-                            android:id="@+id/label_right"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="top|start"
-                            android:layout_margin="8dp"
-                            android:background="#80000000"
-                            android:paddingHorizontal="8dp"
-                            android:paddingVertical="4dp"
-                            android:text="右"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/placeholder_right"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:gravity="center"
-                            android:text="无图片"
-                            android:textColor="@color/preview_placeholder_text"
-                            android:textSize="14sp"
-                            android:visibility="gone" />
-                    </com.kooo.evcam.AspectRatioFrameLayout>
-                    </LinearLayout>
-                </LinearLayout>
-
-                <!-- 单路模式：全屏显示 -->
-                <FrameLayout
-                    android:id="@+id/single_view_layout"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"
-                    android:background="@color/preview_frame_background">
-
-                    <ImageView
-                        android:id="@+id/image_single"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter" />
-
-                    <TextView
-                        android:id="@+id/label_single"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="top|start"
-                        android:layout_margin="12dp"
-                        android:background="#80000000"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"
-                        android:text="前"
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp" />
-                </FrameLayout>
-
-                <!-- 无选中状态提示 -->
-                <LinearLayout
-                    android:id="@+id/no_selection_hint"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="请从左侧列表选择照片"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="24sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="双击画面可放大切换"
-                        android:textColor="@color/text_hint"
-                        android:textSize="18sp" />
-                </LinearLayout>
-            </FrameLayout>
-
-            <!-- 底部控制栏：摄像头切换按钮 -->
-            <LinearLayout
-                android:id="@+id/controls_layout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="8dp"
-                android:gravity="center"
-                android:background="@color/preview_controls_background"
-                android:visibility="gone">
-
-                <Button
-                    android:id="@+id/btn_view_mode"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:minWidth="72dp"
-                    android:text="多路"
-                    android:textSize="16sp"
-                    android:backgroundTint="@color/button_background"
-                    android:textColor="@color/button_text" />
-            </LinearLayout>
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

@@ -13,7 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background">
 
@@ -22,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="☰"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             android:layout_marginEnd="8dp"
@@ -55,8 +58,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="刷新"
-            android:textSize="16sp"
-            android:minHeight="44dp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
 
@@ -65,8 +68,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="多选"
-            android:textSize="16sp"
-            android:minHeight="44dp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -78,7 +81,7 @@
             android:text="⌂"
             android:textSize="20sp"
             android:minWidth="48dp"
-            android:minHeight="44dp"
+            android:minHeight="48dp"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -90,7 +93,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background"
         android:visibility="gone">
@@ -98,9 +104,10 @@
         <Button
             android:id="@+id/btn_select_all"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:text="全选"
-            android:textSize="16sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
 
@@ -111,24 +118,26 @@
             android:layout_weight="1"
             android:text="已选择 0 项"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:gravity="center" />
 
         <Button
             android:id="@+id/btn_delete_selected"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:text="删除"
-            android:textSize="16sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:backgroundTint="@android:color/holo_red_dark"
             android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/btn_cancel_select"
             android:layout_width="wrap_content"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:text="取消"
-            android:textSize="16sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:layout_marginStart="8dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -184,6 +193,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="4dp"
                 android:gravity="center">
 
                 <!-- 多路模式：2x2四宫格 -->
@@ -192,28 +203,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical"
-                    android:gravity="center"
+                    android:baselineAligned="false"
+                    android:gravity="center_horizontal"
                     android:background="@color/preview_grid_divider">
 
-                    <!-- 上排：前、后 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <!-- 前置摄像头 -->
-                        <com.kooo.evcam.AspectRatioFrameLayout
-                            android:id="@+id/frame_front"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
+                        <!-- 上排：前、后 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:layout_marginStart="0dp"
-                            android:layout_marginEnd="2dp"
-                            android:layout_marginTop="0dp"
-                            android:layout_marginBottom="2dp"
-                            android:background="@color/preview_frame_background">
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:baselineAligned="false">
+
+                            <!-- 前置摄像头 -->
+                            <com.kooo.evcam.AspectRatioFrameLayout
+                                android:id="@+id/frame_front"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_margin="5dp"
+                                android:background="@color/preview_frame_background">
 
                             <VideoView
                                 android:id="@+id/video_front"
@@ -246,17 +256,14 @@
                                 android:visibility="gone" />
                         </com.kooo.evcam.AspectRatioFrameLayout>
 
-                        <!-- 后置摄像头 -->
-                        <com.kooo.evcam.AspectRatioFrameLayout
-                            android:id="@+id/frame_back"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_marginStart="2dp"
-                            android:layout_marginEnd="0dp"
-                            android:layout_marginTop="0dp"
-                            android:layout_marginBottom="2dp"
-                            android:background="@color/preview_frame_background">
+                            <!-- 后置摄像头 -->
+                            <com.kooo.evcam.AspectRatioFrameLayout
+                                android:id="@+id/frame_back"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_margin="5dp"
+                                android:background="@color/preview_frame_background">
 
                             <VideoView
                                 android:id="@+id/video_back"
@@ -289,25 +296,23 @@
                         </com.kooo.evcam.AspectRatioFrameLayout>
                     </LinearLayout>
 
-                    <!-- 下排：左、右 -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:layout_weight="1"
-                        android:orientation="horizontal"
-                        android:gravity="center">
-
-                        <!-- 左侧摄像头 -->
-                        <com.kooo.evcam.AspectRatioFrameLayout
-                            android:id="@+id/frame_left"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
+                        <!-- 下排：左、右 -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:layout_marginStart="0dp"
-                            android:layout_marginEnd="2dp"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="0dp"
-                            android:background="@color/preview_frame_background">
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:baselineAligned="false">
+
+                            <!-- 左侧摄像头 -->
+                            <com.kooo.evcam.AspectRatioFrameLayout
+                                android:id="@+id/frame_left"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_margin="5dp"
+                                android:background="@color/preview_frame_background">
 
                             <VideoView
                                 android:id="@+id/video_left"
@@ -339,17 +344,14 @@
                                 android:visibility="gone" />
                         </com.kooo.evcam.AspectRatioFrameLayout>
 
-                        <!-- 右侧摄像头 -->
-                        <com.kooo.evcam.AspectRatioFrameLayout
-                            android:id="@+id/frame_right"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:layout_marginStart="2dp"
-                            android:layout_marginEnd="0dp"
-                            android:layout_marginTop="2dp"
-                            android:layout_marginBottom="0dp"
-                            android:background="@color/preview_frame_background">
+                            <!-- 右侧摄像头 -->
+                            <com.kooo.evcam.AspectRatioFrameLayout
+                                android:id="@+id/frame_right"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_margin="5dp"
+                                android:background="@color/preview_frame_background">
 
                             <VideoView
                                 android:id="@+id/video_right"

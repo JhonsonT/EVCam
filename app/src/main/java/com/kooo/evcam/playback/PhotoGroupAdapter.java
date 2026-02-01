@@ -164,7 +164,7 @@ public class PhotoGroupAdapter extends RecyclerView.Adapter<PhotoGroupAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView thumbFront, thumbBack, thumbLeft, thumbRight;
         TextView videoDate, videoTime, videoSize, videoCountBadge;
-        ImageView checkIndicator;
+        android.widget.CheckBox checkIndicator;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);

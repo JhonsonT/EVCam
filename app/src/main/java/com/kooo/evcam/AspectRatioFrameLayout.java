@@ -53,10 +53,22 @@ public class AspectRatioFrameLayout extends FrameLayout {
             // 宽度确定，根据宽度计算高度
             finalWidth = widthSize;
             finalHeight = (int) (widthSize * HEIGHT_RATIO / WIDTH_RATIO);
+            
+            // 关键修复：如果高度有上限限制（AT_MOST），确保不超过
+            if (heightMode == MeasureSpec.AT_MOST && finalHeight > heightSize) {
+                finalHeight = heightSize;
+                finalWidth = (int) (heightSize * WIDTH_RATIO / HEIGHT_RATIO);
+            }
         } else if (heightMode == MeasureSpec.EXACTLY) {
             // 高度确定，根据高度计算宽度
             finalHeight = heightSize;
             finalWidth = (int) (heightSize * WIDTH_RATIO / HEIGHT_RATIO);
+            
+            // 如果宽度有上限限制（AT_MOST），确保不超过
+            if (widthMode == MeasureSpec.AT_MOST && finalWidth > widthSize) {
+                finalWidth = widthSize;
+                finalHeight = (int) (widthSize * HEIGHT_RATIO / WIDTH_RATIO);
+            }
         } else {
             // 都不确定，使用默认
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);

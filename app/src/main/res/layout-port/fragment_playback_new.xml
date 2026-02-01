@@ -14,7 +14,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background">
 
@@ -23,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="☰"
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
             android:layout_marginEnd="8dp"
@@ -55,7 +58,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="刷新"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -65,7 +68,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="多选"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:minHeight="48dp"
             android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
@@ -90,7 +93,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="8dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical"
         android:background="@color/menu_background"
         android:visibility="gone">
@@ -98,9 +104,10 @@
         <Button
             android:id="@+id/btn_select_all"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:text="全选"
-            android:textSize="14sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
 
@@ -111,24 +118,26 @@
             android:layout_weight="1"
             android:text="已选择 0 项"
             android:textColor="@color/text_primary"
-            android:textSize="14sp"
+            android:textSize="20sp"
             android:gravity="center" />
 
         <Button
             android:id="@+id/btn_delete_selected"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:text="删除"
-            android:textSize="14sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:backgroundTint="@android:color/holo_red_dark"
             android:textColor="@android:color/white" />
 
         <Button
             android:id="@+id/btn_cancel_select"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:text="取消"
-            android:textSize="14sp"
+            android:textSize="20sp"
+            android:minHeight="48dp"
             android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
@@ -179,9 +188,9 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="0dp"
-                            android:layout_marginEnd="2dp"
+                            android:layout_marginEnd="6dp"
                             android:layout_marginTop="0dp"
-                            android:layout_marginBottom="2dp"
+                            android:layout_marginBottom="6dp"
                             android:background="@color/preview_frame_background">
 
                             <VideoView
@@ -219,10 +228,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="2dp"
+                            android:layout_marginStart="6dp"
                             android:layout_marginEnd="0dp"
                             android:layout_marginTop="0dp"
-                            android:layout_marginBottom="2dp"
+                            android:layout_marginBottom="6dp"
                             android:background="@color/preview_frame_background">
 
                             <VideoView
@@ -268,8 +277,8 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="0dp"
-                            android:layout_marginEnd="2dp"
-                            android:layout_marginTop="2dp"
+                            android:layout_marginEnd="6dp"
+                            android:layout_marginTop="6dp"
                             android:layout_marginBottom="0dp"
                             android:background="@color/preview_frame_background">
 
@@ -308,9 +317,9 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:layout_marginStart="2dp"
+                            android:layout_marginStart="6dp"
                             android:layout_marginEnd="0dp"
-                            android:layout_marginTop="2dp"
+                            android:layout_marginTop="6dp"
                             android:layout_marginBottom="0dp"
                             android:background="@color/preview_frame_background">
 

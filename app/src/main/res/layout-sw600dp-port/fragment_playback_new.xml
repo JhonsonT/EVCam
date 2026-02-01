@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 大屏竖屏布局：上方预览区，下方列表 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root_layout"
@@ -41,16 +42,15 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <!-- 当前选中视频的日期时间 -->
         <TextView
             android:id="@+id/current_datetime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="12dp"
             android:text=""
             android:textColor="@color/text_secondary"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:gravity="start|center_vertical" />
 
         <Button
@@ -70,7 +70,7 @@
             android:text="多选"
             android:textSize="20sp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
 
@@ -82,7 +82,7 @@
             android:textSize="20sp"
             android:minWidth="48dp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
     </LinearLayout>
@@ -138,91 +138,54 @@
             android:text="取消"
             android:textSize="20sp"
             android:minHeight="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:backgroundTint="@color/button_background"
             android:textColor="@color/button_text" />
     </LinearLayout>
 
-    <!-- 主内容区：左右分栏 -->
+    <!-- 主内容区：上下分栏（竖屏） -->
     <LinearLayout
         android:id="@+id/content_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <!-- 左侧：视频列表（手机使用固定宽度） -->
-        <FrameLayout
-            android:id="@+id/list_container"
-            android:layout_width="200dp"
-            android:layout_height="match_parent"
-            android:background="@color/page_background">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/video_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="4dp"
-                android:clipToPadding="false" />
-
-            <!-- 空状态 -->
-            <TextView
-                android:id="@+id/empty_text"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="暂无录制文件"
-                android:textColor="@color/text_secondary"
-                android:textSize="16sp"
-                android:visibility="gone" />
-        </FrameLayout>
-
-        <!-- 右侧：预览区（占据剩余空间） -->
+        <!-- 上方：预览区 -->
         <LinearLayout
             android:id="@+id/preview_container"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
             android:orientation="vertical"
             android:background="@color/preview_background">
 
-            <!-- 四宫格预览区（居中显示） -->
+            <!-- 四宫格预览区 -->
             <FrameLayout
                 android:id="@+id/grid_container"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:gravity="center">
+                android:layout_weight="1">
 
-                <!-- 外层容器：保持16:10比例，确保四宫格整体缩放 -->
-                <com.kooo.evcam.AspectRatioFrameLayout
+                <!-- 多路模式：四宫格 -->
+                <LinearLayout
+                    android:id="@+id/multi_view_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center"
+                    android:background="@color/preview_grid_divider">
 
-                    <!-- 多路模式：2x2四宫格 -->
+                    <!-- 上排：前、后 -->
                     <LinearLayout
-                        android:id="@+id/multi_view_layout"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:gravity="center"
-                        android:background="@color/preview_grid_divider">
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-                        <!-- 上排：前、后 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <com.kooo.evcam.AspectRatioFrameLayout
+                            android:id="@+id/frame_front"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center">
-
-                            <!-- 前置摄像头 -->
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_front"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="0dp"
                             android:layout_marginEnd="6dp"
@@ -241,15 +204,14 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="top|start"
-                                android:layout_margin="8dp"
+                                android:layout_margin="6dp"
                                 android:background="#80000000"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="4dp"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="3dp"
                                 android:text="前"
                                 android:textColor="#FFFFFF"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
-                            <!-- 无视频占位 -->
                             <TextView
                                 android:id="@+id/placeholder_front"
                                 android:layout_width="match_parent"
@@ -257,15 +219,14 @@
                                 android:gravity="center"
                                 android:text="无视频"
                                 android:textColor="@color/preview_placeholder_text"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:visibility="gone" />
                         </com.kooo.evcam.AspectRatioFrameLayout>
 
-                            <!-- 后置摄像头 -->
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_back"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                        <com.kooo.evcam.AspectRatioFrameLayout
+                            android:id="@+id/frame_back"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="6dp"
                             android:layout_marginEnd="0dp"
@@ -284,13 +245,13 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="top|start"
-                                android:layout_margin="8dp"
+                                android:layout_margin="6dp"
                                 android:background="#80000000"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="4dp"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="3dp"
                                 android:text="后"
                                 android:textColor="#FFFFFF"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/placeholder_back"
@@ -299,23 +260,21 @@
                                 android:gravity="center"
                                 android:text="无视频"
                                 android:textColor="@color/preview_placeholder_text"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:visibility="gone" />
                         </com.kooo.evcam.AspectRatioFrameLayout>
                     </LinearLayout>
 
-                        <!-- 下排：左、右 -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center">
+                    <!-- 下排：左、右 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
 
-                            <!-- 左侧摄像头 -->
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_left"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                        <com.kooo.evcam.AspectRatioFrameLayout
+                            android:id="@+id/frame_left"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="0dp"
                             android:layout_marginEnd="6dp"
@@ -334,13 +293,13 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="top|start"
-                                android:layout_margin="8dp"
+                                android:layout_margin="6dp"
                                 android:background="#80000000"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="4dp"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="3dp"
                                 android:text="左"
                                 android:textColor="#FFFFFF"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/placeholder_left"
@@ -349,15 +308,14 @@
                                 android:gravity="center"
                                 android:text="无视频"
                                 android:textColor="@color/preview_placeholder_text"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:visibility="gone" />
                         </com.kooo.evcam.AspectRatioFrameLayout>
 
-                            <!-- 右侧摄像头 -->
-                            <com.kooo.evcam.AspectRatioFrameLayout
-                                android:id="@+id/frame_right"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
+                        <com.kooo.evcam.AspectRatioFrameLayout
+                            android:id="@+id/frame_right"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="6dp"
                             android:layout_marginEnd="0dp"
@@ -376,13 +334,13 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="top|start"
-                                android:layout_margin="8dp"
+                                android:layout_margin="6dp"
                                 android:background="#80000000"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="4dp"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="3dp"
                                 android:text="右"
                                 android:textColor="#FFFFFF"
-                                android:textSize="14sp" />
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/placeholder_right"
@@ -391,12 +349,11 @@
                                 android:gravity="center"
                                 android:text="无视频"
                                 android:textColor="@color/preview_placeholder_text"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:visibility="gone" />
-                            </com.kooo.evcam.AspectRatioFrameLayout>
-                        </LinearLayout>
+                        </com.kooo.evcam.AspectRatioFrameLayout>
                     </LinearLayout>
-                </com.kooo.evcam.AspectRatioFrameLayout>
+                </LinearLayout>
 
                 <!-- 单路模式：全屏显示 -->
                 <FrameLayout
@@ -417,13 +374,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top|start"
-                        android:layout_margin="12dp"
+                        android:layout_margin="10dp"
                         android:background="#80000000"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="6dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="5dp"
                         android:text="前"
                         android:textColor="#FFFFFF"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
                 </FrameLayout>
 
                 <!-- 无选中状态提示 -->
@@ -437,17 +394,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="请从左侧列表选择视频"
+                        android:text="请从下方列表选择视频"
                         android:textColor="@color/text_secondary"
-                        android:textSize="24sp" />
+                        android:textSize="20sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="8dp"
                         android:text="双击画面可放大切换"
                         android:textColor="@color/text_hint"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
                 </LinearLayout>
             </FrameLayout>
 
@@ -461,74 +418,95 @@
                 android:gravity="center_vertical"
                 android:background="@color/preview_controls_background">
 
-                <!-- 播放/暂停按钮 -->
                 <Button
                     android:id="@+id/btn_play_pause"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:minWidth="80dp"
+                    android:layout_height="44dp"
+                    android:minWidth="72dp"
                     android:text="暂停"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:backgroundTint="@color/button_background"
                     android:textColor="@color/button_text" />
 
-                <!-- 当前时间 -->
                 <TextView
                     android:id="@+id/current_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="8dp"
                     android:text="00:00"
                     android:textColor="@color/text_primary"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
-                <!-- 进度条 -->
                 <SeekBar
                     android:id="@+id/seek_bar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginHorizontal="12dp"
-                    android:minHeight="48dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:minHeight="44dp"
                     android:max="100"
                     android:progress="0"
                     android:progressTint="@color/button_accent"
                     android:thumbTint="@color/button_accent" />
 
-                <!-- 总时长 -->
                 <TextView
                     android:id="@+id/total_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="00:00"
                     android:textColor="@color/text_primary"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <!-- 摄像头切换按钮 -->
                 <Button
                     android:id="@+id/btn_view_mode"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:minWidth="72dp"
-                    android:layout_marginStart="12dp"
+                    android:layout_height="44dp"
+                    android:minWidth="60dp"
+                    android:layout_marginStart="8dp"
                     android:text="多路"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:backgroundTint="@color/button_background"
                     android:textColor="@color/button_text" />
 
-                <!-- 倍速按钮 -->
                 <Button
                     android:id="@+id/btn_speed"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:minWidth="64dp"
-                    android:layout_marginStart="8dp"
+                    android:layout_height="44dp"
+                    android:minWidth="52dp"
+                    android:layout_marginStart="4dp"
                     android:text="1.0x"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:backgroundTint="@color/button_background"
                     android:textColor="@color/button_text" />
             </LinearLayout>
         </LinearLayout>
+
+        <!-- 下方：视频列表 -->
+        <FrameLayout
+            android:id="@+id/list_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="5"
+            android:background="@color/page_background">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/video_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="4dp"
+                android:clipToPadding="false" />
+
+            <TextView
+                android:id="@+id/empty_text"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="暂无录制文件"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
 </LinearLayout>
