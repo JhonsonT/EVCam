@@ -33,11 +33,15 @@ import com.kooo.evcam.R;
 import com.kooo.evcam.StorageHelper;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,13 +71,12 @@ public class PhotoPlaybackFragmentNew extends Fragment {
     private View controlsLayout;
 
     // 数据
-    private List<PhotoGroup> photoGroups = new ArrayList<>();
-    private PhotoGroupAdapter adapter;
+    private List<DateSection<PhotoGroup>> dateSections = new ArrayList<>();
+    private ExpandablePhotoGroupAdapter adapter;
     private PhotoGroup currentGroup;
 
     // 状态
     private boolean isMultiSelectMode = false;
-    private Set<Integer> selectedPositions = new HashSet<>();
     private boolean isSingleMode = false;
     private String currentSinglePosition = PhotoGroup.POSITION_FRONT;
 
@@ -142,15 +145,22 @@ public class PhotoPlaybackFragmentNew extends Fragment {
         btnViewMode = view.findViewById(R.id.btn_view_mode);
         controlsLayout = view.findViewById(R.id.controls_layout);
 
-        // 设置列表（横屏1列，竖屏2列）
+        // 设置列表（竖屏2列，横屏1列，日期头部跨越所有列）
+        adapter = new ExpandablePhotoGroupAdapter(getContext(), dateSections);
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            photoList.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    // 日期头部占满2列，图片项占1列
+                    return adapter.getItemViewType(position) == 0 ? 2 : 1;
+                }
+            });
+            photoList.setLayoutManager(gridLayoutManager);
         } else {
             photoList.setLayoutManager(new LinearLayoutManager(getContext()));
         }
-        adapter = new PhotoGroupAdapter(getContext(), photoGroups);
-        adapter.setSelectedPositions(selectedPositions);
         photoList.setAdapter(adapter);
 
         // 初始状态：隐藏四宫格，显示提示
@@ -195,13 +205,7 @@ public class PhotoPlaybackFragmentNew extends Fragment {
             loadPhotoGroup(group);
         });
 
-        adapter.setOnItemSelectedListener(position -> {
-            if (selectedPositions.contains(position)) {
-                selectedPositions.remove(position);
-            } else {
-                selectedPositions.add(position);
-            }
-            adapter.notifyDataSetChanged();
+        adapter.setOnItemSelectedListener(group -> {
             updateSelectedCount();
         });
 
@@ -426,10 +430,10 @@ public class PhotoPlaybackFragmentNew extends Fragment {
     }
 
     /**
-     * 更新图片列表（按时间戳分组）
+     * 更新图片列表（按日期分组，然后按时间戳分组）
      */
     private void updatePhotoList() {
-        photoGroups.clear();
+        dateSections.clear();
 
         File saveDir = StorageHelper.getPhotoDir(getContext());
         if (!saveDir.exists() || !saveDir.isDirectory()) {
@@ -447,7 +451,7 @@ public class PhotoPlaybackFragmentNew extends Fragment {
             return;
         }
 
-        // 按时间戳分组
+        // 第一步：按时间戳分组（同一秒拍摄的多路图片）
         Map<String, PhotoGroup> groupMap = new HashMap<>();
         for (File file : files) {
             String timestamp = PhotoGroup.extractTimestampPrefix(file.getName());
@@ -460,17 +464,35 @@ public class PhotoPlaybackFragmentNew extends Fragment {
         }
 
         // 转为列表并排序（最新的在前）
-        photoGroups.addAll(groupMap.values());
-        Collections.sort(photoGroups, (g1, g2) -> g2.getCaptureTime().compareTo(g1.getCaptureTime()));
+        List<PhotoGroup> allGroups = new ArrayList<>(groupMap.values());
+        Collections.sort(allGroups, (g1, g2) -> g2.getCaptureTime().compareTo(g1.getCaptureTime()));
+
+        // 第二步：按日期分组
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Map<String, DateSection<PhotoGroup>> dateSectionMap = new LinkedHashMap<>();
+        
+        for (PhotoGroup group : allGroups) {
+            String dateString = dateFormat.format(group.getCaptureTime());
+            DateSection<PhotoGroup> section = dateSectionMap.get(dateString);
+            if (section == null) {
+                section = new DateSection<>(dateString, group.getCaptureTime());
+                dateSectionMap.put(dateString, section);
+            }
+            section.addItem(group);
+        }
+
+        // 日期分组已按日期排序（LinkedHashMap 保持插入顺序，而 allGroups 已排序）
+        dateSections.addAll(dateSectionMap.values());
 
         // 更新UI
-        if (photoGroups.isEmpty()) {
+        if (dateSections.isEmpty()) {
             showEmptyState();
         } else {
             photoList.setVisibility(View.VISIBLE);
             emptyText.setVisibility(View.GONE);
         }
 
+        adapter.buildFlattenedList();
         adapter.notifyDataSetChanged();
     }
 
@@ -481,7 +503,7 @@ public class PhotoPlaybackFragmentNew extends Fragment {
 
     private void toggleMultiSelectMode() {
         isMultiSelectMode = !isMultiSelectMode;
-        selectedPositions.clear();
+        adapter.clearSelection();
         adapter.setMultiSelectMode(isMultiSelectMode);
         adapter.notifyDataSetChanged();
 
@@ -497,7 +519,7 @@ public class PhotoPlaybackFragmentNew extends Fragment {
 
     private void exitMultiSelectMode() {
         isMultiSelectMode = false;
-        selectedPositions.clear();
+        adapter.clearSelection();
         adapter.setMultiSelectMode(false);
         adapter.notifyDataSetChanged();
         toolbar.setVisibility(View.VISIBLE);
@@ -505,40 +527,42 @@ public class PhotoPlaybackFragmentNew extends Fragment {
     }
 
     private void selectAll() {
-        selectedPositions.clear();
-        for (int i = 0; i < photoGroups.size(); i++) {
-            selectedPositions.add(i);
-        }
+        adapter.selectAll();
         adapter.notifyDataSetChanged();
         updateSelectedCount();
     }
 
     private void updateSelectedCount() {
-        selectedCount.setText("已选择 " + selectedPositions.size() + " 项");
+        selectedCount.setText("已选择 " + adapter.getSelectedCount() + " 项");
     }
 
     private void deleteSelected() {
-        if (selectedPositions.isEmpty()) {
+        Set<PhotoGroup> selectedGroups = adapter.getSelectedGroups();
+        if (selectedGroups.isEmpty()) {
             return;
         }
 
         new MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
                 .setTitle("确认删除")
-                .setMessage("确定要删除选中的 " + selectedPositions.size() + " 组照片吗？（包含所有摄像头照片）")
+                .setMessage("确定要删除选中的 " + selectedGroups.size() + " 组照片吗？（包含所有摄像头照片）")
                 .setPositiveButton("删除", (dialog, which) -> {
                     int deletedCount = 0;
-                    List<Integer> positionsToDelete = new ArrayList<>(selectedPositions);
-                    Collections.sort(positionsToDelete, Collections.reverseOrder());
-
-                    for (int position : positionsToDelete) {
-                        if (position < photoGroups.size()) {
-                            PhotoGroup group = photoGroups.get(position);
-                            deletedCount += group.deleteAll();
-                            photoGroups.remove(position);
-                        }
+                    
+                    // 删除选中的图片组
+                    for (PhotoGroup group : selectedGroups) {
+                        deletedCount += group.deleteAll();
                     }
+                    
+                    // 从日期分组中移除已删除的组
+                    for (DateSection<PhotoGroup> section : dateSections) {
+                        section.getItems().removeAll(selectedGroups);
+                    }
+                    
+                    // 移除空的日期分组
+                    dateSections.removeIf(section -> section.getItemCount() == 0);
 
-                    selectedPositions.clear();
+                    adapter.clearSelection();
+                    adapter.buildFlattenedList();
                     adapter.notifyDataSetChanged();
                     updateSelectedCount();
 
@@ -548,7 +572,7 @@ public class PhotoPlaybackFragmentNew extends Fragment {
                                 android.widget.Toast.LENGTH_SHORT).show();
                     }
 
-                    if (photoGroups.isEmpty()) {
+                    if (dateSections.isEmpty()) {
                         exitMultiSelectMode();
                         showEmptyState();
                     }

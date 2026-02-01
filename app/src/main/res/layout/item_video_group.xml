@@ -132,7 +132,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="20sp"
+                android:textStyle="bold"
                 android:layout_marginTop="2dp"
                 android:text="12:54" />
 
@@ -142,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_secondary"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:layout_marginTop="2dp"
                 android:text="69.94 MB" />
         </LinearLayout>

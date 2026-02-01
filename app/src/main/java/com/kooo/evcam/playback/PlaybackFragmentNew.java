@@ -30,11 +30,14 @@ import com.kooo.evcam.R;
 import com.kooo.evcam.StorageHelper;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -69,14 +72,13 @@ public class PlaybackFragmentNew extends Fragment {
     private TextView currentTime, totalTime;
 
     // 数据
-    private List<VideoGroup> videoGroups = new ArrayList<>();
+    private List<DateSection<VideoGroup>> dateSections = new ArrayList<>();
     private VideoGroup currentGroup;
-    private VideoGroupAdapter adapter;
+    private ExpandableVideoGroupAdapter adapter;
     private MultiVideoPlayerManager playerManager;
 
     // 状态
     private boolean isMultiSelectMode = false;
-    private Set<Integer> selectedPositions = new HashSet<>();
     private boolean isSingleMode = false;
     private String currentSinglePosition = VideoGroup.POSITION_FRONT;
     private boolean isDraggingSeekBar = false;
@@ -153,15 +155,22 @@ public class PlaybackFragmentNew extends Fragment {
         currentTime = view.findViewById(R.id.current_time);
         totalTime = view.findViewById(R.id.total_time);
 
-        // 设置列表（横屏1列，竖屏2列）
+        // 设置列表（竖屏2列，横屏1列，日期头部跨越所有列）
+        adapter = new ExpandableVideoGroupAdapter(getContext(), dateSections);
         int orientation = getResources().getConfiguration().orientation;
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            videoList.setLayoutManager(new GridLayoutManager(getContext(), 2));
+            GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    // 日期头部占满2列，视频项占1列
+                    return adapter.getItemViewType(position) == 0 ? 2 : 1;
+                }
+            });
+            videoList.setLayoutManager(gridLayoutManager);
         } else {
             videoList.setLayoutManager(new LinearLayoutManager(getContext()));
         }
-        adapter = new VideoGroupAdapter(getContext(), videoGroups);
-        adapter.setSelectedPositions(selectedPositions);
         videoList.setAdapter(adapter);
 
         // 初始状态：隐藏四宫格，显示提示
@@ -254,13 +263,7 @@ public class PlaybackFragmentNew extends Fragment {
             loadVideoGroup(group);
         });
 
-        adapter.setOnItemSelectedListener(position -> {
-            if (selectedPositions.contains(position)) {
-                selectedPositions.remove(position);
-            } else {
-                selectedPositions.add(position);
-            }
-            adapter.notifyDataSetChanged();
+        adapter.setOnItemSelectedListener(group -> {
             updateSelectedCount();
         });
 
@@ -535,10 +538,10 @@ public class PlaybackFragmentNew extends Fragment {
     }
 
     /**
-     * 更新视频列表（按时间戳分组）
+     * 更新视频列表（按日期分组，然后按时间戳分组）
      */
     private void updateVideoList() {
-        videoGroups.clear();
+        dateSections.clear();
 
         File saveDir = StorageHelper.getVideoDir(getContext());
         if (!saveDir.exists() || !saveDir.isDirectory()) {
@@ -552,7 +555,7 @@ public class PlaybackFragmentNew extends Fragment {
             return;
         }
 
-        // 按时间戳分组
+        // 第一步：按时间戳分组（同一秒录制的多路视频）
         Map<String, VideoGroup> groupMap = new HashMap<>();
         for (File file : files) {
             String timestamp = VideoGroup.extractTimestampPrefix(file.getName());
@@ -565,17 +568,35 @@ public class PlaybackFragmentNew extends Fragment {
         }
 
         // 转为列表并排序（最新的在前）
-        videoGroups.addAll(groupMap.values());
-        Collections.sort(videoGroups, (g1, g2) -> g2.getRecordTime().compareTo(g1.getRecordTime()));
+        List<VideoGroup> allGroups = new ArrayList<>(groupMap.values());
+        Collections.sort(allGroups, (g1, g2) -> g2.getRecordTime().compareTo(g1.getRecordTime()));
+
+        // 第二步：按日期分组
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Map<String, DateSection<VideoGroup>> dateSectionMap = new LinkedHashMap<>();
+        
+        for (VideoGroup group : allGroups) {
+            String dateString = dateFormat.format(group.getRecordTime());
+            DateSection<VideoGroup> section = dateSectionMap.get(dateString);
+            if (section == null) {
+                section = new DateSection<>(dateString, group.getRecordTime());
+                dateSectionMap.put(dateString, section);
+            }
+            section.addItem(group);
+        }
+
+        // 日期分组已按日期排序（LinkedHashMap 保持插入顺序，而 allGroups 已排序）
+        dateSections.addAll(dateSectionMap.values());
 
         // 更新UI
-        if (videoGroups.isEmpty()) {
+        if (dateSections.isEmpty()) {
             showEmptyState();
         } else {
             videoList.setVisibility(View.VISIBLE);
             emptyText.setVisibility(View.GONE);
         }
 
+        adapter.buildFlattenedList();
         adapter.notifyDataSetChanged();
     }
 
@@ -586,7 +607,7 @@ public class PlaybackFragmentNew extends Fragment {
 
     private void toggleMultiSelectMode() {
         isMultiSelectMode = !isMultiSelectMode;
-        selectedPositions.clear();
+        adapter.clearSelection();
         adapter.setMultiSelectMode(isMultiSelectMode);
         adapter.notifyDataSetChanged();
 
@@ -602,7 +623,7 @@ public class PlaybackFragmentNew extends Fragment {
 
     private void exitMultiSelectMode() {
         isMultiSelectMode = false;
-        selectedPositions.clear();
+        adapter.clearSelection();
         adapter.setMultiSelectMode(false);
         adapter.notifyDataSetChanged();
         toolbar.setVisibility(View.VISIBLE);
@@ -610,40 +631,42 @@ public class PlaybackFragmentNew extends Fragment {
     }
 
     private void selectAll() {
-        selectedPositions.clear();
-        for (int i = 0; i < videoGroups.size(); i++) {
-            selectedPositions.add(i);
-        }
+        adapter.selectAll();
         adapter.notifyDataSetChanged();
         updateSelectedCount();
     }
 
     private void updateSelectedCount() {
-        selectedCount.setText("已选择 " + selectedPositions.size() + " 项");
+        selectedCount.setText("已选择 " + adapter.getSelectedCount() + " 项");
     }
 
     private void deleteSelected() {
-        if (selectedPositions.isEmpty()) {
+        Set<VideoGroup> selectedGroups = adapter.getSelectedGroups();
+        if (selectedGroups.isEmpty()) {
             return;
         }
 
         new MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
                 .setTitle("确认删除")
-                .setMessage("确定要删除选中的 " + selectedPositions.size() + " 组视频吗？（包含所有摄像头录像）")
+                .setMessage("确定要删除选中的 " + selectedGroups.size() + " 组视频吗？（包含所有摄像头录像）")
                 .setPositiveButton("删除", (dialog, which) -> {
                     int deletedCount = 0;
-                    List<Integer> positionsToDelete = new ArrayList<>(selectedPositions);
-                    Collections.sort(positionsToDelete, Collections.reverseOrder());
-
-                    for (int position : positionsToDelete) {
-                        if (position < videoGroups.size()) {
-                            VideoGroup group = videoGroups.get(position);
-                            deletedCount += group.deleteAll();
-                            videoGroups.remove(position);
-                        }
+                    
+                    // 删除选中的视频组
+                    for (VideoGroup group : selectedGroups) {
+                        deletedCount += group.deleteAll();
                     }
+                    
+                    // 从日期分组中移除已删除的组
+                    for (DateSection<VideoGroup> section : dateSections) {
+                        section.getItems().removeAll(selectedGroups);
+                    }
+                    
+                    // 移除空的日期分组
+                    dateSections.removeIf(section -> section.getItemCount() == 0);
 
-                    selectedPositions.clear();
+                    adapter.clearSelection();
+                    adapter.buildFlattenedList();
                     adapter.notifyDataSetChanged();
                     updateSelectedCount();
 
@@ -653,7 +676,7 @@ public class PlaybackFragmentNew extends Fragment {
                                 android.widget.Toast.LENGTH_SHORT).show();
                     }
 
-                    if (videoGroups.isEmpty()) {
+                    if (dateSections.isEmpty()) {
                         exitMultiSelectMode();
                         showEmptyState();
                     }
