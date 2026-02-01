@@ -874,6 +874,13 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             requiredTextureCount = 2;
             AppLog.d(TAG, "使用手机配置：自适应2摄像头布局");
         }
+        // 领克07/08：左侧竖向按钮+右侧单摄像头布局
+        else if (AppConfig.CAR_MODEL_LYNK0708.equals(carModel)) {
+            layoutId = R.layout.activity_main_lynk0708;
+            configuredCameraCount = 1;
+            requiredTextureCount = 1;
+            AppLog.d(TAG, "使用领克07/08配置：左侧竖向按钮+右侧单摄像头布局");
+        }
         // 自定义车型：根据配置选择布局
         else if (appConfig.isCustomCarModel()) {
             configuredCameraCount = appConfig.getCameraCount();
