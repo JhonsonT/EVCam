@@ -68,7 +68,7 @@ public class SettingsFragment extends Fragment {
     // 车型配置相关
     private Spinner carModelSpinner;
     private Button customCameraConfigButton;
-    private static final String[] CAR_MODEL_OPTIONS = {"银河E5", "银河E5-多按钮", "银河L6/L7", "银河L7-多按钮", "手机", "自定义车型"};
+    private static final String[] CAR_MODEL_OPTIONS = {"银河E5", "银河E5-多按钮", "银河L6/L7", "银河L7-多按钮", "26款星舰7", "手机", "自定义车型"};
     private boolean isInitializingCarModel = false;
     private String lastAppliedCarModel = null;
     
@@ -108,6 +108,11 @@ public class SettingsFragment extends Fragment {
     private android.widget.CheckBox cbRecordCameraLeft;
     private android.widget.CheckBox cbRecordCameraRight;
     private boolean isInitializingRecordingCameraSelection = false;
+    
+    // 版本更新相关
+    private TextView currentVersionText;
+    private Button checkUpdateButton;
+    private VersionUpdateManager versionUpdateManager;
 
     @Nullable
     @Override
@@ -204,6 +209,9 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // 初始化版本更新功能
+        initVersionUpdate(view);
+        
         // 初始化使用提示入口
         Button btnUsageGuide = view.findViewById(R.id.btn_usage_guide);
         btnUsageGuide.setOnClickListener(v -> showUsageGuideDialog());
@@ -815,6 +823,9 @@ public class SettingsFragment extends Fragment {
                     newModel = AppConfig.CAR_MODEL_L7_MULTI;
                     modelName = "银河L7-多按钮";
                 } else if (position == 4) {
+                    newModel = AppConfig.CAR_MODEL_XINGHAN_7;
+                    modelName = "26款星舰7";
+                } else if (position == 5) {
                     newModel = AppConfig.CAR_MODEL_PHONE;
                     modelName = "手机";
                 } else {
@@ -823,7 +834,7 @@ public class SettingsFragment extends Fragment {
                 }
 
                 // 仅自定义车型显示配置按钮
-                updateCustomConfigButtonVisibility(position == 5);
+                updateCustomConfigButtonVisibility(position == 6);
 
                 if (isInitializingCarModel) {
                     return;
@@ -860,10 +871,12 @@ public class SettingsFragment extends Fragment {
             selectedIndex = 2;
         } else if (AppConfig.CAR_MODEL_L7_MULTI.equals(currentModel)) {
             selectedIndex = 3;
-        } else if (AppConfig.CAR_MODEL_PHONE.equals(currentModel)) {
+        } else if (AppConfig.CAR_MODEL_XINGHAN_7.equals(currentModel)) {
             selectedIndex = 4;
-        } else if (AppConfig.CAR_MODEL_CUSTOM.equals(currentModel)) {
+        } else if (AppConfig.CAR_MODEL_PHONE.equals(currentModel)) {
             selectedIndex = 5;
+        } else if (AppConfig.CAR_MODEL_CUSTOM.equals(currentModel)) {
+            selectedIndex = 6;
         }
         carModelSpinner.setSelection(selectedIndex);
         
@@ -1761,6 +1774,200 @@ public class SettingsFragment extends Fragment {
         transaction.replace(R.id.fragment_container, new ResolutionSettingsFragment());
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+    
+    // ==================== 版本更新相关方法 ====================
+    
+    /**
+     * 初始化版本更新功能
+     */
+    private void initVersionUpdate(View view) {
+        currentVersionText = view.findViewById(R.id.tv_current_version);
+        checkUpdateButton = view.findViewById(R.id.btn_check_update);
+        
+        if (currentVersionText == null || checkUpdateButton == null || getContext() == null) {
+            return;
+        }
+        
+        versionUpdateManager = new VersionUpdateManager(getContext());
+        
+        // 显示当前版本号
+        String currentVersion = versionUpdateManager.getCurrentVersion();
+        currentVersionText.setText("当前版本：v" + currentVersion);
+        
+        // 设置检查更新按钮点击事件（直接检查，已有默认服务器）
+        checkUpdateButton.setOnClickListener(v -> performCheckUpdate());
+        
+        // 长按可以修改更新服务器地址（高级用户）
+        checkUpdateButton.setOnLongClickListener(v -> {
+            showUpdateServerConfigDialog();
+            return true;
+        });
+    }
+    
+    /**
+     * 显示更新服务器配置对话框
+     */
+    private void showUpdateServerConfigDialog() {
+        if (getContext() == null) return;
+        
+        EditText inputEditText = new EditText(getContext());
+        inputEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        inputEditText.setHint("例如：https://example.com/update/");
+        inputEditText.setPadding(48, 32, 48, 32);
+        inputEditText.setTextColor(ContextCompat.getColor(getContext(), R.color.text_primary));
+        inputEditText.setHintTextColor(ContextCompat.getColor(getContext(), R.color.text_secondary));
+        inputEditText.setBackgroundResource(R.drawable.edit_text_background);
+        
+        // 显示当前设置的地址
+        String currentUrl = appConfig.getUpdateServerUrl();
+        if (currentUrl != null) {
+            inputEditText.setText(currentUrl);
+        }
+        
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
+                .setTitle("配置更新服务器")
+                .setMessage("请输入更新服务器地址。\n\n服务器目录应包含：\n• version.txt（版本号文件）\n• EVCam.apk（安装包）")
+                .setView(inputEditText)
+                .setPositiveButton("保存", (dialog, which) -> {
+                    String url = inputEditText.getText().toString().trim();
+                    if (url.isEmpty()) {
+                        appConfig.setUpdateServerUrl(null);
+                        Toast.makeText(getContext(), "已清除更新服务器地址", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // 基本 URL 验证
+                        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+                            Toast.makeText(getContext(), "请输入有效的 HTTP/HTTPS 地址", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        appConfig.setUpdateServerUrl(url);
+                        Toast.makeText(getContext(), "更新服务器地址已保存", Toast.LENGTH_SHORT).show();
+                        // 保存后自动检查更新
+                        performCheckUpdate();
+                    }
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+    
+    /**
+     * 执行版本检查
+     */
+    private void performCheckUpdate() {
+        if (getContext() == null || versionUpdateManager == null) return;
+        
+        // 禁用按钮防止重复点击
+        checkUpdateButton.setEnabled(false);
+        checkUpdateButton.setText("检查中...");
+        
+        versionUpdateManager.checkUpdate(new VersionUpdateManager.UpdateCheckCallback() {
+            @Override
+            public void onUpdateAvailable(String newVersion) {
+                checkUpdateButton.setEnabled(true);
+                checkUpdateButton.setText("检查 →");
+                showUpdateAvailableDialog(newVersion);
+            }
+            
+            @Override
+            public void onNoUpdate() {
+                checkUpdateButton.setEnabled(true);
+                checkUpdateButton.setText("检查 →");
+                Toast.makeText(getContext(), "已是最新版本", Toast.LENGTH_SHORT).show();
+            }
+            
+            @Override
+            public void onError(String error) {
+                checkUpdateButton.setEnabled(true);
+                checkUpdateButton.setText("检查 →");
+                Toast.makeText(getContext(), "检查更新失败: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    /**
+     * 显示发现新版本对话框
+     */
+    private void showUpdateAvailableDialog(String newVersion) {
+        if (getContext() == null) return;
+        
+        String currentVersion = versionUpdateManager.getCurrentVersion();
+        String message = "当前版本：v" + currentVersion + "\n最新版本：v" + newVersion + "\n\n是否下载新版本？";
+        
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
+                .setTitle("发现新版本")
+                .setMessage(message)
+                .setPositiveButton("下载更新", (dialog, which) -> {
+                    startDownload(newVersion);
+                })
+                .setNegativeButton("稍后再说", null)
+                .show();
+    }
+    
+    /**
+     * 开始下载 APK
+     */
+    private void startDownload(String newVersion) {
+        if (getContext() == null) return;
+        
+        // 创建下载进度对话框
+        android.app.ProgressDialog progressDialog = new android.app.ProgressDialog(getContext());
+        progressDialog.setTitle("下载更新");
+        progressDialog.setMessage("正在下载 EVCam v" + newVersion + "...");
+        progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setMax(100);
+        progressDialog.setProgress(0);
+        progressDialog.setCancelable(false);
+        progressDialog.setButton(android.app.ProgressDialog.BUTTON_NEGATIVE, "取消", (dialog, which) -> {
+            versionUpdateManager.cancelDownload();
+            dialog.dismiss();
+        });
+        progressDialog.show();
+        
+        versionUpdateManager.downloadApk(newVersion, new VersionUpdateManager.DownloadCallback() {
+            @Override
+            public void onProgress(int progress) {
+                progressDialog.setProgress(progress);
+            }
+            
+            @Override
+            public void onComplete(java.io.File apkFile) {
+                progressDialog.dismiss();
+                showDownloadCompleteDialog(apkFile, newVersion);
+            }
+            
+            @Override
+            public void onError(String error) {
+                progressDialog.dismiss();
+                if (!"下载已取消".equals(error)) {
+                    Toast.makeText(getContext(), "下载失败: " + error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+    
+    /**
+     * 显示下载完成对话框
+     */
+    private void showDownloadCompleteDialog(java.io.File apkFile, String newVersion) {
+        if (getContext() == null) return;
+        
+        String filePath = apkFile.getAbsolutePath();
+        // 简化路径显示
+        String displayPath = filePath;
+        String internalRoot = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+        if (filePath.startsWith(internalRoot)) {
+            displayPath = filePath.replace(internalRoot, "内部存储");
+        }
+        
+        String message = "EVCam v" + newVersion + " 已下载完成！\n\n" +
+                "文件位置：\n" + displayPath + "\n\n" +
+                "请使用文件管理器打开 Download 文件夹安装更新。";
+        
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
+                .setTitle("下载完成")
+                .setMessage(message)
+                .setPositiveButton("确定", null)
+                .show();
     }
     
     // ==================== 日志上传相关方法 ====================

@@ -922,6 +922,13 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             requiredTextureCount = 2;
             AppLog.d(TAG, "使用手机配置：自适应2摄像头布局");
         }
+        // 26款星舰7：横屏四摄像头布局（基于银河E5布局）
+        else if (AppConfig.CAR_MODEL_XINGHAN_7.equals(carModel)) {
+            layoutId = R.layout.activity_main;
+            configuredCameraCount = 4;
+            requiredTextureCount = 4;
+            AppLog.d(TAG, "使用26款星舰7配置：横屏4摄像头布局");
+        }
         // 自定义车型：使用统一的自定义布局（支持自由操控）
         else if (appConfig.isCustomCarModel()) {
             layoutId = R.layout.activity_main_custom;
@@ -2530,6 +2537,9 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 } else if (AppConfig.CAR_MODEL_PHONE.equals(carModel)) {
                     // 手机模式：2摄像头（前+后）
                     initCamerasForPhone(cameraIds);
+                } else if (AppConfig.CAR_MODEL_XINGHAN_7.equals(carModel)) {
+                    // 26款星舰7：使用固定映射（前3后2左4右1）
+                    initCamerasForXinghan7(cameraIds);
                 } else if (appConfig.isCustomCarModel()) {
                     // 自定义车型：使用用户配置的摄像头映射
                     initCamerasForCustomModel(cameraIds);
@@ -2617,6 +2627,48 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                     cameraIds[3], textureBack,   // 后摄像头使用 cameraIds[3]
                     cameraIds[0], textureLeft,   // 左摄像头使用 cameraIds[0]
                     cameraIds[1], textureRight   // 右摄像头使用 cameraIds[1]
+            );
+        } else if (cameraIds.length >= 2) {
+            // 只有2个摄像头，复用到四个位置
+            cameraManager.initCameras(
+                    cameraIds[0], textureFront,
+                    cameraIds[1], textureBack,
+                    cameraIds[0], textureLeft,
+                    cameraIds[1], textureRight
+            );
+        } else if (cameraIds.length == 1) {
+            // 只有1个摄像头，所有位置使用同一个
+            cameraManager.initCameras(
+                    cameraIds[0], textureFront,
+                    cameraIds[0], textureBack,
+                    cameraIds[0], textureLeft,
+                    cameraIds[0], textureRight
+            );
+        } else {
+            Toast.makeText(this, "没有可用的摄像头", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * 26款星舰7车型：使用固定的摄像头映射
+     * 前=3, 后=2, 左=4, 右=1
+     */
+    private void initCamerasForXinghan7(String[] cameraIds) {
+        if (cameraIds.length >= 5) {
+            // 有5个或更多摄像头
+            cameraManager.initCameras(
+                    cameraIds[3], textureFront,  // 前摄像头使用 cameraIds[3]
+                    cameraIds[2], textureBack,   // 后摄像头使用 cameraIds[2]
+                    cameraIds[4], textureLeft,   // 左摄像头使用 cameraIds[4]
+                    cameraIds[1], textureRight   // 右摄像头使用 cameraIds[1]
+            );
+        } else if (cameraIds.length >= 4) {
+            // 只有4个摄像头，使用可用的ID
+            cameraManager.initCameras(
+                    cameraIds[3], textureFront,
+                    cameraIds[2], textureBack,
+                    cameraIds[0], textureLeft,
+                    cameraIds[1], textureRight
             );
         } else if (cameraIds.length >= 2) {
             // 只有2个摄像头，复用到四个位置

@@ -188,6 +188,10 @@ public class AppConfig {
     public static final String BUTTON_ORIENTATION_HORIZONTAL = "horizontal";  // 横版
     public static final String BUTTON_ORIENTATION_VERTICAL = "vertical";      // 竖版
     
+    // 版本更新配置
+    private static final String KEY_UPDATE_SERVER_URL = "update_server_url";  // 更新服务器地址
+    private static final String DEFAULT_UPDATE_SERVER_URL = "https://evcam.suyunkai.top:9568/update/";  // 默认更新服务器
+    
     // 车型常量
     public static final String CAR_MODEL_GALAXY_E5 = "galaxy_e5";  // 银河E5
     public static final String CAR_MODEL_E5_MULTI = "galaxy_e5_multi";  // 银河E5-多按钮
@@ -195,6 +199,7 @@ public class AppConfig {
     public static final String CAR_MODEL_L7_MULTI = "galaxy_l7_multi";  // 银河L7-多按钮
     public static final String CAR_MODEL_PHONE = "phone";  // 手机
     public static final String CAR_MODEL_CUSTOM = "custom";  // 自定义车型
+    public static final String CAR_MODEL_XINGHAN_7 = "xinghan_7";  // 26款星舰7
     
     private final SharedPreferences prefs;
     
@@ -373,9 +378,9 @@ public class AppConfig {
             // 强制使用 MediaRecorder 模式
             return false;
         } else {
-            // 自动模式：L6/L7 及 L7-多按钮 车型使用 Codec 模式
+            // 自动模式：L6/L7、L7-多按钮、26款星舰7 车型使用 Codec 模式
             String carModel = getCarModel();
-            return CAR_MODEL_L7.equals(carModel) || CAR_MODEL_L7_MULTI.equals(carModel);
+            return CAR_MODEL_L7.equals(carModel) || CAR_MODEL_L7_MULTI.equals(carModel) || CAR_MODEL_XINGHAN_7.equals(carModel);
         }
     }
     
@@ -660,7 +665,8 @@ public class AppConfig {
             case CAR_MODEL_E5_MULTI:
             case CAR_MODEL_L7:
             case CAR_MODEL_L7_MULTI:
-                return 4;  // 银河E5/L7：4摄
+            case CAR_MODEL_XINGHAN_7:
+                return 4;  // 银河E5/L7/26款星舰7：4摄
             case CAR_MODEL_CUSTOM:
             default:
                 // 自定义车型使用用户设置的数量
@@ -1778,5 +1784,41 @@ public class AppConfig {
             return "竖版";
         }
         return "横版";
+    }
+    
+    // ==================== 版本更新配置相关方法 ====================
+    
+    /**
+     * 设置更新服务器地址
+     * @param url 服务器地址（如 https://example.com/update/）
+     */
+    public void setUpdateServerUrl(String url) {
+        if (url == null || url.trim().isEmpty()) {
+            prefs.edit().remove(KEY_UPDATE_SERVER_URL).apply();
+            AppLog.d(TAG, "清除更新服务器地址");
+        } else {
+            prefs.edit().putString(KEY_UPDATE_SERVER_URL, url.trim()).apply();
+            AppLog.d(TAG, "更新服务器地址设置: " + url.trim());
+        }
+    }
+    
+    /**
+     * 获取更新服务器地址
+     * @return 服务器地址，默认为官方更新服务器
+     */
+    public String getUpdateServerUrl() {
+        String url = prefs.getString(KEY_UPDATE_SERVER_URL, DEFAULT_UPDATE_SERVER_URL);
+        if (url == null || url.trim().isEmpty()) {
+            return DEFAULT_UPDATE_SERVER_URL;
+        }
+        return url;
+    }
+    
+    /**
+     * 检查是否已配置更新服务器
+     * @return true 表示已配置
+     */
+    public boolean hasUpdateServerUrl() {
+        return getUpdateServerUrl() != null;
     }
 }
