@@ -1,0 +1,478 @@
+[
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_presentation_secondary_display.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/presentation_secondary_display.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/xml_backup_rules.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/xml/backup_rules.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_layout_custom_buttons_multi.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/layout_custom_buttons_multi.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_telegram.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_telegram.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable-anydpi_ic_stat_name.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable-anydpi/ic_stat_name.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_resolution_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_resolution_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_status_indicator_online.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/status_indicator_online.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/color_nav_icon_color_selector.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/color/nav_icon_color_selector.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_expand_less.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_expand_less.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-hdpi_ic_launcher_foreground.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-hdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_layout_custom_buttons_standard_vertical.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/layout_custom_buttons_standard_vertical.xml"
+    },
+    {
+        "merged": "com.kooo.evcam.app-debug-43:/layout_fragment_secondary_display_settings.xml.flat",
+        "source": "com.kooo.evcam.app-main-45:/layout/fragment_secondary_display_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_playback.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_playback.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_view_blind_spot_floating.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/view_blind_spot_floating.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_4cam.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_4cam.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_l7.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_l7.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_remote.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_remote.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable-xhdpi_ic_stat_name.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable-xhdpi/ic_stat_name.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_item_date_header.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/item_date_header.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_heartbeat.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_heartbeat.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_camera_label_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/camera_label_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_playback.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_playback.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable-mdpi_ic_stat_name.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable-mdpi/ic_stat_name.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_photo_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_photo_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_1cam.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_1cam.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_dingtalk.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_dingtalk.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_wechat_mini.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_wechat_mini.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_splash_logo.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/splash_logo.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable-xxhdpi_ic_stat_name.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable-xxhdpi/ic_stat_name.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/xml_file_paths.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/xml/file_paths.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_heartbeat.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_heartbeat.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_spinner_dropdown_item.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/spinner_dropdown_item.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_item_video.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/item_video.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_custom.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_custom.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-mdpi_ic_launcher_foreground.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-mdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_wechat.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_wechat.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_4cam_portrait.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_4cam_portrait.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_edit_text_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/edit_text_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_item_photo.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/item_photo.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_custom_camera_config.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_custom_camera_config.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_secondary_display_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_secondary_display_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_status_indicator_offline.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/status_indicator_offline.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_visibility.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_visibility.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_launcher_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-sw600dp-port_fragment_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-sw600dp-port/fragment_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_photo_playback.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_photo_playback.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_nav_divider.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/nav_divider.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-sw600dp-port_fragment_photo_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-sw600dp-port/fragment_photo_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_dialog_rounded_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/dialog_rounded_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xhdpi_ic_launcher_background.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xhdpi/ic_launcher_background.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_joystick_handle.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/joystick_handle.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable-hdpi_ic_stat_name.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable-hdpi/ic_stat_name.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/xml_accessibility_service_config.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/xml/accessibility_service_config.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_joystick_bg.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/joystick_bg.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_dialog_button_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/dialog_button_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_item_video_group.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/item_video_group.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_2cam.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_2cam.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_nav_icon_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/nav_icon_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_layout_custom_buttons_standard.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/layout_custom_buttons_standard.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_phone.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_phone.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_nav_item_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/nav_item_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_spinner_background.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/spinner_background.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_recording.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_recording.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-mdpi_ic_launcher_background.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-mdpi/ic_launcher_background.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/menu_navigation_menu.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/menu/navigation_menu.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-hdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_dialog_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/dialog_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_photo.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_photo.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-port_fragment_photo_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-port/fragment_photo_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_e5_multi.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_e5_multi.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_photo_viewer.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_photo_viewer.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_permission_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_permission_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_logcat_viewer.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_logcat_viewer.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_layout_custom_buttons_multi_vertical.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/layout_custom_buttons_multi_vertical.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-sw600dp_item_video_group.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-sw600dp/item_video_group.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_spinner_item.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/spinner_item.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_main_l7_multi.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_main_l7_multi.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_nav_header.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/nav_header.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_app_logo.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_app_logo.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxxhdpi_ic_launcher_background.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxxhdpi/ic_launcher_background.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_status_indicator_connecting.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/status_indicator_connecting.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxxhdpi_ic_launcher_foreground.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxxhdpi/ic_launcher_foreground.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_expand_more.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_expand_more.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_settings.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_settings.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_view_mock_turn_signal_floating.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/view_mock_turn_signal_floating.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_feishu.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_feishu.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_activity_video_player.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/activity_video_player.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_nav_logo.png.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/nav_logo.png"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_nav_feishu.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_nav_feishu.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_remote_view.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_remote_view.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-hdpi_ic_launcher_background.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-hdpi/ic_launcher_background.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_ic_visibility_off.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/ic_visibility_off.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-sw600dp_fragment_photo_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-sw600dp/fragment_photo_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-port_fragment_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-port/fragment_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_dialog_first_launch_guide.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/dialog_first_launch_guide.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/color_nav_text_color_selector.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/color/nav_text_color_selector.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxhdpi_ic_launcher_background.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxhdpi/ic_launcher_background.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_nav_header_gradient.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/nav_header_gradient.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout_fragment_telegram.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout/fragment_telegram.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/layout-sw600dp_fragment_playback_new.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/layout-sw600dp/fragment_playback_new.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/xml_data_extraction_rules.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-debug-43:/drawable_secondary_display_border.xml.flat",
+        "source": "/Users/lifutai/.gradle/daemon/9.1.0/com.kooo.evcam.app-main-45:/drawable/secondary_display_border.xml"
+    }
+]

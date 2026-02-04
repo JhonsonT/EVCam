@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.kooo.evcam.app-mergeDebugResources-41:/values-h720dp-v13/values-h720dp-v13.xml",
+            "map": [
+                {
+                    "source": "/Users/lifutai/.gradle/caches/9.1.0/transforms/446be6b50c3d9d345241b3f4b4146c1e/transformed/appcompat-1.7.1/res/values-h720dp-v13/values-h720dp-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "66",
+                        "endOffsets": "117"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.kooo.evcam.app-mergeDebugResources-41:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/Users/lifutai/.gradle/caches/9.1.0/transforms/446be6b50c3d9d345241b3f4b4146c1e/transformed/appcompat-1.7.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    }
+                }
+            ]
+        }
+    ]
+}

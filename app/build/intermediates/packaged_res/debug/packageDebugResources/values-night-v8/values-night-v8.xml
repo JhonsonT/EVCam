@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="button_accent">#FF5B9BD5</color>
+    <color name="button_background">#FF060809</color>
+    <color name="button_text">#FFFFFFFF</color>
+    <color name="card_background">#FF060809</color>
+    <color name="dialog_guide_accent">#64B5F6</color>
+    <color name="dialog_guide_background">#2A2A2A</color>
+    <color name="dialog_guide_button_bg">#64B5F6</color>
+    <color name="dialog_guide_button_ripple">#30FFFFFF</color>
+    <color name="dialog_guide_button_text">#000000</color>
+    <color name="dialog_guide_content">#E0E0E0</color>
+    <color name="dialog_guide_divider">#424242</color>
+    <color name="dialog_guide_secondary">#AAAAAA</color>
+    <color name="dialog_guide_title">#FFFFFF</color>
+    <color name="input_background">#FF2A3038</color>
+    <color name="item_selected_background">#40FFFFFF</color>
+    <color name="menu_background">#FF20272E</color>
+    <color name="nav_background">#FF060809</color>
+    <color name="nav_divider_color">#1AFFFFFF</color>
+    <color name="nav_header_background">#FF20272E</color>
+    <color name="nav_header_gradient_center">#FF1A2026</color>
+    <color name="nav_header_gradient_end">#FF20272E</color>
+    <color name="nav_header_gradient_start">#FF151A1E</color>
+    <color name="nav_header_text">#FFFFFFFF</color>
+    <color name="nav_header_text_secondary">#FFCCCCCC</color>
+    <color name="nav_icon_background">#15FFFFFF</color>
+    <color name="nav_icon_tint">#FFAAAAAA</color>
+    <color name="nav_icon_tint_selected">#FFFFFFFF</color>
+    <color name="nav_item_pressed_background">#10FFFFFF</color>
+    <color name="nav_item_selected_background">#20FFFFFF</color>
+    <color name="nav_logo_accent">#FF616161</color>
+    <color name="nav_logo_background">#FF616161</color>
+    <color name="nav_logo_foreground">#FFFFFFFF</color>
+    <color name="nav_ripple_color">#30FFFFFF</color>
+    <color name="nav_section_title">#FF888888</color>
+    <color name="nav_text_primary">#FFFFFFFF</color>
+    <color name="nav_text_secondary">#FFAAAAAA</color>
+    <color name="nav_version_text">#FF666666</color>
+    <color name="page_background">#FF20272E</color>
+    <color name="preview_background">@color/page_background</color>
+    <color name="preview_controls_background">@color/page_background</color>
+    <color name="preview_frame_background">#FF1A1A1A</color>
+    <color name="preview_grid_divider">@color/page_background</color>
+    <color name="preview_placeholder_text">#FF666666</color>
+    <color name="text_hint">#FF666666</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#FF888888</color>
+    <style name="Base.Theme.Cam" parent="Theme.Material3.DayNight.NoActionBar">
+        
+        <item name="colorPrimary">#424242</item>
+        <item name="colorPrimaryVariant">#2A2A2A</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#616161</item>
+        <item name="colorSecondaryVariant">#424242</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:colorBackground">#1A1A1A</item>
+        <item name="colorSurface">#2A2A2A</item>
+        <item name="colorOnSurface">#FFFFFF</item>
+        <item name="android:statusBarColor">#2A2A2A</item>
+        <item name="android:navigationBarColor">#000000</item>
+        
+        <item name="android:windowBackground">@color/page_background</item>
+        
+        <item name="android:windowSplashScreenBackground">@color/page_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    </style>
+    <style name="NavigationMenuTextAppearance" parent="TextAppearance.AppCompat.Body1">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/nav_text_primary</item>
+        <item name="fontFamily">sans-serif-medium</item>
+    </style>
+    <style name="NavigationSubheaderTextAppearance" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/nav_section_title</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">0.03</item>
+    </style>
+    <style name="NavigationViewStyle">
+        <item name="itemBackground">@drawable/nav_item_background</item>
+        <item name="itemIconTint">@color/nav_icon_tint</item>
+        <item name="itemTextColor">@color/nav_text_primary</item>
+        <item name="itemShapeFillColor">@android:color/transparent</item>
+        <item name="itemIconPadding">16dp</item>
+        <item name="itemHorizontalPadding">20dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+    </style>
+    <style name="Theme.Cam.MaterialAlertDialog" parent="ThemeOverlay.Material3.MaterialAlertDialog">
+        
+        <item name="colorSurface">#2A2A2A</item>
+        
+        <item name="colorOnSurface">#FFFFFF</item>
+        
+        <item name="colorPrimary">#64B5F6</item>
+    </style>
+</resources>

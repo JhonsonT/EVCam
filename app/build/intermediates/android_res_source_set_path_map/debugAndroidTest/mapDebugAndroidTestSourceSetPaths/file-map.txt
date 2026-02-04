@@ -1,0 +1,6 @@
+com.kooo.evcam.test.app-tracing-1.2.0-0 /Users/lifutai/.gradle/caches/9.1.0/transforms/0d4c26ea04c809653fe71dfed8954217/transformed/tracing-1.2.0/res
+com.kooo.evcam.test.app-core-1.7.0-1 /Users/lifutai/.gradle/caches/9.1.0/transforms/ec3b2049ec81cae5ef61b7ea755c9fbe/transformed/core-1.7.0/res
+com.kooo.evcam.test.app-updated_navigation_xml-2 /Users/lifutai/Documents/trae_projects/EVCamKyle/app/build/generated/updated_navigation_xml/debugAndroidTest
+com.kooo.evcam.test.app-packageDebugAndroidTestResources-3 /Users/lifutai/Documents/trae_projects/EVCamKyle/app/build/intermediates/incremental/debugAndroidTest/packageDebugAndroidTestResources/merged.dir
+com.kooo.evcam.test.app-packageDebugAndroidTestResources-4 /Users/lifutai/Documents/trae_projects/EVCamKyle/app/build/intermediates/incremental/debugAndroidTest/packageDebugAndroidTestResources/stripped.dir
+com.kooo.evcam.test.app-debugAndroidTest-5 /Users/lifutai/Documents/trae_projects/EVCamKyle/app/build/intermediates/merged_res/debugAndroidTest/mergeDebugAndroidTestResources

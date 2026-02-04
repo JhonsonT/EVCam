@@ -1,0 +1,904 @@
+-- Merging decision tree log ---
+provider#com.kooo.evcam.KeepAliveProvider
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:59:9-63:46
+	android:authorities
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:61:13-61
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:62:13-37
+	android:initOrder
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:63:13-43
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:60:13-46
+provider#androidx.core.content.FileProvider
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:66:9-74:20
+	android:grantUriPermissions
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:70:13-47
+	android:authorities
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:68:13-64
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:69:13-37
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:67:13-62
+manifest
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:2:1-265:12
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:2:1-265:12
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:2:1-265:12
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:2:1-265:12
+MERGED from [com.google.android.material:material:1.13.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/12fefd901c1a8b33202216173e0030f2/transformed/material-1.13.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/5a4874d348e546abce622a67d22e9195/transformed/constraintlayout-2.2.1/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/0bb7353642acbe82865e4bd6d342ff49/transformed/appcompat-resources-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.appcompat:appcompat:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/446be6b50c3d9d345241b3f4b4146c1e/transformed/appcompat-1.7.1/AndroidManifest.xml:2:1-7:12
+MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/b7bf3c13195eabf76cf7aaf89e579b09/transformed/glide-4.16.0/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/b572a1913831b255c3dc4306900347af/transformed/recyclerview-1.3.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /Users/lifutai/.gradle/caches/9.1.0/transforms/45be34d2bec01f200d5a85da85dfffab/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.fragment:fragment:1.5.4] /Users/lifutai/.gradle/caches/9.1.0/transforms/c89deef6ebfde9407ab0383bb75b970d/transformed/fragment-1.5.4/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.activity:activity:1.12.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/8104e82b6f9e39c47c96d830a8d4802b/transformed/activity-1.12.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:17:1-145:12
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/99face40aa949d74a11cb65f20dc286e/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/16466eac28ca3a414f119477c684195b/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c7f8dd64159db11415d1d62b63bdf3b6/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.transition:transition:1.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/a4e5962d4f6a700c2213c49da067c4fe/transformed/transition-1.5.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/1dbb966a278eb01d07a6366689f2fd75/transformed/dynamicanimation-1.1.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/929b1d50a7adf9a854f5a1113b0dba84/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/ebf0274be586cb7bc762fa0478cdf84a/transformed/vectordrawable-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/d9d3f68e4508829a4d37d289f15ef9bf/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:17:1-23:12
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3cec2c3efc38adb23d80124d4f94730/transformed/graphics-shapes-release/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.core:core-ktx:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/9d214bf2c8aeb34caeefd6449ec84a3b/transformed/core-ktx-1.16.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.loader:loader:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/66af48386751a7ed08176ed8a5fc8b67/transformed/loader-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/10dcbc33314849159bc0bd552373267e/transformed/viewpager-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.customview:customview:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/019d322a5d044db44b10352d44a95902/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:17:1-30:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7ff1f638a1ac409628b046d1629495f4/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-service:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/5c295362adce3b086cc00c5bdb7cea7a/transformed/lifecycle-service-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:17:1-35:12
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/1aa42d8e18876451abb3b1ff818cbba4/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/0e197c138e3006557ffdbef7541a70b9/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/874095e47a550739d76201c8746c20d9/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7cf3b2996b62153917d1ae25b55a2a4f/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/4b218b66dc9c09630b1e96ee8efda42d/transformed/savedstate-1.2.1/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/f690b1bddb61eb7c5e69ba29fde6c048/transformed/navigationevent/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.core:core-viewtree:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3c430fc8ab17606851236000b26ca62/transformed/core-viewtree-1.0.0/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.room:room-ktx:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/836efda562a7b9abb5822736e79613c4/transformed/room-ktx-2.5.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:17:1-31:12
+MERGED from [androidx.sqlite:sqlite-framework:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/2ed35273885d688652a5c5674693ba18/transformed/sqlite-framework-2.3.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.sqlite:sqlite:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/5549cffb03235a70d397839cbab0e54c/transformed/sqlite-2.3.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/3dbc0259f0d019ea086a62c058cf0741/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:17:1-27:12
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/fc5a167cc59f70a0ac347bb502b33b21/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/37c6dfc5e9de9bf537a225c1b7df1edb/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c0237a218ac34047af009a8125a5f480/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:17:1-55:12
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/16389df1536e410863107d83cf167099/transformed/gifdecoder-4.16.0/AndroidManifest.xml:2:1-9:12
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /Users/lifutai/.gradle/caches/9.1.0/transforms/a575aec8462305a3c74ff7def177b185/transformed/exifinterface-1.3.6/AndroidManifest.xml:17:1-24:12
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/dc0ee8c280d47d8a169caf742770b104/transformed/interpolator-1.0.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/0d4c26ea04c809653fe71dfed8954217/transformed/tracing-1.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/81a7d93c7255e716dd9e969d5d86c955/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3da806fa2bf0fb08a547b37a185ce53f/transformed/runtime-annotation/AndroidManifest.xml:2:1-7:12
+	package
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:3:5-51
+	android:versionCode
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.CAMERA
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:6:5-65
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:6:22-62
+uses-permission#android.permission.READ_LOGS
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:7:5-68
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:7:22-65
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:9:5-71
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:9:22-68
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:11:5-12:38
+	android:maxSdkVersion
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:12:9-35
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:11:22-78
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:13:5-14:38
+	android:maxSdkVersion
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:14:9-35
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:13:22-77
+uses-permission#android.permission.READ_MEDIA_VIDEO
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:16:5-75
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:16:22-72
+uses-permission#android.permission.READ_MEDIA_IMAGES
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:17:5-76
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:17:22-73
+uses-permission#android.permission.MANAGE_EXTERNAL_STORAGE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:19:5-20:40
+	tools:ignore
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:20:9-37
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:19:22-79
+uses-permission#android.permission.INTERNET
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:22:5-67
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:22:22-64
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:23:5-79
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:5-79
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:24:5-79
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:23:22-76
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:25:5-77
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:26:5-77
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:26:5-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:25:22-74
+uses-permission#android.permission.FOREGROUND_SERVICE_CAMERA
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:27:5-84
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:27:22-81
+uses-permission#android.permission.FOREGROUND_SERVICE_DATA_SYNC
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:29:5-87
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:29:22-84
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:31:5-68
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:5-68
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:23:5-68
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:31:22-65
+uses-permission#android.permission.SYSTEM_ALERT_WINDOW
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:33:5-78
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:33:22-75
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:35:5-81
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:5-81
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:25:5-81
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:35:22-78
+uses-permission#android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:37:5-95
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:37:22-92
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:39:5-68
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:39:22-65
+uses-permission#android.permission.BLUETOOTH_CONNECT
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:40:5-76
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:40:22-73
+uses-feature#android.hardware.camera
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:43:5-84
+	android:required
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:43:58-81
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:43:19-57
+uses-feature#android.hardware.camera.autofocus
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:44:5-95
+	android:required
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:44:68-92
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:44:19-67
+application
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:46:5-263:19
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:46:5-263:19
+MERGED from [com.google.android.material:material:1.13.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/12fefd901c1a8b33202216173e0030f2/transformed/material-1.13.0/AndroidManifest.xml:22:5-20
+MERGED from [com.google.android.material:material:1.13.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/12fefd901c1a8b33202216173e0030f2/transformed/material-1.13.0/AndroidManifest.xml:22:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/5a4874d348e546abce622a67d22e9195/transformed/constraintlayout-2.2.1/AndroidManifest.xml:7:5-20
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/5a4874d348e546abce622a67d22e9195/transformed/constraintlayout-2.2.1/AndroidManifest.xml:7:5-20
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:28:5-143:19
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:28:5-143:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:28:5-89
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:23:5-33:19
+MERGED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:23:5-29:19
+MERGED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:23:5-29:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/3dbc0259f0d019ea086a62c058cf0741/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/3dbc0259f0d019ea086a62c058cf0741/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:24:5-25:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:23:5-53:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:25:5-31:19
+	android:extractNativeLibs
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+	android:appComponentFactory
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:28:18-86
+	android:supportsRtl
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:53:9-35
+	android:label
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:51:9-41
+	android:fullBackupContent
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:49:9-54
+	android:roundIcon
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:52:9-54
+	android:icon
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:50:9-43
+	android:allowBackup
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:47:9-35
+	android:theme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:55:9-41
+	android:dataExtractionRules
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:48:9-65
+	android:usesCleartextTraffic
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:54:9-44
+activity#com.kooo.evcam.MainActivity
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:76:9-85:20
+	android:launchMode
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:79:13-44
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:78:13-36
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:77:13-41
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:80:13-84:29
+action#android.intent.action.MAIN
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:81:17-69
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:81:25-66
+category#android.intent.category.LAUNCHER
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:83:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:83:27-74
+activity#com.kooo.evcam.PhotoViewerActivity
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:88:9-91:59
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:90:13-37
+	android:theme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:91:13-56
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:89:13-48
+activity#com.kooo.evcam.VideoPlayerActivity
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:94:9-97:59
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:96:13-37
+	android:theme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:97:13-56
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:95:13-48
+activity#com.kooo.evcam.TransparentBootActivity
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:100:9-106:39
+	android:excludeFromRecents
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:104:13-46
+	android:noHistory
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:105:13-37
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:102:13-37
+	android:theme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:103:13-57
+	android:taskAffinity
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:106:13-36
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:101:13-52
+service#com.kooo.evcam.CameraForegroundService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:109:9-112:40
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:112:13-37
+	android:foregroundServiceType
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:111:13-51
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:110:13-52
+service#com.kooo.evcam.FloatingWindowService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:115:9-117:40
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:117:13-37
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:116:13-50
+service#com.kooo.evcam.BlindSpotService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:120:9-122:40
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:122:13-37
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:121:13-45
+activity#com.kooo.evcam.LogcatViewerActivity
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:124:9-128:40
+	android:screenOrientation
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:127:13-50
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:128:13-37
+	android:theme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:126:13-75
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:125:13-49
+service#com.kooo.evcam.KeepAliveAccessibilityService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:131:9-141:19
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:134:13-36
+	android:permission
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:133:13-79
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:132:13-58
+intent-filter#action:name:android.accessibilityservice.AccessibilityService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:135:13-137:29
+action#android.accessibilityservice.AccessibilityService
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:136:17-92
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:136:25-89
+meta-data#android.accessibilityservice
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:138:13-140:72
+	android:resource
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:140:17-69
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:139:17-60
+receiver#com.kooo.evcam.BootReceiver
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:144:9-153:20
+	android:enabled
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:146:13-35
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:147:13-36
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:145:13-41
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.QUICKBOOT_POWERON+category:name:android.intent.category.DEFAULT
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:148:13-152:29
+	android:priority
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:148:28-51
+action#android.intent.action.BOOT_COMPLETED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:149:17-79
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:149:25-76
+action#android.intent.action.QUICKBOOT_POWERON
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:150:17-82
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:150:25-79
+category#android.intent.category.DEFAULT
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:151:17-76
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:151:27-73
+receiver#com.kooo.evcam.KeepAliveReceiver
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:158:9-262:20
+	android:enabled
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:160:13-35
+	android:exported
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:161:13-36
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:159:13-46
+intent-filter#action:name:android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED+action:name:android.bluetooth.adapter.action.STATE_CHANGED+action:name:android.bluetooth.device.action.ACL_CONNECTED+action:name:android.bluetooth.device.action.ACL_DISCONNECTED+action:name:android.hardware.usb.action.USB_DEVICE_ATTACHED+action:name:android.hardware.usb.action.USB_DEVICE_DETACHED+action:name:android.intent.action.ACTION_POWER_CONNECTED+action:name:android.intent.action.ACTION_POWER_DISCONNECTED+action:name:android.intent.action.AIRPLANE_MODE+action:name:android.intent.action.BATTERY_CHANGED+action:name:android.intent.action.BATTERY_LOW+action:name:android.intent.action.BATTERY_OKAY+action:name:android.intent.action.DATE_CHANGED+action:name:android.intent.action.HEADSET_PLUG+action:name:android.intent.action.LOCALE_CHANGED+action:name:android.intent.action.MEDIA_EJECT+action:name:android.intent.action.MEDIA_MOUNTED+action:name:android.intent.action.MEDIA_REMOVED+action:name:android.intent.action.MEDIA_UNMOUNTED+action:name:android.intent.action.MY_PACKAGE_REPLACED+action:name:android.intent.action.PACKAGE_ADDED+action:name:android.intent.action.PACKAGE_REPLACED+action:name:android.intent.action.SCREEN_OFF+action:name:android.intent.action.SCREEN_ON+action:name:android.intent.action.TIMEZONE_CHANGED+action:name:android.intent.action.TIME_SET+action:name:android.intent.action.USER_PRESENT+action:name:android.media.AUDIO_BECOMING_NOISY+action:name:android.net.conn.CONNECTIVITY_CHANGE+action:name:android.net.wifi.SCAN_RESULTS+action:name:android.net.wifi.STATE_CHANGE+action:name:com.kooo.evcam.ACTION_KEEP_ALIVE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:162:13-245:29
+	android:priority
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:162:28-51
+action#android.intent.action.SCREEN_ON
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:165:17-74
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:165:25-71
+action#android.intent.action.SCREEN_OFF
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:167:17-75
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:167:25-72
+action#android.intent.action.USER_PRESENT
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:169:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:169:25-74
+action#android.intent.action.ACTION_POWER_CONNECTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:173:17-87
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:173:25-84
+action#android.intent.action.ACTION_POWER_DISCONNECTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:175:17-90
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:175:25-87
+action#android.intent.action.BATTERY_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:177:17-80
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:177:25-77
+action#android.intent.action.BATTERY_LOW
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:179:17-76
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:179:25-73
+action#android.intent.action.BATTERY_OKAY
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:181:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:181:25-74
+action#android.bluetooth.adapter.action.STATE_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:185:17-89
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:185:25-86
+action#android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:187:17-100
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:187:25-97
+action#android.bluetooth.device.action.ACL_CONNECTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:189:17-88
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:189:25-85
+action#android.bluetooth.device.action.ACL_DISCONNECTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:191:17-91
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:191:25-88
+action#android.intent.action.MEDIA_MOUNTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:195:17-78
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:195:25-75
+action#android.intent.action.MEDIA_UNMOUNTED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:197:17-80
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:197:25-77
+action#android.intent.action.MEDIA_REMOVED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:199:17-78
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:199:25-75
+action#android.intent.action.MEDIA_EJECT
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:201:17-76
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:201:25-73
+action#android.hardware.usb.action.USB_DEVICE_ATTACHED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:203:17-90
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:203:25-87
+action#android.hardware.usb.action.USB_DEVICE_DETACHED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:205:17-90
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:205:25-87
+action#android.net.conn.CONNECTIVITY_CHANGE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:209:17-79
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:209:25-76
+action#android.net.wifi.STATE_CHANGE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:211:17-72
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:211:25-69
+action#android.net.wifi.SCAN_RESULTS
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:213:17-72
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:213:25-69
+action#android.intent.action.HEADSET_PLUG
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:217:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:217:25-74
+action#android.media.AUDIO_BECOMING_NOISY
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:219:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:219:25-74
+action#android.intent.action.TIMEZONE_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:223:17-81
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:223:25-78
+action#android.intent.action.TIME_SET
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:225:17-73
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:225:25-70
+action#android.intent.action.DATE_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:227:17-77
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:227:25-74
+action#android.intent.action.LOCALE_CHANGED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:231:17-79
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:231:25-76
+action#android.intent.action.AIRPLANE_MODE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:233:17-78
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:233:25-75
+action#android.intent.action.PACKAGE_ADDED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:237:17-78
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:237:25-75
+action#android.intent.action.PACKAGE_REPLACED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:239:17-81
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:239:25-78
+action#android.intent.action.MY_PACKAGE_REPLACED
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:241:17-84
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:241:25-81
+action#com.kooo.evcam.ACTION_KEEP_ALIVE
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:244:17-75
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:244:25-72
+intent-filter#action:name:android.intent.action.MEDIA_EJECT+action:name:android.intent.action.MEDIA_MOUNTED+action:name:android.intent.action.MEDIA_REMOVED+action:name:android.intent.action.MEDIA_UNMOUNTED+data:scheme:file
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:248:13-254:29
+	android:priority
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:248:28-51
+data
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:253:17-47
+	android:scheme
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:253:23-44
+intent-filter#action:name:android.intent.action.PACKAGE_ADDED+action:name:android.intent.action.PACKAGE_REPLACED+data:scheme:package
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:257:13-261:29
+	android:priority
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:257:28-51
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:71:13-73:54
+	android:resource
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:73:17-51
+	android:name
+		ADDED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml:72:17-67
+uses-sdk
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+MERGED from [com.google.android.material:material:1.13.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/12fefd901c1a8b33202216173e0030f2/transformed/material-1.13.0/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.material:material:1.13.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/12fefd901c1a8b33202216173e0030f2/transformed/material-1.13.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/5a4874d348e546abce622a67d22e9195/transformed/constraintlayout-2.2.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.constraintlayout:constraintlayout:2.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/5a4874d348e546abce622a67d22e9195/transformed/constraintlayout-2.2.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/0bb7353642acbe82865e4bd6d342ff49/transformed/appcompat-resources-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat-resources:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/0bb7353642acbe82865e4bd6d342ff49/transformed/appcompat-resources-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/446be6b50c3d9d345241b3f4b4146c1e/transformed/appcompat-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.appcompat:appcompat:1.7.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/446be6b50c3d9d345241b3f4b4146c1e/transformed/appcompat-1.7.1/AndroidManifest.xml:5:5-44
+MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/b7bf3c13195eabf76cf7aaf89e579b09/transformed/glide-4.16.0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:glide:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/b7bf3c13195eabf76cf7aaf89e579b09/transformed/glide-4.16.0/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/b572a1913831b255c3dc4306900347af/transformed/recyclerview-1.3.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.recyclerview:recyclerview:1.3.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/b572a1913831b255c3dc4306900347af/transformed/recyclerview-1.3.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /Users/lifutai/.gradle/caches/9.1.0/transforms/45be34d2bec01f200d5a85da85dfffab/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
+MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /Users/lifutai/.gradle/caches/9.1.0/transforms/45be34d2bec01f200d5a85da85dfffab/transformed/viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
+MERGED from [androidx.fragment:fragment:1.5.4] /Users/lifutai/.gradle/caches/9.1.0/transforms/c89deef6ebfde9407ab0383bb75b970d/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.fragment:fragment:1.5.4] /Users/lifutai/.gradle/caches/9.1.0/transforms/c89deef6ebfde9407ab0383bb75b970d/transformed/fragment-1.5.4/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.activity:activity:1.12.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/8104e82b6f9e39c47c96d830a8d4802b/transformed/activity-1.12.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.activity:activity:1.12.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/8104e82b6f9e39c47c96d830a8d4802b/transformed/activity-1.12.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/99face40aa949d74a11cb65f20dc286e/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2-views-helper:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/99face40aa949d74a11cb65f20dc286e/transformed/emoji2-views-helper-1.3.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/16466eac28ca3a414f119477c684195b/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/16466eac28ca3a414f119477c684195b/transformed/drawerlayout-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c7f8dd64159db11415d1d62b63bdf3b6/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.coordinatorlayout:coordinatorlayout:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c7f8dd64159db11415d1d62b63bdf3b6/transformed/coordinatorlayout-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.transition:transition:1.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/a4e5962d4f6a700c2213c49da067c4fe/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.transition:transition:1.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/a4e5962d4f6a700c2213c49da067c4fe/transformed/transition-1.5.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/1dbb966a278eb01d07a6366689f2fd75/transformed/dynamicanimation-1.1.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.dynamicanimation:dynamicanimation:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/1dbb966a278eb01d07a6366689f2fd75/transformed/dynamicanimation-1.1.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/929b1d50a7adf9a854f5a1113b0dba84/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable-animated:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/929b1d50a7adf9a854f5a1113b0dba84/transformed/vectordrawable-animated-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/ebf0274be586cb7bc762fa0478cdf84a/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.vectordrawable:vectordrawable:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/ebf0274be586cb7bc762fa0478cdf84a/transformed/vectordrawable-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/d9d3f68e4508829a4d37d289f15ef9bf/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.customview:customview-poolingcontainer:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/d9d3f68e4508829a4d37d289f15ef9bf/transformed/customview-poolingcontainer-1.0.0/AndroidManifest.xml:20:5-21:38
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3cec2c3efc38adb23d80124d4f94730/transformed/graphics-shapes-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.graphics:graphics-shapes-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3cec2c3efc38adb23d80124d4f94730/transformed/graphics-shapes-release/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/9d214bf2c8aeb34caeefd6449ec84a3b/transformed/core-ktx-1.16.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-ktx:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/9d214bf2c8aeb34caeefd6449ec84a3b/transformed/core-ktx-1.16.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/66af48386751a7ed08176ed8a5fc8b67/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.loader:loader:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/66af48386751a7ed08176ed8a5fc8b67/transformed/loader-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/10dcbc33314849159bc0bd552373267e/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.viewpager:viewpager:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/10dcbc33314849159bc0bd552373267e/transformed/viewpager-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.customview:customview:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/019d322a5d044db44b10352d44a95902/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.customview:customview:1.1.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/019d322a5d044db44b10352d44a95902/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7ff1f638a1ac409628b046d1629495f4/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7ff1f638a1ac409628b046d1629495f4/transformed/lifecycle-viewmodel-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/5c295362adce3b086cc00c5bdb7cea7a/transformed/lifecycle-service-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-service:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/5c295362adce3b086cc00c5bdb7cea7a/transformed/lifecycle-service-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:21:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/1aa42d8e18876451abb3b1ff818cbba4/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata-core:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/1aa42d8e18876451abb3b1ff818cbba4/transformed/lifecycle-livedata-core-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/0e197c138e3006557ffdbef7541a70b9/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-livedata:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/0e197c138e3006557ffdbef7541a70b9/transformed/lifecycle-livedata-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/874095e47a550739d76201c8746c20d9/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/874095e47a550739d76201c8746c20d9/transformed/lifecycle-runtime-2.6.2/AndroidManifest.xml:5:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7cf3b2996b62153917d1ae25b55a2a4f/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/7cf3b2996b62153917d1ae25b55a2a4f/transformed/lifecycle-viewmodel-savedstate-2.6.2/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/4b218b66dc9c09630b1e96ee8efda42d/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.savedstate:savedstate:1.2.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/4b218b66dc9c09630b1e96ee8efda42d/transformed/savedstate-1.2.1/AndroidManifest.xml:20:5-44
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/f690b1bddb61eb7c5e69ba29fde6c048/transformed/navigationevent/AndroidManifest.xml:5:5-44
+MERGED from [androidx.navigationevent:navigationevent-android:1.0.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/f690b1bddb61eb7c5e69ba29fde6c048/transformed/navigationevent/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-viewtree:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3c430fc8ab17606851236000b26ca62/transformed/core-viewtree-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.core:core-viewtree:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/e3c430fc8ab17606851236000b26ca62/transformed/core-viewtree-1.0.0/AndroidManifest.xml:5:5-44
+MERGED from [androidx.room:room-ktx:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/836efda562a7b9abb5822736e79613c4/transformed/room-ktx-2.5.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.room:room-ktx:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/836efda562a7b9abb5822736e79613c4/transformed/room-ktx-2.5.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.sqlite:sqlite-framework:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/2ed35273885d688652a5c5674693ba18/transformed/sqlite-framework-2.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite-framework:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/2ed35273885d688652a5c5674693ba18/transformed/sqlite-framework-2.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/5549cffb03235a70d397839cbab0e54c/transformed/sqlite-2.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.sqlite:sqlite:2.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/5549cffb03235a70d397839cbab0e54c/transformed/sqlite-2.3.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/3dbc0259f0d019ea086a62c058cf0741/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/3dbc0259f0d019ea086a62c058cf0741/transformed/versionedparcelable-1.1.1/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/fc5a167cc59f70a0ac347bb502b33b21/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.annotation:annotation-experimental:1.4.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/fc5a167cc59f70a0ac347bb502b33b21/transformed/annotation-experimental-1.4.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/37c6dfc5e9de9bf537a225c1b7df1edb/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cardview:cardview:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/37c6dfc5e9de9bf537a225c1b7df1edb/transformed/cardview-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c0237a218ac34047af009a8125a5f480/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/c0237a218ac34047af009a8125a5f480/transformed/cursoradapter-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:21:5-44
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/16389df1536e410863107d83cf167099/transformed/gifdecoder-4.16.0/AndroidManifest.xml:5:5-7:41
+MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/16389df1536e410863107d83cf167099/transformed/gifdecoder-4.16.0/AndroidManifest.xml:5:5-7:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /Users/lifutai/.gradle/caches/9.1.0/transforms/a575aec8462305a3c74ff7def177b185/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.exifinterface:exifinterface:1.3.6] /Users/lifutai/.gradle/caches/9.1.0/transforms/a575aec8462305a3c74ff7def177b185/transformed/exifinterface-1.3.6/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/dc0ee8c280d47d8a169caf742770b104/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.interpolator:interpolator:1.0.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/dc0ee8c280d47d8a169caf742770b104/transformed/interpolator-1.0.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/0d4c26ea04c809653fe71dfed8954217/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.tracing:tracing:1.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/0d4c26ea04c809653fe71dfed8954217/transformed/tracing-1.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/81a7d93c7255e716dd9e969d5d86c955/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.arch.core:core-runtime:2.2.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/81a7d93c7255e716dd9e969d5d86c955/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3da806fa2bf0fb08a547b37a185ce53f/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
+MERGED from [androidx.compose.runtime:runtime-annotation-android:1.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3da806fa2bf0fb08a547b37a185ce53f/transformed/runtime-annotation/AndroidManifest.xml:5:5-44
+	android:targetSdkVersion
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/lifutai/Documents/trae_projects/EVCamKyle/app/src/main/AndroidManifest.xml
+provider#androidx.startup.InitializationProvider
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:29:9-37:20
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:24:9-32:20
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/lifutai/.gradle/caches/9.1.0/transforms/de9cda326955b522f27b95dd8f9784cb/transformed/startup-runtime-1.1.1/AndroidManifest.xml:26:9-30:34
+	tools:node
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:33:13-31
+	android:authorities
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:31:13-68
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:32:13-37
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:30:13-67
+meta-data#androidx.work.WorkManagerInitializer
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:34:13-36:52
+	android:value
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:36:17-49
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:35:17-68
+service#androidx.work.impl.background.systemalarm.SystemAlarmService
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:39:9-45:35
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:42:13-72
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:43:13-37
+	tools:ignore
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:44:13-60
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:45:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:41:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:40:13-88
+service#androidx.work.impl.background.systemjob.SystemJobService
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:46:9-52:35
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:49:13-70
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:50:13-36
+	android:permission
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:51:13-69
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:52:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:48:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:47:13-84
+service#androidx.work.impl.foreground.SystemForegroundService
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:53:9-59:35
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:56:13-77
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:57:13-37
+	tools:ignore
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:58:13-60
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:59:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:55:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:54:13-81
+receiver#androidx.work.impl.utils.ForceStopRunnable$BroadcastReceiver
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:61:9-66:35
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:64:13-35
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:65:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:66:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:63:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:62:13-88
+receiver#androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:67:9-77:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:70:13-36
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:71:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:72:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:69:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:68:13-106
+intent-filter#action:name:android.intent.action.ACTION_POWER_CONNECTED+action:name:android.intent.action.ACTION_POWER_DISCONNECTED
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:73:13-76:29
+receiver#androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:78:9-88:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:81:13-36
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:82:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:83:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:80:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:79:13-104
+intent-filter#action:name:android.intent.action.BATTERY_LOW+action:name:android.intent.action.BATTERY_OKAY
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:84:13-87:29
+receiver#androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:89:9-99:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:92:13-36
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:93:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:94:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:91:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:90:13-104
+intent-filter#action:name:android.intent.action.DEVICE_STORAGE_LOW+action:name:android.intent.action.DEVICE_STORAGE_OK
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:95:13-98:29
+action#android.intent.action.DEVICE_STORAGE_LOW
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:17-83
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:96:25-80
+action#android.intent.action.DEVICE_STORAGE_OK
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:17-82
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:97:25-79
+receiver#androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:100:9-109:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:103:13-36
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:104:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:105:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:102:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:101:13-103
+intent-filter#action:name:android.net.conn.CONNECTIVITY_CHANGE
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:106:13-108:29
+receiver#androidx.work.impl.background.systemalarm.RescheduleReceiver
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:110:9-121:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:113:13-36
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:114:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:115:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:112:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:111:13-88
+intent-filter#action:name:android.intent.action.BOOT_COMPLETED+action:name:android.intent.action.TIMEZONE_CHANGED+action:name:android.intent.action.TIME_SET
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:116:13-120:29
+receiver#androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:122:9-131:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:125:13-72
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:126:13-37
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:127:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:124:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:123:13-99
+intent-filter#action:name:androidx.work.impl.background.systemalarm.UpdateProxies
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:128:13-130:29
+action#androidx.work.impl.background.systemalarm.UpdateProxies
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:17-98
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:129:25-95
+receiver#androidx.work.impl.diagnostics.DiagnosticsReceiver
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:132:9-142:20
+	android:enabled
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:135:13-35
+	android:exported
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:136:13-36
+	android:permission
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:137:13-57
+	tools:targetApi
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:138:13-32
+	android:directBootAware
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:134:13-44
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:133:13-78
+intent-filter#action:name:androidx.work.diagnostics.REQUEST_DIAGNOSTICS
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:139:13-141:29
+action#androidx.work.diagnostics.REQUEST_DIAGNOSTICS
+ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:17-88
+	android:name
+		ADDED from [androidx.work:work-runtime:2.9.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/8bb13347fba5e2945da250c992fc68c1/transformed/work-runtime-2.9.0/AndroidManifest.xml:140:25-85
+meta-data#androidx.emoji2.text.EmojiCompatInitializer
+ADDED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.emoji2:emoji2:1.3.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/7770a28b09590e98e84f895712357f71/transformed/emoji2-1.3.0/AndroidManifest.xml:30:17-75
+permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:23:9-81
+permission#com.kooo.evcam.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:22:5-24:47
+	android:protectionLevel
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:24:9-44
+	android:name
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:23:9-81
+uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:26:22-94
+uses-permission#com.kooo.evcam.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:26:5-97
+	android:name
+		ADDED from [androidx.core:core:1.16.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/abde01fe205d77b55fd4224cbc0bc5e5/transformed/core-1.16.0/AndroidManifest.xml:26:22-94
+meta-data#androidx.lifecycle.ProcessLifecycleInitializer
+ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.lifecycle:lifecycle-process:2.6.2] /Users/lifutai/.gradle/caches/9.1.0/transforms/c85b5da28d857e94f95babbbc3ae16ac/transformed/lifecycle-process-2.6.2/AndroidManifest.xml:30:17-78
+service#androidx.room.MultiInstanceInvalidationService
+ADDED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:24:9-28:63
+	android:exported
+		ADDED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:27:13-37
+	tools:ignore
+		ADDED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:28:13-60
+	android:directBootAware
+		ADDED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:26:13-43
+	android:name
+		ADDED from [androidx.room:room-runtime:2.5.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/3d5ec806b4705ed3e9d425d4316f626c/transformed/room-runtime-2.5.0/AndroidManifest.xml:25:13-74
+meta-data#androidx.profileinstaller.ProfileInstallerInitializer
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:29:13-31:52
+	android:value
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:31:17-49
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:30:17-85
+receiver#androidx.profileinstaller.ProfileInstallReceiver
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:34:9-52:20
+	android:enabled
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:37:13-35
+	android:exported
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:38:13-36
+	android:permission
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:39:13-57
+	android:directBootAware
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:36:13-44
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:35:13-76
+intent-filter#action:name:androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:40:13-42:29
+action#androidx.profileinstaller.action.INSTALL_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:17-91
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:41:25-88
+intent-filter#action:name:androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:43:13-45:29
+action#androidx.profileinstaller.action.SKIP_FILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:17-85
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:44:25-82
+intent-filter#action:name:androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:46:13-48:29
+action#androidx.profileinstaller.action.SAVE_PROFILE
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:17-88
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:47:25-85
+intent-filter#action:name:androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:49:13-51:29
+action#androidx.profileinstaller.action.BENCHMARK_OPERATION
+ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:17-95
+	android:name
+		ADDED from [androidx.profileinstaller:profileinstaller:1.4.0] /Users/lifutai/.gradle/caches/9.1.0/transforms/6243823f691310414a595d9240747e80/transformed/profileinstaller-1.4.0/AndroidManifest.xml:50:25-92
