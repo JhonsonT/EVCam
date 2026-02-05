@@ -1,4 +1,4 @@
-<div align="center">
+﻿<div align="center">
   <img src="assets/logo.png" alt="EVCam Logo" width="200"/>
   
   # EVCam - 电车记录仪
@@ -10,8 +10,7 @@
   <p>
     <img src="https://img.shields.io/badge/Android-9.0+-green?style=flat-square&logo=android" alt="Android"/>
     <img src="https://img.shields.io/badge/API-28+-brightgreen?style=flat-square" alt="API"/>
-    <img src="https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey?style=flat-square" alt="License"/>
-    <img src="https://img.shields.io/badge/Commercial-Contact%20Author-orange?style=flat-square" alt="Commercial"/>
+    <img src="https://img.shields.io/badge/License-GPLv3-blue?style=flat-square" alt="License"/>
     <img src="https://img.shields.io/badge/Language-Java-red?style=flat-square&logo=openjdk&logoColor=white" alt="Java"/>
   </p>
 </div>
@@ -614,16 +613,17 @@ gradlew.bat connectedAndroidTest
 
 ## 📄 许可证
 
-本项目采用 **双重许可** 模式：
+本项目采用 **GPL-3.0** 开源协议。
 
-### 非商业使用
-- 📜 **CC BY-NC-SA 4.0**（知识共享署名-非商业性使用-相同方式共享 4.0）
-- ✅ 允许个人学习、研究、非商业使用
-- ✅ 允许修改和分发（需保持相同许可）
-- ❌ 禁止任何商业用途
+你可以自由地使用、修改和分发本项目，但需要遵守 GPL-3.0 的条款。
 
-### 商业使用
-- 💼 如需商业授权，请联系作者获取商业许可证
+### 必须遵守
+- 保留版权与许可声明，随分发提供 GPL-3.0 文本（LICENSE）。
+- 任何修改或衍生作品在对外分发时，必须以 GPL-3.0 许可发布并提供对应源代码。
+- 不得添加额外限制或技术手段，阻止他人行使 GPL 权利。
+
+### 商业用途
+GPL-3.0 **允许** 商业目的使用与分发/销售，但只要对外分发，就需要遵守上面的开源义务（提供源代码、保留声明、同许可等）。
 
 详细条款请参阅 [LICENSE](LICENSE) 文件。
 
@@ -646,3 +646,5 @@ gradlew.bat connectedAndroidTest
 - **wechat**: greenteacher46 (请备注来意)
 
 ---
+
+
