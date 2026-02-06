@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <TextureView
+        android:id="@+id/blind_spot_texture_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center" />
+
+    <!-- 设置模式下的保存按钮容器 -->
+    <LinearLayout
+        android:id="@+id/layout_save_config"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="#88000000"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btn_rotate_blind_spot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="旋转"
+            android:backgroundTint="@color/button_accent"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_save_blind_spot_config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="保存并关闭"
+            android:backgroundTint="@color/button_accent"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</FrameLayout>

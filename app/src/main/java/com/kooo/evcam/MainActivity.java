@@ -90,6 +90,10 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     private AutoFitTextureView textureFront, textureBack, textureLeft, textureRight;
     private Button btnStartRecord, btnExit, btnTakePhoto;
     private MultiCameraManager cameraManager;
+
+    public MultiCameraManager getCameraManager() {
+        return cameraManager;
+    }
     private ImageAdjustManager imageAdjustManager;  // 亮度/降噪调节管理器
     private ImageAdjustFloatingWindow imageAdjustFloatingWindow;  // 亮度/降噪调节悬浮窗
     private int textureReadyCount = 0;  // 记录准备好的TextureView数量
@@ -456,6 +460,12 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 // 应用在前台，隐藏悬浮窗
                 FloatingWindowService.sendAppForegroundState(this, true);
             }, 500);
+        }
+
+        // 启动补盲选项服务 (副屏/主屏悬浮窗/转向灯联动)
+        if (appConfig.isSecondaryDisplayEnabled() || appConfig.isMainFloatingEnabled() || appConfig.isTurnSignalLinkageEnabled()) {
+            BlindSpotService.update(this);
+            AppLog.d(TAG, "补盲选项服务已启动");
         }
         
         // 初始化息屏录制检测
@@ -1088,50 +1098,55 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
 
         btnTakePhoto.setOnClickListener(v -> takePicture());
 
-        // 为每个TextureView添加Surface监听器
-        TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener() {
+        if (textureFront != null) {
+            textureFront.setSurfaceTextureListener(buildSurfaceListener("front"));
+        }
+        if (textureBack != null && configuredCameraCount >= 2) {
+            textureBack.setSurfaceTextureListener(buildSurfaceListener("back"));
+        }
+        if (textureLeft != null && configuredCameraCount >= 4) {
+            textureLeft.setSurfaceTextureListener(buildSurfaceListener("left"));
+        }
+        if (textureRight != null && configuredCameraCount >= 4) {
+            textureRight.setSurfaceTextureListener(buildSurfaceListener("right"));
+        }
+    }
+
+    private TextureView.SurfaceTextureListener buildSurfaceListener(String cameraKey) {
+        return new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(@NonNull android.graphics.SurfaceTexture surface, int width, int height) {
                 textureReadyCount++;
-                AppLog.d(TAG, "TextureView ready: " + textureReadyCount + "/" + requiredTextureCount);
+                AppLog.d(TAG, "TextureView " + cameraKey + " ready: " + textureReadyCount + "/" + requiredTextureCount);
 
-                // 当所有需要的TextureView都准备好后，初始化摄像头
                 if (textureReadyCount >= requiredTextureCount && checkPermissions()) {
-                    initCamera();
+                    if (cameraManager == null) {
+                        initCamera();
+                    } else {
+                        cameraManager.updatePreviewTextureViews(textureFront, textureBack, textureLeft, textureRight);
+                    }
                 }
             }
 
             @Override
             public void onSurfaceTextureSizeChanged(@NonNull android.graphics.SurfaceTexture surface, int width, int height) {
-                AppLog.d(TAG, "TextureView size changed: " + width + "x" + height);
+                AppLog.d(TAG, "TextureView " + cameraKey + " size changed: " + width + "x" + height);
             }
 
             @Override
             public boolean onSurfaceTextureDestroyed(@NonNull android.graphics.SurfaceTexture surface) {
                 textureReadyCount--;
-                AppLog.d(TAG, "TextureView destroyed, remaining: " + textureReadyCount);
+                AppLog.d(TAG, "TextureView " + cameraKey + " destroyed, remaining: " + textureReadyCount);
+                if (cameraManager != null) {
+                    cameraManager.onPreviewTextureDestroyed(cameraKey);
+                }
                 return true;
             }
 
             @Override
             public void onSurfaceTextureUpdated(@NonNull android.graphics.SurfaceTexture surface) {
-                // 不需要处理每帧更新
             }
         };
-
-        // 根据配置的摄像头数量设置监听器
-        if (textureFront != null) {
-            textureFront.setSurfaceTextureListener(surfaceTextureListener);
-        }
-        if (textureBack != null && configuredCameraCount >= 2) {
-            textureBack.setSurfaceTextureListener(surfaceTextureListener);
-        }
-        if (textureLeft != null && configuredCameraCount >= 4) {
-            textureLeft.setSurfaceTextureListener(surfaceTextureListener);
-        }
-        if (textureRight != null && configuredCameraCount >= 4) {
-            textureRight.setSurfaceTextureListener(surfaceTextureListener);
-        }
     }
     
     /**
@@ -1680,6 +1695,19 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     }
 
     /**
+     * 切换侧边栏的打开/关闭状态
+     */
+    public void toggleDrawer() {
+        if (drawerLayout != null) {
+            if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        }
+    }
+
+    /**
      * 设置导航抽屉
      */
     private void setupNavigationDrawer() {
@@ -1713,6 +1741,9 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             } else if (itemId == R.id.nav_heartbeat) {
                 // 显示心跳推图界面
                 showHeartbeatInterface();
+            } else if (itemId == R.id.nav_secondary_display) {
+                // 显示补盲选项界面
+                showBlindSpotInterface();
             } else if (itemId == R.id.nav_settings) {
                 showSettingsInterface();
             }
@@ -1875,7 +1906,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     /**
      * 显示录制界面
      */
-    private void showRecordingInterface() {
+    public void showRecordingInterface() {
         // 清除所有Fragment
         FragmentManager fragmentManager = getSupportFragmentManager();
         for (Fragment fragment : fragmentManager.getFragments()) {
@@ -2191,6 +2222,21 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, new SettingsFragment());
+        transaction.commit();
+    }
+
+    /**
+     * 显示补盲选项设置界面
+     */
+    private void showBlindSpotInterface() {
+        // 隐藏录制布局，显示Fragment容器
+        recordingLayout.setVisibility(View.GONE);
+        fragmentContainer.setVisibility(View.VISIBLE);
+
+        // 显示BlindSpotSettingsFragment
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, new BlindSpotSettingsFragment());
         transaction.commit();
     }
 
@@ -4449,9 +4495,16 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 // 自动录制正在等待中：保持摄像头连接（开机自启动场景）
                 AppLog.d(TAG, "Auto recording pending, keeping cameras connected for startup recording");
             } else {
-                // 未录制：主动断开摄像头，避免后台拍照黑屏问题
-                AppLog.d(TAG, "Not recording, closing all cameras to avoid background issues");
-                cameraManager.closeAllCameras();
+                boolean keepCamerasForBlindSpot = appConfig.isSecondaryDisplayEnabled()
+                        || appConfig.isMainFloatingEnabled()
+                        || appConfig.isTurnSignalLinkageEnabled();
+                if (keepCamerasForBlindSpot) {
+                    AppLog.d(TAG, "Not recording, but blind-spot features enabled, keeping cameras connected");
+                } else {
+                    // 未录制：主动断开摄像头，避免后台拍照黑屏问题
+                    AppLog.d(TAG, "Not recording, closing all cameras to avoid background issues");
+                    cameraManager.closeAllCameras();
+                }
             }
         }
     }

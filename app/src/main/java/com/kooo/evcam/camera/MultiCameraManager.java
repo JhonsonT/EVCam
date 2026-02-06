@@ -29,6 +29,9 @@ public class MultiCameraManager {
     private static final String TAG = "MultiCameraManager";
 
     private static final int DEFAULT_MAX_OPEN_CAMERAS = 4;
+    private static final long RECORDING_STABLE_FRAME_MAX_AGE_MS = 1500;
+    private static final int MAX_STABLE_WAIT_ATTEMPTS = 10;
+    private static final long STABLE_WAIT_INTERVAL_MS = 200;
     // 录制分辨率将使用预览的实际分辨率，不再硬编码
 
     private final Context context;
@@ -283,6 +286,35 @@ public class MultiCameraManager {
         return cameras.get(position);
     }
 
+    public void updatePreviewTextureViews(TextureView frontView,
+                                          TextureView backView,
+                                          TextureView leftView,
+                                          TextureView rightView) {
+        updatePreviewTextureView("front", frontView);
+        updatePreviewTextureView("back", backView);
+        updatePreviewTextureView("left", leftView);
+        updatePreviewTextureView("right", rightView);
+    }
+
+    public void onPreviewTextureDestroyed(String cameraKey) {
+        SingleCamera camera = cameras.get(cameraKey);
+        if (camera == null) {
+            return;
+        }
+        camera.setTextureView(null);
+        camera.clearPreviewSurface();
+        camera.recreateSession();
+    }
+
+    private void updatePreviewTextureView(String cameraKey, TextureView view) {
+        SingleCamera camera = cameras.get(cameraKey);
+        if (camera == null) {
+            return;
+        }
+        camera.setTextureView(view);
+        camera.recreateSession();
+    }
+
     /**
      * 初始化摄像头
      * 支持 null 参数以适配不同数量的摄像头配置（1摄/2摄/4摄）
@@ -387,12 +419,16 @@ public class MultiCameraManager {
                             }
                         }
                         if (cameraKey != null) {
-                            cameraSessionReady.put(cameraKey, true);
-                            AppLog.d(TAG, "Camera " + cameraKey + " (id=" + cameraId + ") session marked as ready");
+                            Boolean wasReady = cameraSessionReady.get(cameraKey);
+                            if (wasReady != null && wasReady) {
+                                AppLog.d(TAG, "Camera " + cameraKey + " (id=" + cameraId + ") session already marked ready, skipping count");
+                            } else {
+                                cameraSessionReady.put(cameraKey, true);
+                                sessionConfiguredCount++;
+                                AppLog.d(TAG, "Camera " + cameraKey + " (id=" + cameraId + ") session marked as ready");
+                                AppLog.d(TAG, "Session configured: " + sessionConfiguredCount + "/" + expectedSessionCount);
+                            }
                         }
-                        
-                        sessionConfiguredCount++;
-                        AppLog.d(TAG, "Session configured: " + sessionConfiguredCount + "/" + expectedSessionCount);
 
                         if (sessionConfiguredCount >= expectedSessionCount) {
                             // 所有会话都已配置完成，执行待处理的录制启动
@@ -404,6 +440,9 @@ public class MultiCameraManager {
                                     mainHandler.removeCallbacks(sessionTimeoutRunnable);
                                     sessionTimeoutRunnable = null;
                                 }
+                                pendingRecordingStart = null;
+                                sessionConfiguredCount = 0;
+                                expectedSessionCount = 0;
                                 // 延迟 300ms 再启动录制，让 Camera Session 稳定
                                 // 某些车机设备需要这个延迟才能正确将帧发送到 MediaRecorder Surface
                                 mainHandler.postDelayed(recordingTask, 300);
@@ -912,6 +951,31 @@ public class MultiCameraManager {
      * @param fromTimeout 是否是从超时触发的
      */
     private void executeRecordingStart(List<String> keys, boolean fromTimeout) {
+        executeRecordingStart(keys, fromTimeout, 0, false);
+    }
+
+    private void executeRecordingStart(List<String> keys, boolean fromTimeout, int stableAttempt, boolean forcedReopen) {
+        if (!fromTimeout) {
+            long now = System.currentTimeMillis();
+            List<String> unstable = getUnstableCameras(keys, now);
+            if (!unstable.isEmpty()) {
+                if (stableAttempt < MAX_STABLE_WAIT_ATTEMPTS) {
+                    AppLog.w(TAG, "Waiting for stable frames before recording, attempt " + (stableAttempt + 1) +
+                            "/" + MAX_STABLE_WAIT_ATTEMPTS + ", unstable=" + unstable);
+                    mainHandler.postDelayed(() -> executeRecordingStart(keys, false, stableAttempt + 1, forcedReopen), STABLE_WAIT_INTERVAL_MS);
+                    return;
+                }
+                if (!forcedReopen) {
+                    AppLog.w(TAG, "Frames still unstable after wait, forcing reopen all cameras once: " + unstable);
+                    forceReopenAllCameras();
+                    mainHandler.postDelayed(() -> executeRecordingStart(keys, false, 0, true), 500);
+                    return;
+                }
+                AppLog.w(TAG, "Frames still unstable after force reopen, starting recording with stable subset: " + unstable);
+                fromTimeout = true;
+            }
+        }
+
         Set<String> activeCameras = new HashSet<>();
         Set<String> failedCameras = new HashSet<>();
         
@@ -927,6 +991,12 @@ public class MultiCameraManager {
                     failedCameras.add(key);
                     AppLog.w(TAG, "Camera " + key + " session not ready, skipping");
                 }
+                continue;
+            }
+
+            if (fromTimeout && !isFrameStable(key, System.currentTimeMillis())) {
+                failedCameras.add(key);
+                AppLog.w(TAG, "Camera " + key + " frame not stable, skipping");
                 continue;
             }
             
@@ -975,6 +1045,30 @@ public class MultiCameraManager {
         pendingRecordingStart = null;
         sessionConfiguredCount = 0;
         expectedSessionCount = 0;
+    }
+
+    private boolean isFrameStable(String key, long nowMs) {
+        SingleCamera camera = cameras.get(key);
+        if (camera == null) {
+            return false;
+        }
+        long last = camera.getLastFrameTimestampMs();
+        return last > 0 && (nowMs - last) <= RECORDING_STABLE_FRAME_MAX_AGE_MS;
+    }
+
+    private List<String> getUnstableCameras(List<String> keys, long nowMs) {
+        List<String> unstable = new ArrayList<>();
+        for (String key : keys) {
+            Boolean ready = cameraSessionReady.get(key);
+            if (ready == null || !ready) {
+                unstable.add(key);
+                continue;
+            }
+            if (!isFrameStable(key, nowMs)) {
+                unstable.add(key);
+            }
+        }
+        return unstable;
     }
 
     /**
@@ -1223,6 +1317,8 @@ public class MultiCameraManager {
         synchronized (sessionLock) {
             sessionConfiguredCount = 0;
             expectedSessionCount = keys.size();
+            cameraSessionReady.clear();
+            cameraRecordingActive.clear();
         }
 
         for (String key : keys) {
@@ -1232,38 +1328,8 @@ public class MultiCameraManager {
             }
         }
 
-        // 设置待处理的录制启动任务
-        pendingRecordingStart = () -> {
-            AppLog.d(TAG, "Attempting to start codec recording...");
-            boolean startSuccess = false;
-            int successCount = 0;
-
-            for (String key : keys) {
-                CodecVideoRecorder codecRecorder = codecRecorders.get(key);
-                if (codecRecorder != null) {
-                    if (codecRecorder.startRecording()) {
-                        successCount++;
-                        startSuccess = true;
-                    } else {
-                        AppLog.e(TAG, "Failed to start codec recording for " + key);
-                    }
-                }
-            }
-
-            if (startSuccess) {
-                lastNotifiedSegmentIndex = -1;  // 重置分段通知计数
-                isRecording = true;
-                AppLog.d(TAG, successCount + " camera(s) started codec recording successfully");
-            } else {
-                AppLog.e(TAG, "Failed to start codec recording on all cameras");
-                isRecording = false;
-                // 清理所有录制器
-                for (CodecVideoRecorder recorder : codecRecorders.values()) {
-                    recorder.release();
-                }
-                codecRecorders.clear();
-            }
-        };
+        final List<String> recordingKeys = new ArrayList<>(keys);
+        pendingRecordingStart = () -> executeCodecRecordingStart(recordingKeys, 0, false);
 
         // 设置超时机制
         sessionTimeoutRunnable = () -> {
@@ -1281,6 +1347,96 @@ public class MultiCameraManager {
         mainHandler.postDelayed(sessionTimeoutRunnable, 3000);
 
         return true;
+    }
+
+    private void executeCodecRecordingStart(List<String> keys, int stableAttempt, boolean forcedReopen) {
+        AppLog.d(TAG, "Attempting to start codec recording...");
+        if (isRecording) {
+            AppLog.w(TAG, "Codec recording already active, skipping duplicate start");
+            synchronized (sessionLock) {
+                pendingRecordingStart = null;
+                sessionConfiguredCount = 0;
+                expectedSessionCount = 0;
+                cameraSessionReady.clear();
+                cameraRecordingActive.clear();
+            }
+            if (sessionTimeoutRunnable != null) {
+                mainHandler.removeCallbacks(sessionTimeoutRunnable);
+                sessionTimeoutRunnable = null;
+            }
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+        List<String> unstable = getUnstableCameras(keys, now);
+        if (!unstable.isEmpty()) {
+            if (stableAttempt < MAX_STABLE_WAIT_ATTEMPTS) {
+                AppLog.w(TAG, "Waiting for stable frames before codec recording, attempt " + (stableAttempt + 1) +
+                        "/" + MAX_STABLE_WAIT_ATTEMPTS + ", unstable=" + unstable);
+                mainHandler.postDelayed(() -> executeCodecRecordingStart(keys, stableAttempt + 1, forcedReopen), STABLE_WAIT_INTERVAL_MS);
+                return;
+            }
+            if (!forcedReopen) {
+                AppLog.w(TAG, "Codec frames still unstable after wait, forcing reopen all cameras once: " + unstable);
+                forceReopenAllCameras();
+                mainHandler.postDelayed(() -> executeCodecRecordingStart(keys, 0, true), 500);
+                return;
+            }
+            AppLog.w(TAG, "Codec frames still unstable after force reopen, starting with stable subset: " + unstable);
+        }
+
+        boolean anyActive = false;
+        int activeCount = 0;
+
+        for (String key : keys) {
+            Boolean ready = cameraSessionReady.get(key);
+            if (ready == null || !ready) {
+                continue;
+            }
+            if (!unstable.isEmpty() && !isFrameStable(key, System.currentTimeMillis())) {
+                continue;
+            }
+            CodecVideoRecorder codecRecorder = codecRecorders.get(key);
+            if (codecRecorder == null) {
+                continue;
+            }
+            if (codecRecorder.isRecording()) {
+                anyActive = true;
+                activeCount++;
+                continue;
+            }
+            if (codecRecorder.startRecording() || codecRecorder.isRecording()) {
+                anyActive = true;
+                activeCount++;
+            } else {
+                AppLog.e(TAG, "Failed to start codec recording for " + key);
+            }
+        }
+
+        if (anyActive) {
+            lastNotifiedSegmentIndex = -1;
+            isRecording = true;
+            AppLog.d(TAG, activeCount + " camera(s) started codec recording successfully");
+        } else {
+            AppLog.e(TAG, "Failed to start codec recording on all cameras");
+            isRecording = false;
+            for (CodecVideoRecorder recorder : codecRecorders.values()) {
+                recorder.release();
+            }
+            codecRecorders.clear();
+        }
+
+        synchronized (sessionLock) {
+            pendingRecordingStart = null;
+            sessionConfiguredCount = 0;
+            expectedSessionCount = 0;
+            cameraSessionReady.clear();
+            cameraRecordingActive.clear();
+        }
+        if (sessionTimeoutRunnable != null) {
+            mainHandler.removeCallbacks(sessionTimeoutRunnable);
+            sessionTimeoutRunnable = null;
+        }
     }
 
     /**
