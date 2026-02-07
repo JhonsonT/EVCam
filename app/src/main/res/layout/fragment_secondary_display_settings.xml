@@ -276,12 +276,66 @@
                         android:textColor="@color/text_primary" />
                 </LinearLayout>
 
-                <!-- 触发log关键字 -->
+                <!-- 触发log预设方案 -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginTop="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="触发log方案"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <RadioGroup
+                        android:id="@+id/rg_turn_signal_preset"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <RadioButton
+                            android:id="@+id/rb_preset_xinghan7"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:text="26款星舰7"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:buttonTint="@color/colorPrimary" />
+
+                        <RadioButton
+                            android:id="@+id/rb_preset_e5"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:text="银河E5"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:buttonTint="@color/colorPrimary" />
+
+                        <RadioButton
+                            android:id="@+id/rb_preset_custom"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:text="自定义"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:buttonTint="@color/colorPrimary" />
+                    </RadioGroup>
+                </LinearLayout>
+
+                <!-- 触发log关键字 -->
+                <LinearLayout
+                    android:id="@+id/layout_turn_signal_custom_keywords"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="8dp">
 
                     <TextView
                         android:layout_width="wrap_content"

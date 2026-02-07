@@ -42,9 +42,9 @@
             <ImageView
                 android:id="@+id/img_douyin"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="360dp"
                 android:layout_marginTop="14dp"
-                android:scaleType="centerInside" />
+                android:scaleType="fitCenter" />
         </LinearLayout>
     </ScrollView>
 

@@ -1000,7 +1000,8 @@ public class SingleCamera {
                     case CameraDevice.StateCallback.ERROR_CAMERA_DISABLED:
                         errorMsg = "ERROR_CAMERA_DISABLED (3) - Camera disabled by policy (likely background restriction)";
                         shouldRetry = true;
-                        reconnectDelayFloorMs = 5000;
+                        // 冷启动时前台服务可能刚启动还未完全建立，1.5秒后重试通常已就绪
+                        reconnectDelayFloorMs = 1500;
                         break;
                     case CameraDevice.StateCallback.ERROR_CAMERA_DEVICE:
                         errorMsg = "ERROR_CAMERA_DEVICE (4) - Device error (may be temporary due to resource contention)";

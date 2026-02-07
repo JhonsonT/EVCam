@@ -51,6 +51,8 @@ public class BlindSpotService extends Service {
     private LogcatSignalObserver signalObserver;
     private final Handler hideHandler = new Handler(Looper.getMainLooper());
     private Runnable hideRunnable;
+    private Runnable signalKeepAliveRunnable; // 信号保活计时器（debounce）
+    private static final long SIGNAL_KEEPALIVE_MS = 1200; // 1.2秒无信号视为转向灯已关闭（约3个闪烁周期）
     private String currentSignalCamera = null; // 当前转向灯触发的摄像头
     private Runnable secondaryRetryRunnable;
     private int secondaryRetryCount = 0;
@@ -72,7 +74,15 @@ public class BlindSpotService extends Service {
     }
 
     private void initSignalObserver() {
+        // 记录启动时间，用于跳过 logcat 缓冲区中的历史日志
+        // logcat 进程启动时会先输出缓冲区内所有旧日志，可能包含之前的转向灯信号，
+        // 导致服务刚启动就误触发补盲画面。2 秒预热期足够刷完历史缓冲。
+        final long observerStartTime = System.currentTimeMillis();
+        final long WARMUP_MS = 2000;
+
         signalObserver = new LogcatSignalObserver((line, data1) -> {
+            if (System.currentTimeMillis() - observerStartTime < WARMUP_MS) return;
+
             if (!appConfig.isBlindSpotGlobalEnabled()) return;
             if (!appConfig.isTurnSignalLinkageEnabled()) return;
 
@@ -110,6 +120,10 @@ public class BlindSpotService extends Service {
             hideRunnable = null;
         }
 
+        // 重置信号保活计时器（debounce）
+        // 每次收到有效信号（value:1）都重置，超过 1.2 秒无新信号则认为转向灯已关闭
+        resetSignalKeepAlive();
+
         if (cameraPos.equals(currentSignalCamera)) {
             AppLog.d(TAG, "转向灯相同，不重复切换: " + cameraPos);
             return;
@@ -117,6 +131,10 @@ public class BlindSpotService extends Service {
 
         currentSignalCamera = cameraPos;
         AppLog.d(TAG, "转向灯触发摄像头: " + cameraPos);
+
+        // 确保前台服务已启动（带 camera 类型的前台服务是后台访问摄像头的前提条件）
+        // 冷启动时 CameraForegroundService 可能还未启动，导致摄像头被系统 CAMERA_DISABLED 拦截
+        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
 
         // 确保摄像头已初始化（通过全局 Holder，不依赖 MainActivity）
         com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
@@ -256,6 +274,24 @@ public class BlindSpotService extends Service {
             secondaryRetryRunnable = null;
         }
         secondaryRetryCount = 0;
+    }
+
+    /**
+     * 重置信号保活计时器（debounce 机制）
+     * 转向灯闪烁时，每 ~400ms 会产生一次 value:1 的日志。
+     * 如果超过 1.2 秒没有收到新的 value:1 信号，说明转向灯已关闭，
+     * 此时启动隐藏计时器（用户配置的延迟时间）。
+     */
+    private void resetSignalKeepAlive() {
+        if (signalKeepAliveRunnable != null) {
+            hideHandler.removeCallbacks(signalKeepAliveRunnable);
+        }
+        signalKeepAliveRunnable = () -> {
+            AppLog.d(TAG, "转向灯信号超时（" + SIGNAL_KEEPALIVE_MS + "ms 无新信号），启动隐藏计时器");
+            signalKeepAliveRunnable = null;
+            startHideTimer();
+        };
+        hideHandler.postDelayed(signalKeepAliveRunnable, SIGNAL_KEEPALIVE_MS);
     }
 
     private void startHideTimer() {
@@ -576,7 +612,9 @@ public class BlindSpotService extends Service {
                 finalWidth > 0 ? finalWidth : WindowManager.LayoutParams.WRAP_CONTENT,
                 finalHeight > 0 ? finalHeight : WindowManager.LayoutParams.WRAP_CONTENT,
                 type,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
                 PixelFormat.TRANSLUCENT
         );
 
@@ -821,6 +859,9 @@ public class BlindSpotService extends Service {
         }
         if (hideRunnable != null) {
             hideHandler.removeCallbacks(hideRunnable);
+        }
+        if (signalKeepAliveRunnable != null) {
+            hideHandler.removeCallbacks(signalKeepAliveRunnable);
         }
         cancelSecondaryRetry();
         removeSecondaryView();

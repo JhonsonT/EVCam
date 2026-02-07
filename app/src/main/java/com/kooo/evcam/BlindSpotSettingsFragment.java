@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,8 +34,18 @@ public class BlindSpotSettingsFragment extends Fragment {
     private SwitchMaterial turnSignalLinkageSwitch;
     private SeekBar turnSignalTimeoutSeekBar;
     private TextView tvTurnSignalTimeout;
+    private RadioGroup turnSignalPresetGroup;
+    private LinearLayout customKeywordsLayout;
     private EditText turnSignalLeftLogEditText;
     private EditText turnSignalRightLogEditText;
+    private boolean isUpdatingFromPreset = false; // 防止 TextWatcher 在预设填充时触发
+
+    // 转向灯触发log预设方案
+    private static final String[][] TURN_SIGNAL_PRESETS = {
+        // { presetId, leftKeyword, rightKeyword }
+        { "xinghan7", "left front turn signal:1", "right front turn signal:1" },
+        { "e5", "PA_GpioTurnLeftLamp, value:1", "PA_GpioTurnRightLamp, value:1" },
+    };
 
     private SwitchMaterial blindSpotGlobalSwitch;
     private android.widget.LinearLayout subFeaturesContainer;
@@ -78,6 +90,8 @@ public class BlindSpotSettingsFragment extends Fragment {
         turnSignalLinkageSwitch = view.findViewById(R.id.switch_turn_signal_linkage);
         turnSignalTimeoutSeekBar = view.findViewById(R.id.seekbar_turn_signal_timeout);
         tvTurnSignalTimeout = view.findViewById(R.id.tv_turn_signal_timeout_value);
+        turnSignalPresetGroup = view.findViewById(R.id.rg_turn_signal_preset);
+        customKeywordsLayout = view.findViewById(R.id.layout_turn_signal_custom_keywords);
         turnSignalLeftLogEditText = view.findViewById(R.id.et_turn_signal_left_log);
         turnSignalRightLogEditText = view.findViewById(R.id.et_turn_signal_right_log);
 
@@ -121,8 +135,23 @@ public class BlindSpotSettingsFragment extends Fragment {
         int timeout = appConfig.getTurnSignalTimeout();
         turnSignalTimeoutSeekBar.setProgress(timeout);
         tvTurnSignalTimeout.setText(timeout + "s");
-        turnSignalLeftLogEditText.setText(appConfig.getTurnSignalLeftTriggerLog());
-        turnSignalRightLogEditText.setText(appConfig.getTurnSignalRightTriggerLog());
+        String currentLeft = appConfig.getTurnSignalLeftTriggerLog();
+        String currentRight = appConfig.getTurnSignalRightTriggerLog();
+        turnSignalLeftLogEditText.setText(currentLeft);
+        turnSignalRightLogEditText.setText(currentRight);
+
+        // 根据当前关键词匹配预设
+        int matchedPreset = findMatchingPreset(currentLeft, currentRight);
+        if (matchedPreset == 0) {
+            turnSignalPresetGroup.check(R.id.rb_preset_xinghan7);
+            customKeywordsLayout.setVisibility(View.GONE);
+        } else if (matchedPreset == 1) {
+            turnSignalPresetGroup.check(R.id.rb_preset_e5);
+            customKeywordsLayout.setVisibility(View.GONE);
+        } else {
+            turnSignalPresetGroup.check(R.id.rb_preset_custom);
+            customKeywordsLayout.setVisibility(View.VISIBLE);
+        }
 
         secondaryBlindSpotSwitch.setChecked(appConfig.isSecondaryDisplayEnabled());
 
@@ -185,6 +214,17 @@ public class BlindSpotSettingsFragment extends Fragment {
             }
         });
 
+        // 预设方案选择
+        turnSignalPresetGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rb_preset_custom) {
+                customKeywordsLayout.setVisibility(View.VISIBLE);
+            } else {
+                customKeywordsLayout.setVisibility(View.GONE);
+                int presetIndex = (checkedId == R.id.rb_preset_xinghan7) ? 0 : 1;
+                applyPreset(presetIndex);
+            }
+        });
+
         android.text.TextWatcher turnSignalLogWatcher = new android.text.TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -194,6 +234,7 @@ public class BlindSpotSettingsFragment extends Fragment {
 
             @Override
             public void afterTextChanged(android.text.Editable s) {
+                if (isUpdatingFromPreset) return; // 预设填充时不触发保存
                 if (turnSignalLeftLogEditText.getEditableText() == s) {
                     appConfig.setTurnSignalCustomLeftTriggerLog(s.toString());
                 } else if (turnSignalRightLogEditText.getEditableText() == s) {
@@ -292,6 +333,38 @@ public class BlindSpotSettingsFragment extends Fragment {
                 ((MainActivity) getActivity()).goToRecordingInterface();
             }
         });
+    }
+
+    /**
+     * 根据当前关键词匹配预设方案
+     * @return 预设索引（0=星舰7, 1=E5），-1 表示自定义
+     */
+    private int findMatchingPreset(String leftKeyword, String rightKeyword) {
+        if (leftKeyword == null || rightKeyword == null) return -1;
+        for (int i = 0; i < TURN_SIGNAL_PRESETS.length; i++) {
+            if (TURN_SIGNAL_PRESETS[i][1].equals(leftKeyword) && TURN_SIGNAL_PRESETS[i][2].equals(rightKeyword)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * 应用预设方案：填充关键词并保存配置
+     */
+    private void applyPreset(int presetIndex) {
+        if (presetIndex < 0 || presetIndex >= TURN_SIGNAL_PRESETS.length) return;
+        String leftKeyword = TURN_SIGNAL_PRESETS[presetIndex][1];
+        String rightKeyword = TURN_SIGNAL_PRESETS[presetIndex][2];
+
+        isUpdatingFromPreset = true;
+        turnSignalLeftLogEditText.setText(leftKeyword);
+        turnSignalRightLogEditText.setText(rightKeyword);
+        isUpdatingFromPreset = false;
+
+        appConfig.setTurnSignalCustomLeftTriggerLog(leftKeyword);
+        appConfig.setTurnSignalCustomRightTriggerLog(rightKeyword);
+        BlindSpotService.update(requireContext());
     }
 
     private void maybeShowDisclaimerDialog() {

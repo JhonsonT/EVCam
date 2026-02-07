@@ -316,6 +316,24 @@ public class MultiCameraManager {
     }
 
     /**
+     * 手动触发所有已有 previewSize 的摄像头的 PreviewSizeCallback。
+     * 用于后台初始化（CameraManagerHolder）复用场景：
+     * 摄像头在 BlindSpotService 中已打开并确定了预览尺寸，
+     * 但 MainActivity 的回调（旋转变换等）此时尚未注册。
+     * 在 MainActivity 注册回调后调用此方法，补偿缺失的回调触发。
+     */
+    public void firePreviewSizeCallbacks() {
+        if (previewSizeCallback == null) return;
+        for (Map.Entry<String, SingleCamera> entry : cameras.entrySet()) {
+            SingleCamera camera = entry.getValue();
+            Size size = camera.getPreviewSize();
+            if (size != null) {
+                previewSizeCallback.onPreviewSizeChosen(entry.getKey(), camera.getCameraId(), size);
+            }
+        }
+    }
+
+    /**
      * 初始化摄像头
      * 支持 null 参数以适配不同数量的摄像头配置（1摄/2摄/4摄）
      */

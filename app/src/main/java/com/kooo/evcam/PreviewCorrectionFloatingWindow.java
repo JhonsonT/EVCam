@@ -81,7 +81,13 @@ public class PreviewCorrectionFloatingWindow {
         );
         layoutParams.gravity = Gravity.TOP | Gravity.START;
         layoutParams.x = 50;
-        layoutParams.y = 50;
+        // 获取状态栏高度，避免悬浮窗被状态栏遮挡
+        int statusBarHeight = 0;
+        int resId = context.getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            statusBarHeight = context.getResources().getDimensionPixelSize(resId);
+        }
+        layoutParams.y = statusBarHeight + 20;
 
         try {
             windowManager.addView(floatingView, layoutParams);

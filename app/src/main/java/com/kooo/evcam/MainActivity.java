@@ -2315,7 +2315,115 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             // 后台已初始化，复用实例并绑定 TextureView
             AppLog.d(TAG, "复用后台已初始化的摄像头管理器，绑定 TextureView");
             cameraManager = existingManager;
+
+            // --- 补全后台初始化时缺失的回调 ---
+            // 后台（BlindSpotService）初始化的 MultiCameraManager 没有设置 MainActivity 的回调，
+            // 必须在此处设置，否则左右摄像头旋转变换、录制计时等功能不正常。
+
+            // 摄像头状态回调
+            cameraManager.setStatusCallback((cameraId, status) -> {
+                AppLog.d(TAG, "摄像头 " + cameraId + ": " + status);
+                if (status.contains("错误") || status.contains("断开")) {
+                    runOnUiThread(() -> {
+                        if (status.contains("ERROR_CAMERA_IN_USE") || status.contains("DISCONNECTED")) {
+                            Toast.makeText(MainActivity.this,
+                                "摄像头 " + cameraId + " 被占用，正在自动重连...",
+                                Toast.LENGTH_SHORT).show();
+                        } else if (status.contains("max reconnect attempts")) {
+                            Toast.makeText(MainActivity.this,
+                                "摄像头 " + cameraId + " 重连失败，请手动重启应用",
+                                Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
+            });
+
+            // 分段切换回调
+            cameraManager.setSegmentSwitchCallback(newSegmentIndex -> {
+                onSegmentSwitch(newSegmentIndex);
+            });
+
+            // 损坏文件删除回调
+            cameraManager.setCorruptedFilesCallback(deletedFiles -> {
+                showCorruptedFilesDeletedDialog(deletedFiles);
+            });
+
+            // Codec 回退通知回调
+            cameraManager.setCodecFallbackCallback(() -> {
+                runOnUiThread(() -> {
+                    Toast.makeText(this,
+                        "录制故障，已回退到MediaCodec模式，如果频繁故障请手动更改录制模式",
+                        Toast.LENGTH_LONG).show();
+                });
+            });
+
+            // 录制时间戳更新回调
+            cameraManager.setTimestampUpdateCallback(newTimestamp -> {
+                if (isRemoteRecording && remoteRecordingTimestamp != null) {
+                    AppLog.d(TAG, "远程录制时间戳更新: " + remoteRecordingTimestamp + " -> " + newTimestamp);
+                    remoteRecordingTimestamp = newTimestamp;
+                }
+                if (remoteCommandDispatcher != null) {
+                    remoteCommandDispatcher.onTimestampUpdated(newTimestamp);
+                }
+            });
+
+            // 首次数据写入回调（录制计时器依赖此回调）
+            cameraManager.setFirstDataWrittenCallback(() -> {
+                AppLog.d(TAG, "收到首次数据写入回调，录制已真正开始");
+                runOnUiThread(() -> {
+                    if (isPreparingRecording) {
+                        isPreparingRecording = false;
+                        hidePreparingIndicator();
+                        AppLog.d(TAG, "准备状态结束，录制进入正常状态");
+                    }
+                    if (isRecording && !isRemoteRecording) {
+                        if (shouldResumeRecordingAfterRecreate && savedRecordingStartTime > 0) {
+                            startRecordingTimer(savedRecordingStartTime, savedSegmentCount);
+                            AppLog.d(TAG, "主题切换后恢复录制计时器（首次写入后）");
+                            shouldResumeRecordingAfterRecreate = false;
+                            savedRecordingStartTime = 0;
+                            savedSegmentCount = 1;
+                        } else {
+                            startRecordingTimer();
+                            AppLog.d(TAG, "手动录制计时器已启动（首次写入后）");
+                        }
+                    }
+                    if (remoteCommandDispatcher != null) {
+                        remoteCommandDispatcher.onFirstDataWritten();
+                    }
+                    if (isRemoteRecording && pendingRemoteDurationSeconds > 0) {
+                        AppLog.d(TAG, "远程录制首次写入成功，启动 " + pendingRemoteDurationSeconds + " 秒定时器");
+                        autoStopHandler.postDelayed(autoStopRunnable, pendingRemoteDurationSeconds * 1000L);
+                        pendingRemoteDurationSeconds = 0;
+                    }
+                });
+            });
+
+            // 预览尺寸回调（关键：负责左右摄像头旋转变换）
+            cameraManager.setPreviewSizeCallback((cameraKey, cameraId, previewSize) -> {
+                AppLog.d(TAG, "摄像头 " + cameraId + " 预览尺寸: " + previewSize.getWidth() + "x" + previewSize.getHeight());
+                runOnUiThread(() -> {
+                    final AutoFitTextureView textureView;
+                    switch (cameraKey) {
+                        case "front": textureView = textureFront; break;
+                        case "back":  textureView = textureBack;  break;
+                        case "left":  textureView = textureLeft;  break;
+                        case "right": textureView = textureRight; break;
+                        default:      textureView = null;         break;
+                    }
+                    if (textureView != null) {
+                        applyPreviewSizeTransform(cameraKey, textureView, previewSize);
+                    }
+                });
+            });
+
+            // 绑定 TextureView
             cameraManager.updatePreviewTextureViews(textureFront, textureBack, textureLeft, textureRight);
+
+            // 手动触发 previewSizeCallback（摄像头可能已在补盲阶段打开并确定了预览尺寸）
+            cameraManager.firePreviewSizeCallbacks();
+
             // 初始化亮度/降噪调节管理器
             imageAdjustManager = new ImageAdjustManager(this);
             registerCamerasToImageAdjustManager();
@@ -2434,97 +2542,17 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
         // 设置预览尺寸回调
         cameraManager.setPreviewSizeCallback((cameraKey, cameraId, previewSize) -> {
             AppLog.d(TAG, "摄像头 " + cameraId + " 预览尺寸: " + previewSize.getWidth() + "x" + previewSize.getHeight());
-            // 根据 camera key 设置对应 TextureView 的宽高比
             runOnUiThread(() -> {
                 final AutoFitTextureView textureView;
                 switch (cameraKey) {
-                    case "front":
-                        textureView = textureFront;
-                        break;
-                    case "back":
-                        textureView = textureBack;
-                        break;
-                    case "left":
-                        textureView = textureLeft;
-                        break;
-                    case "right":
-                        textureView = textureRight;
-                        break;
-                    default:
-                        textureView = null;
-                        break;
+                    case "front": textureView = textureFront; break;
+                    case "back":  textureView = textureBack;  break;
+                    case "left":  textureView = textureLeft;  break;
+                    case "right": textureView = textureRight; break;
+                    default:      textureView = null;         break;
                 }
                 if (textureView != null) {
-                    String carModel = appConfig.getCarModel();
-                    
-                    // 自定义车型：保持原始状态，不旋转、不镜像，所有调节在自由调节界面进行
-                    if (appConfig.isCustomCarModel()) {
-                        // 使用原始宽高比，不应用任何旋转
-                        textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
-                        textureView.setFillContainer(true);  // 使用填充模式，无黑边
-                        
-                        AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(自定义-填充): " + previewSize.getWidth() + "x" + previewSize.getHeight());
-                        
-                        // 更新布局管理器中的宽高比信息（不旋转）
-                        if (customLayoutManager != null) {
-                            customLayoutManager.updateCameraAspectRatio(cameraKey, previewSize.getWidth(), previewSize.getHeight(), 0);
-                        }
-                        applyPreviewCorrectionOnly(textureView, cameraKey);
-                    }
-                    // L7/L6车型：左右摄像头需要旋转
-                    else if (AppConfig.CAR_MODEL_L7.equals(carModel) || AppConfig.CAR_MODEL_L7_MULTI.equals(carModel)) {
-                        boolean needRotation = "left".equals(cameraKey) || "right".equals(cameraKey);
-                        
-                        if (needRotation) {
-                            // 左右摄像头：容器使用旋转后的宽高比（800x1280，竖向）
-                            textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
-                            AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(旋转后): " + previewSize.getHeight() + ":" + previewSize.getWidth());
-
-                            // 应用旋转变换（修正倒立问题）
-                            int rotation = "left".equals(cameraKey) ? 270 : 90;
-                            applyRotationTransform(textureView, previewSize, rotation, cameraKey);
-                        } else {
-                            // 前后摄像头：使用原始宽高比
-                            textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
-                            textureView.setFillContainer(false);
-                            AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
-                            applyPreviewCorrectionOnly(textureView, cameraKey);
-                        }
-                    }
-                    // 手机车型：预览是竖向的，需要应用缩放变换保持比例
-                    else if (AppConfig.CAR_MODEL_PHONE.equals(carModel)) {
-                        textureView.setFillContainer(false);
-                        applyPhoneScaleTransform(textureView, previewSize, cameraKey);
-                        AppLog.d(TAG, "设置 " + cameraKey + " 手机缩放变换, 预览尺寸: " + previewSize.getWidth() + "x" + previewSize.getHeight());
-                    }
-                    // 其他车型（E5等）：左右摄像头也需要旋转
-                    else {
-                        boolean needRotation = "left".equals(cameraKey) || "right".equals(cameraKey);
-                        
-                        if (needRotation) {
-                            // 左右摄像头：容器使用旋转后的宽高比（800x1280，竖向）
-                            textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
-                            AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(E5旋转后): " + previewSize.getHeight() + ":" + previewSize.getWidth());
-
-                            // 应用旋转变换（修正倒立问题）
-                            int rotation = "left".equals(cameraKey) ? 270 : 90;
-                            applyRotationTransform(textureView, previewSize, rotation, cameraKey);
-                        } else {
-                            // 前后摄像头：使用原始宽高比
-                            textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
-                            
-                            // E5的4摄模式：启用填满模式，避免黑边
-                            boolean useFillMode = configuredCameraCount >= 4;
-                            if (useFillMode) {
-                                textureView.setFillContainer(true);
-                                AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 填满模式");
-                            } else {
-                                textureView.setFillContainer(false);
-                                AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
-                            }
-                            applyPreviewCorrectionOnly(textureView, cameraKey);
-                        }
-                    }
+                    applyPreviewSizeTransform(cameraKey, textureView, previewSize);
                 }
             });
         });
@@ -2964,6 +2992,61 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                     ", preview=" + previewWidth + "x" + previewHeight + 
                     ", scale=" + scale);
         });
+    }
+
+    /**
+     * 根据车型和摄像头位置，对 TextureView 应用正确的宽高比和旋转变换。
+     * 从 previewSizeCallback 提取，避免正常初始化和后台复用路径的代码重复。
+     */
+    private void applyPreviewSizeTransform(String cameraKey, AutoFitTextureView textureView, android.util.Size previewSize) {
+        String carModel = appConfig.getCarModel();
+
+        if (appConfig.isCustomCarModel()) {
+            textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
+            textureView.setFillContainer(true);
+            AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(自定义-填充): " + previewSize.getWidth() + "x" + previewSize.getHeight());
+            if (customLayoutManager != null) {
+                customLayoutManager.updateCameraAspectRatio(cameraKey, previewSize.getWidth(), previewSize.getHeight(), 0);
+            }
+            applyPreviewCorrectionOnly(textureView, cameraKey);
+        } else if (AppConfig.CAR_MODEL_L7.equals(carModel) || AppConfig.CAR_MODEL_L7_MULTI.equals(carModel)) {
+            boolean needRotation = "left".equals(cameraKey) || "right".equals(cameraKey);
+            if (needRotation) {
+                textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+                AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(旋转后): " + previewSize.getHeight() + ":" + previewSize.getWidth());
+                int rotation = "left".equals(cameraKey) ? 270 : 90;
+                applyRotationTransform(textureView, previewSize, rotation, cameraKey);
+            } else {
+                textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
+                textureView.setFillContainer(false);
+                AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
+                applyPreviewCorrectionOnly(textureView, cameraKey);
+            }
+        } else if (AppConfig.CAR_MODEL_PHONE.equals(carModel)) {
+            textureView.setFillContainer(false);
+            applyPhoneScaleTransform(textureView, previewSize, cameraKey);
+            AppLog.d(TAG, "设置 " + cameraKey + " 手机缩放变换, 预览尺寸: " + previewSize.getWidth() + "x" + previewSize.getHeight());
+        } else {
+            // E5 等其他车型
+            boolean needRotation = "left".equals(cameraKey) || "right".equals(cameraKey);
+            if (needRotation) {
+                textureView.setAspectRatio(previewSize.getHeight(), previewSize.getWidth());
+                AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(E5旋转后): " + previewSize.getHeight() + ":" + previewSize.getWidth());
+                int rotation = "left".equals(cameraKey) ? 270 : 90;
+                applyRotationTransform(textureView, previewSize, rotation, cameraKey);
+            } else {
+                textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
+                boolean useFillMode = configuredCameraCount >= 4;
+                if (useFillMode) {
+                    textureView.setFillContainer(true);
+                    AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 填满模式");
+                } else {
+                    textureView.setFillContainer(false);
+                    AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
+                }
+                applyPreviewCorrectionOnly(textureView, cameraKey);
+            }
+        }
     }
 
     private void applyRotationTransform(AutoFitTextureView textureView, android.util.Size previewSize,
