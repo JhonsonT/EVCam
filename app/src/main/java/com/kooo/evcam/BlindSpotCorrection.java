@@ -41,7 +41,7 @@ public final class BlindSpotCorrection {
                 }
             }
 
-            // 获取矫正旋转角度（仅 0/90/180/270）
+            // 获取矫正旋转角度（0~360 任意角度）
             int correctionRotation = 0;
             if (appConfig.isBlindSpotCorrectionEnabled() && cameraPos != null) {
                 correctionRotation = appConfig.getBlindSpotCorrectionRotation(cameraPos);
@@ -50,13 +50,13 @@ public final class BlindSpotCorrection {
             // 计算总旋转（baseRotation + correctionRotation），用于判断center-crop时的有效宽高比
             int totalRotation = (baseRotation + correctionRotation) % 360;
             if (totalRotation < 0) totalRotation += 360;
-            boolean isRotated90or270 = (totalRotation == 90 || totalRotation == 270);
+            boolean isMorePortrait = isCloserToPortrait(totalRotation);
 
             // 居中填充（center-crop）：考虑总旋转后的有效预览宽高比
             if (previewW > 0 && previewH > 0) {
-                // 旋转90/270后预览宽高互换
-                float effectivePreviewW = isRotated90or270 ? previewH : previewW;
-                float effectivePreviewH = isRotated90or270 ? previewW : previewH;
+                // 更接近竖屏时，预览宽高互换
+                float effectivePreviewW = isMorePortrait ? previewH : previewW;
+                float effectivePreviewH = isMorePortrait ? previewW : previewH;
                 float previewAspect = effectivePreviewW / effectivePreviewH;
                 float viewAspect = (float) viewWidth / viewHeight;
                 float scaleXFill, scaleYFill;
@@ -88,16 +88,20 @@ public final class BlindSpotCorrection {
 
                 matrix.postScale(scaleX, scaleY, centerX, centerY);
 
-                // 矫正旋转（0/90/180/270）
-                // 悬浮窗已自动交换宽高（由 MainFloatingWindowView/BlindSpotFloatingWindowView 负责）
-                // 旋转后需要缩放补偿：旋转使 viewH×viewW 内容显示在 viewW×viewH 窗口中
-                // 正确公式：postScale(viewW/viewH, viewH/viewW) 让内容精确填满窗口
+                // 矫正旋转（支持 0~360 任意角度）
+                // 悬浮窗在更接近竖屏时已自动交换宽高（由 MainFloatingWindowView/BlindSpotFloatingWindowView 负责）
+                // 旋转后需要缩放补偿，使旋转后的内容完全覆盖窗口（无黑边）
                 if (correctionRotation != 0) {
                     matrix.postRotate(correctionRotation, centerX, centerY);
-                    if (correctionRotation == 90 || correctionRotation == 270) {
-                        float scaleRatio = (float) viewWidth / (float) viewHeight;
-                        matrix.postScale(scaleRatio, 1f / scaleRatio, centerX, centerY);
-                    }
+                    // 通用缩放补偿：旋转 θ 后，原始 W×H 矩形的包围盒尺寸
+                    // boundW = W*|cosθ| + H*|sinθ|,  boundH = W*|sinθ| + H*|cosθ|
+                    // 需要缩放 boundW/W, boundH/H 使内容填满窗口
+                    double rad = Math.toRadians(correctionRotation);
+                    float absCos = (float) Math.abs(Math.cos(rad));
+                    float absSin = (float) Math.abs(Math.sin(rad));
+                    float compensateX = absCos + ((float) viewHeight / viewWidth) * absSin;
+                    float compensateY = ((float) viewWidth / viewHeight) * absSin + absCos;
+                    matrix.postScale(compensateX, compensateY, centerX, centerY);
                 }
 
                 matrix.postTranslate(translateX * viewWidth, translateY * viewHeight);
@@ -105,6 +109,16 @@ public final class BlindSpotCorrection {
 
             textureView.setTransform(matrix);
         });
+    }
+
+    /**
+     * 判断旋转角度是否更接近竖屏（即需要交换宽高）
+     * 45°~135° 和 225°~315° 范围视为更接近竖屏
+     */
+    public static boolean isCloserToPortrait(int rotation) {
+        int normalized = ((rotation % 360) + 360) % 360; // 归一化到 0~359
+        int mod180 = normalized % 180; // 映射到 0~179
+        return (mod180 >= 45 && mod180 < 135);
     }
 
     private static float clamp(float v, float min, float max) {

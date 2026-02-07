@@ -13,6 +13,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Locale;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -26,8 +28,6 @@ public class BlindSpotCorrectionFragment extends Fragment {
     private static final float TRANSLATE_MAX = 5.00f;
     private static final float TRANSLATE_STEP = 0.01f;
 
-    private static final int[] ROTATION_VALUES = {0, 90, 180, 270};
-
     private Button backButton;
     private Button homeButton;
     private Spinner cameraSpinner;
@@ -36,12 +36,13 @@ public class BlindSpotCorrectionFragment extends Fragment {
     private SeekBar seekScaleY;
     private SeekBar seekTranslateX;
     private SeekBar seekTranslateY;
-    private Spinner spinnerRotation;
+    private SeekBar seekRotation;
 
     private TextView tvScaleX;
     private TextView tvScaleY;
     private TextView tvTranslateX;
     private TextView tvTranslateY;
+    private TextView tvRotation;
 
     private Button resetButton;
     private Button saveButton;
@@ -78,12 +79,13 @@ public class BlindSpotCorrectionFragment extends Fragment {
         seekScaleY = view.findViewById(R.id.seek_scale_y);
         seekTranslateX = view.findViewById(R.id.seek_translate_x);
         seekTranslateY = view.findViewById(R.id.seek_translate_y);
-        spinnerRotation = view.findViewById(R.id.spinner_rotation);
+        seekRotation = view.findViewById(R.id.seek_rotation);
 
         tvScaleX = view.findViewById(R.id.tv_scale_x);
         tvScaleY = view.findViewById(R.id.tv_scale_y);
         tvTranslateX = view.findViewById(R.id.tv_translate_x);
         tvTranslateY = view.findViewById(R.id.tv_translate_y);
+        tvRotation = view.findViewById(R.id.tv_rotation);
 
         resetButton = view.findViewById(R.id.btn_reset);
         saveButton = view.findViewById(R.id.btn_save_apply);
@@ -103,10 +105,7 @@ public class BlindSpotCorrectionFragment extends Fragment {
         seekTranslateX.setMax((int) Math.round((TRANSLATE_MAX - TRANSLATE_MIN) / TRANSLATE_STEP));
         seekTranslateY.setMax((int) Math.round((TRANSLATE_MAX - TRANSLATE_MIN) / TRANSLATE_STEP));
 
-        String[] rotationLabels = {"0°", "90°", "180°", "270°"};
-        ArrayAdapter<String> rotAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, rotationLabels);
-        rotAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerRotation.setAdapter(rotAdapter);
+        seekRotation.setMax(360);
     }
 
     private void setupListeners() {
@@ -180,17 +179,20 @@ public class BlindSpotCorrectionFragment extends Fragment {
         seekTranslateX.setOnSeekBarChangeListener(seekListener);
         seekTranslateY.setOnSeekBarChangeListener(seekListener);
 
-        spinnerRotation.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private boolean first = true;
+        seekRotation.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (first) { first = false; return; }
-                int rotation = ROTATION_VALUES[position];
-                appConfig.setBlindSpotCorrectionRotation(currentCameraPos, rotation);
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!fromUser) return;
+                tvRotation.setText(progress + "°");
+                appConfig.setBlindSpotCorrectionRotation(currentCameraPos, progress);
                 BlindSpotService.update(requireContext());
             }
+
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         resetButton.setOnClickListener(v -> {
@@ -221,12 +223,13 @@ public class BlindSpotCorrectionFragment extends Fragment {
         seekScaleY.setProgress(py);
         seekTranslateX.setProgress(tx);
         seekTranslateY.setProgress(ty);
-        spinnerRotation.setSelection(rotationToIndex(rotation));
+        seekRotation.setProgress(rotation);
 
         tvScaleX.setText(format2(progressToScale(px)));
         tvScaleY.setText(format2(progressToScale(py)));
         tvTranslateX.setText(format2(progressToTranslate(tx)));
         tvTranslateY.setText(format2(progressToTranslate(ty)));
+        tvRotation.setText(rotation + "°");
     }
 
     private void startPreview(String cameraPos) {
@@ -283,13 +286,6 @@ public class BlindSpotCorrectionFragment extends Fragment {
 
     private float progressToTranslate(int progress) {
         return TRANSLATE_MIN + progress * TRANSLATE_STEP;
-    }
-
-    private int rotationToIndex(int rotation) {
-        for (int i = 0; i < ROTATION_VALUES.length; i++) {
-            if (ROTATION_VALUES[i] == rotation) return i;
-        }
-        return 0;
     }
 
     private float clamp(float v, float min, float max) {
