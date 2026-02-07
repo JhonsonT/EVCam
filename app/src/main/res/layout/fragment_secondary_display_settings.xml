@@ -421,19 +421,6 @@
 
             </LinearLayout> <!-- end blind_spot_sub_features_container -->
 
-            <!-- 保存按钮 -->
-            <Button
-                android:id="@+id/btn_save_apply"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="保存配置并应用"
-                android:textSize="20sp"
-                android:minHeight="56dp"
-                android:backgroundTint="@color/button_background"
-                android:textColor="@color/button_text"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp" />
-
             <!-- Logcat 调试工具 -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -456,7 +443,7 @@
                     android:id="@+id/et_log_filter"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:hint="输入日志过滤关键字 (可选)"
+                    android:hint="输入日志过滤关键字"
                     android:paddingStart="12dp"
                     android:paddingEnd="12dp"
                     android:background="@drawable/spinner_background"

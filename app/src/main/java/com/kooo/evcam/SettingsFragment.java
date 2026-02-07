@@ -53,6 +53,14 @@ public class SettingsFragment extends Fragment {
     // private SwitchMaterial preventSleepSwitch;
     private SwitchMaterial recordingStatsSwitch;
     private SwitchMaterial timestampWatermarkSwitch;
+    
+    // 预览画面矫正相关
+    private SwitchMaterial previewCorrectionSwitch;
+    private LinearLayout previewCorrectionButtonsLayout;
+    private Button openPreviewCorrectionFloatingButton;
+    private Button resetPreviewCorrectionButton;
+    private PreviewCorrectionFloatingWindow previewCorrectionFloatingWindow;
+    
     private AppConfig appConfig;
     
     // 悬浮窗相关
@@ -258,6 +266,54 @@ public class SettingsFragment extends Fragment {
                 String message = isChecked ? "时间角标已开启" : "时间角标已关闭";
                 Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                 AppLog.d("SettingsFragment", message);
+            }
+        });
+
+        // 初始化预览画面矫正
+        previewCorrectionSwitch = view.findViewById(R.id.switch_preview_correction);
+        previewCorrectionButtonsLayout = view.findViewById(R.id.layout_preview_correction_buttons);
+        openPreviewCorrectionFloatingButton = view.findViewById(R.id.btn_open_preview_correction_floating);
+        resetPreviewCorrectionButton = view.findViewById(R.id.btn_reset_preview_correction);
+        if (getContext() != null && appConfig != null) {
+            boolean correctionEnabled = appConfig.isPreviewCorrectionEnabled();
+            previewCorrectionSwitch.setChecked(correctionEnabled);
+            previewCorrectionButtonsLayout.setVisibility(correctionEnabled ? View.VISIBLE : View.GONE);
+        }
+        previewCorrectionSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (getContext() != null && appConfig != null) {
+                appConfig.setPreviewCorrectionEnabled(isChecked);
+                previewCorrectionButtonsLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                // 刷新预览
+                MainActivity mainActivity = MainActivity.getInstance();
+                if (mainActivity != null) {
+                    mainActivity.refreshPreviewCorrection();
+                }
+                String message = isChecked ? "预览画面矫正已开启" : "预览画面矫正已关闭";
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+        openPreviewCorrectionFloatingButton.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            if (!WakeUpHelper.hasOverlayPermission(requireContext())) {
+                Toast.makeText(requireContext(), "请先授予悬浮窗权限", Toast.LENGTH_SHORT).show();
+                WakeUpHelper.requestOverlayPermission(requireContext());
+                return;
+            }
+            // 先回到主界面再打开悬浮窗，方便实时预览
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null) {
+                mainActivity.goToRecordingInterface();
+                mainActivity.showPreviewCorrectionFloating();
+            }
+        });
+        resetPreviewCorrectionButton.setOnClickListener(v -> {
+            if (getContext() != null && appConfig != null) {
+                appConfig.resetAllPreviewCorrection();
+                Toast.makeText(getContext(), "所有预览矫正参数已恢复默认", Toast.LENGTH_SHORT).show();
+                MainActivity mainActivity = MainActivity.getInstance();
+                if (mainActivity != null) {
+                    mainActivity.refreshPreviewCorrection();
+                }
             }
         });
 

@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     }
 
     private AutoFitTextureView textureFront, textureBack, textureLeft, textureRight;
+    private final java.util.Map<String, android.graphics.Matrix> previewBaseTransforms = new java.util.HashMap<>();
+    private PreviewCorrectionFloatingWindow previewCorrectionFloatingWindow;
     private Button btnStartRecord, btnExit, btnTakePhoto;
     private MultiCameraManager cameraManager;
 
@@ -2427,6 +2429,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                         if (customLayoutManager != null) {
                             customLayoutManager.updateCameraAspectRatio(cameraKey, previewSize.getWidth(), previewSize.getHeight(), 0);
                         }
+                        applyPreviewCorrectionOnly(textureView, cameraKey);
                     }
                     // L7/L6车型：左右摄像头需要旋转
                     else if (AppConfig.CAR_MODEL_L7.equals(carModel) || AppConfig.CAR_MODEL_L7_MULTI.equals(carModel)) {
@@ -2445,6 +2448,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                             textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
                             textureView.setFillContainer(false);
                             AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
+                            applyPreviewCorrectionOnly(textureView, cameraKey);
                         }
                     }
                     // 手机车型：预览是竖向的，需要应用缩放变换保持比例
@@ -2478,6 +2482,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                                 textureView.setFillContainer(false);
                                 AppLog.d(TAG, "设置 " + cameraKey + " 宽高比: " + previewSize.getWidth() + ":" + previewSize.getHeight() + ", 适应模式");
                             }
+                            applyPreviewCorrectionOnly(textureView, cameraKey);
                         }
                     }
                 }
@@ -2910,6 +2915,10 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             matrix.setScale(scale, scale);
             matrix.postTranslate(dx, dy);
 
+            // 保存基础变换，并叠加预览矫正
+            previewBaseTransforms.put(cameraKey, new android.graphics.Matrix(matrix));
+            PreviewCorrection.postApply(matrix, appConfig, cameraKey, viewWidth, viewHeight);
+
             textureView.setTransform(matrix);
             AppLog.d(TAG, cameraKey + " 应用手机缩放变换: view=" + viewWidth + "x" + viewHeight + 
                     ", preview=" + previewWidth + "x" + previewHeight + 
@@ -2963,9 +2972,85 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
                 matrix.postRotate(180, centerX, centerY);
             }
 
+            // 保存基础变换，并叠加预览矫正
+            previewBaseTransforms.put(cameraKey, new android.graphics.Matrix(matrix));
+            PreviewCorrection.postApply(matrix, appConfig, cameraKey, viewWidth, viewHeight);
+
             textureView.setTransform(matrix);
             AppLog.d(TAG, cameraKey + " 应用修正旋转: " + rotation + "度");
         });
+    }
+
+    /**
+     * 对没有基础变换的 TextureView 单独应用预览矫正
+     * 用于 E5/L7 前后摄像头、自定义车型等不需要旋转的场景
+     */
+    private void applyPreviewCorrectionOnly(AutoFitTextureView textureView, String cameraKey) {
+        textureView.post(() -> {
+            int viewWidth = textureView.getWidth();
+            int viewHeight = textureView.getHeight();
+            if (viewWidth <= 0 || viewHeight <= 0) {
+                textureView.postDelayed(() -> applyPreviewCorrectionOnly(textureView, cameraKey), 100);
+                return;
+            }
+            android.graphics.Matrix matrix = new android.graphics.Matrix(); // identity
+            previewBaseTransforms.put(cameraKey, new android.graphics.Matrix(matrix));
+            PreviewCorrection.postApply(matrix, appConfig, cameraKey, viewWidth, viewHeight);
+            textureView.setTransform(matrix);
+        });
+    }
+
+    /**
+     * 刷新所有预览 TextureView 的矫正变换
+     * 由悬浮窗调参或设置页调用
+     */
+    public void refreshPreviewCorrection() {
+        runOnUiThread(() -> {
+            refreshSinglePreviewCorrection(textureFront, "front");
+            refreshSinglePreviewCorrection(textureBack, "back");
+            refreshSinglePreviewCorrection(textureLeft, "left");
+            refreshSinglePreviewCorrection(textureRight, "right");
+        });
+    }
+
+    private void refreshSinglePreviewCorrection(AutoFitTextureView textureView, String cameraKey) {
+        if (textureView == null) return;
+        textureView.post(() -> {
+            int viewWidth = textureView.getWidth();
+            int viewHeight = textureView.getHeight();
+            if (viewWidth <= 0 || viewHeight <= 0) return;
+
+            android.graphics.Matrix base = previewBaseTransforms.get(cameraKey);
+            android.graphics.Matrix matrix;
+            if (base != null) {
+                matrix = new android.graphics.Matrix(base);
+            } else {
+                matrix = new android.graphics.Matrix(); // identity
+            }
+            PreviewCorrection.postApply(matrix, appConfig, cameraKey, viewWidth, viewHeight);
+            textureView.setTransform(matrix);
+        });
+    }
+
+    /**
+     * 显示预览画面矫正悬浮窗
+     */
+    public void showPreviewCorrectionFloating() {
+        if (previewCorrectionFloatingWindow != null && previewCorrectionFloatingWindow.isShowing()) {
+            return;
+        }
+        previewCorrectionFloatingWindow = new PreviewCorrectionFloatingWindow(this);
+        previewCorrectionFloatingWindow.show();
+    }
+
+    /**
+     * 关闭预览画面矫正悬浮窗
+     */
+    public void dismissPreviewCorrectionFloating() {
+        if (previewCorrectionFloatingWindow != null) {
+            previewCorrectionFloatingWindow.dismiss();
+            previewCorrectionFloatingWindow = null;
+        }
     }
 
     /**
@@ -4613,6 +4698,9 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        
+        // 关闭预览矫正悬浮窗
+        dismissPreviewCorrectionFloating();
         
         // 清除静态实例引用
         if (instance == this) {

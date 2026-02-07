@@ -95,6 +95,10 @@ public class AppConfig {
     private static final String KEY_BLIND_SPOT_CORRECTION_PREFIX = "blind_spot_correction_";
     private static final String KEY_BLIND_SPOT_DISCLAIMER_ACCEPTED = "blind_spot_disclaimer_accepted";
     
+    // 预览画面矫正配置
+    private static final String KEY_PREVIEW_CORRECTION_ENABLED = "preview_correction_enabled";
+    private static final String KEY_PREVIEW_CORRECTION_PREFIX = "preview_correction_";
+
     // 时间角标配置
     private static final String KEY_TIMESTAMP_WATERMARK_ENABLED = "timestamp_watermark_enabled";  // 时间角标开关
     
@@ -1520,6 +1524,82 @@ public class AppConfig {
                 .putFloat(getBlindSpotCorrectionKey(cameraPos, "translate_x"), 0.0f)
                 .putFloat(getBlindSpotCorrectionKey(cameraPos, "translate_y"), 0.0f)
                 .apply();
+    }
+
+    // ==================== 预览画面矫正配置相关方法 ====================
+
+    /**
+     * 设置预览画面矫正开关
+     */
+    public void setPreviewCorrectionEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_PREVIEW_CORRECTION_ENABLED, enabled).apply();
+        AppLog.d(TAG, "预览画面矫正设置: " + (enabled ? "启用" : "禁用"));
+    }
+
+    /**
+     * 获取预览画面矫正开关
+     */
+    public boolean isPreviewCorrectionEnabled() {
+        return prefs.getBoolean(KEY_PREVIEW_CORRECTION_ENABLED, false);
+    }
+
+    private String getPreviewCorrectionKey(String cameraPos, String suffix) {
+        return KEY_PREVIEW_CORRECTION_PREFIX + cameraPos + "_" + suffix;
+    }
+
+    public void setPreviewCorrectionScaleX(String cameraPos, float scaleX) {
+        prefs.edit().putFloat(getPreviewCorrectionKey(cameraPos, "scale_x"), scaleX).apply();
+    }
+
+    public void setPreviewCorrectionScaleY(String cameraPos, float scaleY) {
+        prefs.edit().putFloat(getPreviewCorrectionKey(cameraPos, "scale_y"), scaleY).apply();
+    }
+
+    public void setPreviewCorrectionTranslateX(String cameraPos, float translateX) {
+        prefs.edit().putFloat(getPreviewCorrectionKey(cameraPos, "translate_x"), translateX).apply();
+    }
+
+    public void setPreviewCorrectionTranslateY(String cameraPos, float translateY) {
+        prefs.edit().putFloat(getPreviewCorrectionKey(cameraPos, "translate_y"), translateY).apply();
+    }
+
+    public float getPreviewCorrectionScaleX(String cameraPos) {
+        return prefs.getFloat(getPreviewCorrectionKey(cameraPos, "scale_x"), 1.0f);
+    }
+
+    public float getPreviewCorrectionScaleY(String cameraPos) {
+        return prefs.getFloat(getPreviewCorrectionKey(cameraPos, "scale_y"), 1.0f);
+    }
+
+    public float getPreviewCorrectionTranslateX(String cameraPos) {
+        return prefs.getFloat(getPreviewCorrectionKey(cameraPos, "translate_x"), 0.0f);
+    }
+
+    public float getPreviewCorrectionTranslateY(String cameraPos) {
+        return prefs.getFloat(getPreviewCorrectionKey(cameraPos, "translate_y"), 0.0f);
+    }
+
+    /**
+     * 重置单路摄像头的预览矫正参数
+     */
+    public void resetPreviewCorrection(String cameraPos) {
+        prefs.edit()
+                .putFloat(getPreviewCorrectionKey(cameraPos, "scale_x"), 1.0f)
+                .putFloat(getPreviewCorrectionKey(cameraPos, "scale_y"), 1.0f)
+                .putFloat(getPreviewCorrectionKey(cameraPos, "translate_x"), 0.0f)
+                .putFloat(getPreviewCorrectionKey(cameraPos, "translate_y"), 0.0f)
+                .apply();
+    }
+
+    /**
+     * 重置所有摄像头的预览矫正参数
+     */
+    public void resetAllPreviewCorrection() {
+        resetPreviewCorrection("front");
+        resetPreviewCorrection("back");
+        resetPreviewCorrection("left");
+        resetPreviewCorrection("right");
+        AppLog.d(TAG, "所有预览画面矫正参数已重置");
     }
 
     // ==================== 主屏悬浮窗配置相关方法 ====================

@@ -2,15 +2,24 @@ package com.kooo.evcam;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Logcat 实时日志查看工具
@@ -35,6 +44,7 @@ public class LogcatViewerActivity extends Activity {
         logTextView = findViewById(R.id.tv_log_content);
         scrollView = findViewById(R.id.scroll_log);
         Button btnClear = findViewById(R.id.btn_clear_log);
+        Button btnSave = findViewById(R.id.btn_save_log);
         Button btnClose = findViewById(R.id.btn_close_log);
         
         filterKeyword = getIntent().getStringExtra("filter_keyword");
@@ -43,9 +53,40 @@ public class LogcatViewerActivity extends Activity {
         setTitle("Logcat 调试: " + (filterKeyword.isEmpty() ? "全部" : filterKeyword));
         
         btnClear.setOnClickListener(v -> logTextView.setText(""));
+        btnSave.setOnClickListener(v -> saveLogToFile());
         btnClose.setOnClickListener(v -> finish());
         
         startReadingLogs();
+    }
+
+    private void saveLogToFile() {
+        String logContent = logTextView.getText().toString();
+        if (logContent.isEmpty()) {
+            Toast.makeText(this, "日志内容为空，无需保存", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        try {
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+            String fileName = "logcat_" + timestamp + ".txt";
+            
+            // 保存到 Download/EVCam_Log/ 目录（与设置界面debug模式日志保存位置一致）
+            File logDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS), "EVCam_Log");
+            if (!logDir.exists()) {
+                logDir.mkdirs();
+            }
+            
+            File logFile = new File(logDir, fileName);
+            try (OutputStreamWriter writer = new OutputStreamWriter(
+                    new FileOutputStream(logFile), StandardCharsets.UTF_8)) {
+                writer.write(logContent);
+            }
+            
+            Toast.makeText(this, "日志已保存: " + logFile.getAbsolutePath(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(this, "保存失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
 
     private void startReadingLogs() {

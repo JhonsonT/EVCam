@@ -42,7 +42,6 @@ public class BlindSpotSettingsFragment extends Fragment {
     private SwitchMaterial mockFloatingSwitch;
     private SwitchMaterial blindSpotCorrectionSwitch;
     private Button adjustBlindSpotCorrectionButton;
-    private Button saveButton;
     private Button logcatDebugButton;
     private android.widget.EditText logFilterEditText;
     private Button menuButton;
@@ -90,7 +89,6 @@ public class BlindSpotSettingsFragment extends Fragment {
         blindSpotCorrectionSwitch = view.findViewById(R.id.switch_blind_spot_correction);
         adjustBlindSpotCorrectionButton = view.findViewById(R.id.btn_adjust_blind_spot_correction);
         
-        saveButton = view.findViewById(R.id.btn_save_apply);
         logcatDebugButton = view.findViewById(R.id.btn_logcat_debug);
         logFilterEditText = view.findViewById(R.id.et_log_filter);
         menuButton = view.findViewById(R.id.btn_menu);
@@ -165,7 +163,10 @@ public class BlindSpotSettingsFragment extends Fragment {
                 turnSignalLinkageSwitch.setChecked(false);
                 Toast.makeText(requireContext(), "请先授予悬浮窗权限", Toast.LENGTH_SHORT).show();
                 WakeUpHelper.requestOverlayPermission(requireContext());
+                return;
             }
+            appConfig.setTurnSignalLinkageEnabled(isChecked);
+            BlindSpotService.update(requireContext());
         });
 
         turnSignalTimeoutSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -178,7 +179,10 @@ public class BlindSpotSettingsFragment extends Fragment {
             public void onStartTrackingTouch(SeekBar seekBar) {}
 
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                appConfig.setTurnSignalTimeout(seekBar.getProgress());
+                BlindSpotService.update(requireContext());
+            }
         });
 
         android.text.TextWatcher turnSignalLogWatcher = new android.text.TextWatcher() {
@@ -208,7 +212,10 @@ public class BlindSpotSettingsFragment extends Fragment {
                 secondaryBlindSpotSwitch.setChecked(false);
                 Toast.makeText(requireContext(), "请先授予悬浮窗权限", Toast.LENGTH_SHORT).show();
                 WakeUpHelper.requestOverlayPermission(requireContext());
+                return;
             }
+            appConfig.setSecondaryDisplayEnabled(isChecked);
+            BlindSpotService.update(requireContext());
         });
 
         mockFloatingSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -253,12 +260,25 @@ public class BlindSpotSettingsFragment extends Fragment {
             transaction.commit();
         });
 
-        saveButton.setOnClickListener(v -> saveAndApply());
-
         logcatDebugButton.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(requireContext(), LogcatViewerActivity.class);
-            intent.putExtra("filter_keyword", logFilterEditText.getText().toString());
-            startActivity(intent);
+            String keyword = logFilterEditText.getText().toString().trim();
+            if (keyword.isEmpty()) {
+                // 没有输入关键词时弹窗提示
+                new android.app.AlertDialog.Builder(requireContext())
+                    .setTitle("提示")
+                    .setMessage("未输入过滤关键字，日志量可能很大，可能导致界面卡顿。\n\n建议输入关键字进行过滤，是否继续？")
+                    .setPositiveButton("继续打开", (dialog, which) -> {
+                        android.content.Intent intent = new android.content.Intent(requireContext(), LogcatViewerActivity.class);
+                        intent.putExtra("filter_keyword", "");
+                        startActivity(intent);
+                    })
+                    .setNegativeButton("返回输入", null)
+                    .show();
+            } else {
+                android.content.Intent intent = new android.content.Intent(requireContext(), LogcatViewerActivity.class);
+                intent.putExtra("filter_keyword", keyword);
+                startActivity(intent);
+            }
         });
 
         menuButton.setOnClickListener(v -> {
@@ -282,18 +302,4 @@ public class BlindSpotSettingsFragment extends Fragment {
         new BlindSpotDisclaimerDialogFragment().show(getChildFragmentManager(), "blind_spot_disclaimer");
     }
 
-    private void saveAndApply() {
-        // 转向灯联动
-        appConfig.setTurnSignalLinkageEnabled(turnSignalLinkageSwitch.isChecked());
-        appConfig.setTurnSignalTimeout(turnSignalTimeoutSeekBar.getProgress());
-
-        appConfig.setSecondaryDisplayEnabled(secondaryBlindSpotSwitch.isChecked());
-
-        appConfig.setBlindSpotCorrectionEnabled(blindSpotCorrectionSwitch.isChecked());
-
-        Toast.makeText(requireContext(), "配置已保存并应用", Toast.LENGTH_SHORT).show();
-        
-        // 触发服务更新
-        BlindSpotService.update(requireContext());
-    }
 }
