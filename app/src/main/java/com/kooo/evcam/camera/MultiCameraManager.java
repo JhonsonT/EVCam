@@ -327,29 +327,29 @@ public class MultiCameraManager {
         // 清空之前的摄像头实例
         cameras.clear();
         
-        // 根据参数创建摄像头实例（支持 null 参数以跳过某些摄像头）
-        if (frontId != null && frontView != null) {
+        // 根据参数创建摄像头实例（支持 null TextureView 用于后台初始化）
+        if (frontId != null) {
             SingleCamera frontCamera = new SingleCamera(context, frontId, frontView);
             frontCamera.setCameraPosition("front");
             cameras.put("front", frontCamera);
             AppLog.d(TAG, "初始化前摄像头: ID=" + frontId);
         }
 
-        if (backId != null && backView != null) {
+        if (backId != null) {
             SingleCamera backCamera = new SingleCamera(context, backId, backView);
             backCamera.setCameraPosition("back");
             cameras.put("back", backCamera);
             AppLog.d(TAG, "初始化后摄像头: ID=" + backId);
         }
 
-        if (leftId != null && leftView != null) {
+        if (leftId != null) {
             SingleCamera leftCamera = new SingleCamera(context, leftId, leftView);
             leftCamera.setCameraPosition("left");
             cameras.put("left", leftCamera);
             AppLog.d(TAG, "初始化左摄像头: ID=" + leftId);
         }
 
-        if (rightId != null && rightView != null) {
+        if (rightId != null) {
             SingleCamera rightCamera = new SingleCamera(context, rightId, rightView);
             rightCamera.setCameraPosition("right");
             cameras.put("right", rightCamera);

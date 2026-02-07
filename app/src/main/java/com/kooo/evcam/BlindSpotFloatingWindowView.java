@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.kooo.evcam.camera.CameraManagerHolder;
 import com.kooo.evcam.camera.MultiCameraManager;
 import com.kooo.evcam.camera.SingleCamera;
 
@@ -105,16 +106,13 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture surface, int width, int height) {
-                MainActivity mainActivity = MainActivity.getInstance();
-                if (mainActivity != null) {
-                    MultiCameraManager cameraManager = mainActivity.getCameraManager();
-                    if (cameraManager != null) {
-                        SingleCamera camera = cameraManager.getCamera(cameraPos);
-                        if (camera != null) {
-                            Size previewSize = camera.getPreviewSize();
-                            if (previewSize != null) {
-                                surface.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
-                            }
+                MultiCameraManager cm = CameraManagerHolder.getInstance().getCameraManager();
+                if (cm != null) {
+                    SingleCamera camera = cm.getCamera(cameraPos);
+                    if (camera != null) {
+                        Size previewSize = camera.getPreviewSize();
+                        if (previewSize != null) {
+                            surface.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
                         }
                     }
                 }
@@ -221,10 +219,38 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
         return super.onTouchEvent(event);
     }
 
+    /**
+     * 仅设置摄像头位置（不触发预览切换）。
+     * 用于 show() 前设定初始摄像头，避免 onSurfaceTextureAvailable 使用默认值。
+     */
+    public void setCameraPos(String cameraPos) {
+        this.cameraPos = cameraPos;
+    }
+
     public void setCamera(String cameraPos) {
         this.cameraPos = cameraPos;
         stopCameraPreview(true); // 切换摄像头时使用紧急模式清除旧surface
         applyTransformNow();
+
+        // 更新 SurfaceTexture 的 buffer size 以匹配新摄像头的预览分辨率
+        // 避免 Surface 尺寸与摄像头配置不匹配导致 session 创建失败
+        if (textureView.isAvailable()) {
+            android.graphics.SurfaceTexture st = textureView.getSurfaceTexture();
+            if (st != null) {
+                MultiCameraManager cm = CameraManagerHolder.getInstance().getCameraManager();
+                if (cm != null) {
+                    SingleCamera camera = cm.getCamera(cameraPos);
+                    if (camera != null) {
+                        Size previewSize = camera.getPreviewSize();
+                        if (previewSize != null) {
+                            st.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
+                            AppLog.d(TAG, "Updated buffer size to " + previewSize.getWidth() + "x" + previewSize.getHeight() + " for " + cameraPos);
+                        }
+                    }
+                }
+            }
+        }
+
         if (textureView.isAvailable() && cachedSurface != null && cachedSurface.isValid()) {
             startCameraPreview(cachedSurface, true);
         } else {
@@ -237,15 +263,13 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
     }
 
     private void startCameraPreview(Surface surface, boolean urgent) {
-        MainActivity mainActivity = MainActivity.getInstance();
-        if (mainActivity == null) {
-            scheduleRetryBind();
-            return;
-        }
-        MultiCameraManager cameraManager = mainActivity.getCameraManager();
+        MultiCameraManager cameraManager = CameraManagerHolder.getInstance().getCameraManager();
         if (cameraManager == null) {
-            scheduleRetryBind();
-            return;
+            cameraManager = CameraManagerHolder.getInstance().getOrInit(getContext());
+            if (cameraManager == null) {
+                scheduleRetryBind();
+                return;
+            }
         }
 
         currentCamera = cameraManager.getCamera(cameraPos);
@@ -254,7 +278,21 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
             return;
         }
         currentCamera.setMainFloatingSurface(surface);
-        currentCamera.recreateSession(urgent);
+
+        // 如果摄像头硬件还未打开（后台初始化时不打开），先打开
+        if (!currentCamera.isCameraOpened()) {
+            AppLog.d(TAG, "Camera not opened yet, opening now for " + cameraPos);
+            // 先打开当前需要的摄像头
+            currentCamera.openCamera();
+            // 延迟打开其他摄像头
+            final MultiCameraManager cm = cameraManager;
+            mainHandler.postDelayed(() -> {
+                AppLog.d(TAG, "Deferred opening remaining cameras");
+                cm.openAllCameras();
+            }, 500);
+        } else {
+            currentCamera.recreateSession(urgent);
+        }
         cancelRetryBind();
     }
 
@@ -264,6 +302,8 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
 
     private void stopCameraPreview(boolean urgent) {
         if (currentCamera != null) {
+            // 立即停止推帧，防止 Surface 销毁后 queueBuffer abandoned 刷屏
+            currentCamera.stopRepeatingNow();
             currentCamera.setMainFloatingSurface(null);
             currentCamera.recreateSession(urgent);
             currentCamera = null;

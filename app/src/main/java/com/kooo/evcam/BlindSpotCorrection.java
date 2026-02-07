@@ -28,17 +28,14 @@ public final class BlindSpotCorrection {
             // 获取预览尺寸
             int previewW = 0, previewH = 0;
             if (cameraPos != null) {
-                MainActivity mainActivity = MainActivity.getInstance();
-                if (mainActivity != null) {
-                    com.kooo.evcam.camera.MultiCameraManager cm = mainActivity.getCameraManager();
-                    if (cm != null) {
-                        com.kooo.evcam.camera.SingleCamera camera = cm.getCamera(cameraPos);
-                        if (camera != null) {
-                            android.util.Size previewSize = camera.getPreviewSize();
-                            if (previewSize != null) {
-                                previewW = previewSize.getWidth();
-                                previewH = previewSize.getHeight();
-                            }
+                com.kooo.evcam.camera.MultiCameraManager cm = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+                if (cm != null) {
+                    com.kooo.evcam.camera.SingleCamera camera = cm.getCamera(cameraPos);
+                    if (camera != null) {
+                        android.util.Size previewSize = camera.getPreviewSize();
+                        if (previewSize != null) {
+                            previewW = previewSize.getWidth();
+                            previewH = previewSize.getHeight();
                         }
                     }
                 }

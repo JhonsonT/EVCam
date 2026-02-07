@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.kooo.evcam.camera.CameraManagerHolder;
 import com.kooo.evcam.camera.MultiCameraManager;
 import com.kooo.evcam.camera.SingleCamera;
 
@@ -75,16 +76,13 @@ public class MainFloatingWindowView extends FrameLayout {
             @Override
             public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture surface, int width, int height) {
                 String cameraPos = desiredCameraPos != null ? desiredCameraPos : appConfig.getMainFloatingCamera();
-                MainActivity mainActivity = MainActivity.getInstance();
-                if (mainActivity != null) {
-                    MultiCameraManager cameraManager = mainActivity.getCameraManager();
-                    if (cameraManager != null) {
-                        SingleCamera camera = cameraManager.getCamera(cameraPos);
-                        if (camera != null) {
-                            Size previewSize = camera.getPreviewSize();
-                            if (previewSize != null) {
-                                surface.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
-                            }
+                MultiCameraManager cm = CameraManagerHolder.getInstance().getCameraManager();
+                if (cm != null) {
+                    SingleCamera camera = cm.getCamera(cameraPos);
+                    if (camera != null) {
+                        Size previewSize = camera.getPreviewSize();
+                        if (previewSize != null) {
+                            surface.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
                         }
                     }
                 }
@@ -207,16 +205,14 @@ public class MainFloatingWindowView extends FrameLayout {
             return;
         }
         String cameraPos = desiredCameraPos != null ? desiredCameraPos : appConfig.getMainFloatingCamera();
-        MainActivity mainActivity = MainActivity.getInstance();
-        if (mainActivity == null) {
-            scheduleRetryBind();
-            return;
-        }
-
-        MultiCameraManager cameraManager = mainActivity.getCameraManager();
+        MultiCameraManager cameraManager = CameraManagerHolder.getInstance().getCameraManager();
         if (cameraManager == null) {
-            scheduleRetryBind();
-            return;
+            // Holder 只初始化了对象但可能还没被调用过 getOrInit
+            cameraManager = CameraManagerHolder.getInstance().getOrInit(getContext());
+            if (cameraManager == null) {
+                scheduleRetryBind();
+                return;
+            }
         }
 
         currentCamera = cameraManager.getCamera(cameraPos);
@@ -227,7 +223,22 @@ public class MainFloatingWindowView extends FrameLayout {
 
         cancelRetryBind();
         currentCamera.setMainFloatingSurface(surface);
-        currentCamera.recreateSession(urgent);
+
+        // 如果摄像头硬件还未打开（后台初始化时不打开），先打开
+        if (!currentCamera.isCameraOpened()) {
+            AppLog.d(TAG, "Camera not opened yet, opening now for " + cameraPos);
+            // 先打开当前需要的摄像头（优先保证能显示）
+            currentCamera.openCamera();
+            // openCamera 是异步的，打开成功后会自动调用 createCameraPreviewSession
+            // 延迟一小段时间后再打开其他摄像头，避免批量打开时被系统 CAMERA_DISABLED 拦截
+            final MultiCameraManager cm = cameraManager;
+            mainHandler.postDelayed(() -> {
+                AppLog.d(TAG, "Deferred opening remaining cameras");
+                cm.openAllCameras(); // 已打开的会跳过（isCameraOpened guard）
+            }, 500);
+        } else {
+            currentCamera.recreateSession(urgent);
+        }
     }
 
     private void stopCameraPreview() {
@@ -236,6 +247,8 @@ public class MainFloatingWindowView extends FrameLayout {
 
     private void stopCameraPreview(boolean urgent) {
         if (currentCamera != null) {
+            // 立即停止推帧，防止 Surface 销毁后 queueBuffer abandoned 刷屏
+            currentCamera.stopRepeatingNow();
             currentCamera.setMainFloatingSurface(null);
             currentCamera.recreateSession(urgent);
             currentCamera = null;
@@ -302,12 +315,7 @@ public class MainFloatingWindowView extends FrameLayout {
     public void updateCamera(String cameraPos, boolean urgent) {
         desiredCameraPos = cameraPos;
         if (urgent) urgentPending = true; // 保留紧急标记，供 SurfaceTexture 就绪回调使用
-        MainActivity mainActivity = MainActivity.getInstance();
-        if (mainActivity == null) {
-            scheduleRetryBind();
-            return;
-        }
-        MultiCameraManager cameraManager = mainActivity.getCameraManager();
+        MultiCameraManager cameraManager = CameraManagerHolder.getInstance().getCameraManager();
         if (cameraManager == null) {
             scheduleRetryBind();
             return;

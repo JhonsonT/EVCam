@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     private MultiCameraManager cameraManager;
 
     public MultiCameraManager getCameraManager() {
+        if (cameraManager == null) {
+            cameraManager = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+        }
         return cameraManager;
     }
     private ImageAdjustManager imageAdjustManager;  // 亮度/降噪调节管理器
@@ -2305,8 +2308,29 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             return;
         }
 
+        // 检查 Holder 中是否已有后台初始化的实例
+        com.kooo.evcam.camera.CameraManagerHolder holder = com.kooo.evcam.camera.CameraManagerHolder.getInstance();
+        MultiCameraManager existingManager = holder.getCameraManager();
+        if (existingManager != null) {
+            // 后台已初始化，复用实例并绑定 TextureView
+            AppLog.d(TAG, "复用后台已初始化的摄像头管理器，绑定 TextureView");
+            cameraManager = existingManager;
+            cameraManager.updatePreviewTextureViews(textureFront, textureBack, textureLeft, textureRight);
+            // 初始化亮度/降噪调节管理器
+            imageAdjustManager = new ImageAdjustManager(this);
+            registerCamerasToImageAdjustManager();
+            initHeartbeatManager();
+            AppLog.d(TAG, "Camera initialized with " + configuredCameraCount + " cameras (reused from background)");
+            checkResumeRecordingAfterRecreate();
+            checkAutoStartRecording();
+            startAutoRecordingCheck();
+            return;
+        }
+
         cameraManager = new MultiCameraManager(this);
         cameraManager.setMaxOpenCameras(configuredCameraCount);
+        // 注册到全局 Holder
+        holder.setCameraManager(cameraManager);
         
         // 初始化亮度/降噪调节管理器
         imageAdjustManager = new ImageAdjustManager(this);
@@ -3818,6 +3842,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
         if (cameraManager != null) {
             cameraManager.release();
         }
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().release();
         
         // 保存日志（System.exit 会跳过 onDestroy，所以这里手动保存）
         AppLog.saveToPersistentLog(this);

@@ -89,9 +89,9 @@ public class BlindSpotDisclaimerDialogFragment extends DialogFragment {
 
         int dialogW, dialogH;
         if (isLandscape) {
-            // Landscape (car displays): use most of height with margins, limit width
+            // Landscape (car displays): use most of height with margins, width ~85%
             dialogH = Math.min((int) (screenH * 0.88), (int) (600 * density));
-            dialogW = Math.min((int) (screenW * 0.55), (int) (480 * density));
+            dialogW = (int) (screenW * 0.85);
         } else {
             // Portrait: cap at original content size (~590dp) to keep original look
             int originalContentPx = (int) (590 * density);

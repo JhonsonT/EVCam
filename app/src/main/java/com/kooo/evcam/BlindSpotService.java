@@ -118,17 +118,8 @@ public class BlindSpotService extends Service {
         currentSignalCamera = cameraPos;
         AppLog.d(TAG, "转向灯触发摄像头: " + cameraPos);
 
-        // 确保 MainActivity 已启动（摄像头由其管理，未启动时悬浮窗会黑屏）
-        if (MainActivity.getInstance() == null) {
-            AppLog.d(TAG, "MainActivity 未初始化，正在启动以初始化摄像头...");
-            try {
-                Intent launchIntent = new Intent(this, MainActivity.class);
-                launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(launchIntent);
-            } catch (Exception e) {
-                AppLog.e(TAG, "启动 MainActivity 失败: " + e.getMessage());
-            }
-        }
+        // 确保摄像头已初始化（通过全局 Holder，不依赖 MainActivity）
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
 
         boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
 
@@ -159,6 +150,7 @@ public class BlindSpotService extends Service {
                 dedicatedBlindSpotWindow = null;
             }
             dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
+            dedicatedBlindSpotWindow.setCameraPos(cameraPos); // 先设置摄像头位置，再 show
             dedicatedBlindSpotWindow.show();
             dedicatedBlindSpotWindow.setCamera(cameraPos);
         }
@@ -175,12 +167,7 @@ public class BlindSpotService extends Service {
     private void startSecondaryCameraPreviewDirectly(String cameraPos) {
         secondaryDesiredCameraPos = cameraPos;
         BlindSpotCorrection.apply(secondaryTextureView, appConfig, cameraPos, appConfig.getSecondaryDisplayRotation());
-        MainActivity mainActivity = MainActivity.getInstance();
-        if (mainActivity == null) {
-            scheduleSecondaryRetry(cameraPos);
-            return;
-        }
-        MultiCameraManager cameraManager = mainActivity.getCameraManager();
+        MultiCameraManager cameraManager = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
         if (cameraManager == null) {
             scheduleSecondaryRetry(cameraPos);
             return;
@@ -201,7 +188,8 @@ public class BlindSpotService extends Service {
         }
 
         cancelSecondaryRetry();
-        if (secondaryCamera != null && secondaryCamera != newCamera) {
+        boolean isSwitchingCamera = secondaryCamera != null && secondaryCamera != newCamera;
+        if (isSwitchingCamera) {
             stopSecondaryCameraPreview();
         }
         secondaryCamera = newCamera;
@@ -218,9 +206,28 @@ public class BlindSpotService extends Service {
                 }
                 secondaryCachedSurface = new Surface(secondaryTextureView.getSurfaceTexture());
             }
-            AppLog.d(TAG, "副屏绑定新 Surface 并重建 Session: " + cameraPos);
-            secondaryCamera.setSecondaryDisplaySurface(secondaryCachedSurface);
-            secondaryCamera.recreateSession(true); // 紧急模式，最小化延迟
+            
+            if (isSwitchingCamera) {
+                // 切换摄像头：延迟绑定副屏 Surface，等旧 session 完全关闭释放 Surface
+                // 主悬浮窗会先显示（不含副屏 Surface），副屏稍后加入，避免 "connect: already connected"
+                AppLog.d(TAG, "副屏延迟绑定 Surface（等待旧 session 关闭）: " + cameraPos);
+                final SingleCamera delayedCamera = secondaryCamera;
+                final Surface delayedSurface = secondaryCachedSurface;
+                hideHandler.postDelayed(() -> {
+                    // 确认仍然是同一个摄像头和 Surface（防止快速切换导致的过期回调）
+                    if (delayedCamera == secondaryCamera && delayedSurface == secondaryCachedSurface
+                            && delayedSurface != null && delayedSurface.isValid()) {
+                        AppLog.d(TAG, "副屏绑定 Surface 并重建 Session: " + cameraPos);
+                        delayedCamera.setSecondaryDisplaySurface(delayedSurface);
+                        delayedCamera.recreateSession(false);
+                    }
+                }, 300);
+            } else {
+                // 同一个摄像头或首次绑定：立即设置
+                AppLog.d(TAG, "副屏绑定新 Surface 并重建 Session: " + cameraPos);
+                secondaryCamera.setSecondaryDisplaySurface(secondaryCachedSurface);
+                secondaryCamera.recreateSession(false);
+            }
             BlindSpotCorrection.apply(secondaryTextureView, appConfig, cameraPos, appConfig.getSecondaryDisplayRotation());
         } else {
             AppLog.d(TAG, "副屏 TextureView 尚未就绪，暂不绑定 Surface: " + cameraPos);
@@ -343,6 +350,7 @@ public class BlindSpotService extends Service {
         if (previewBlindSpotWindow == null) {
             previewBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
             previewBlindSpotWindow.enableAdjustPreviewMode();
+            previewBlindSpotWindow.setCameraPos(cameraPos); // 先设置摄像头位置，再 show
             previewBlindSpotWindow.show();
         }
         previewBlindSpotWindow.setCamera(cameraPos);
@@ -612,6 +620,16 @@ public class BlindSpotService extends Service {
 
             @Override
             public boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture surface) {
+                // 保存当前 TextureView 的引用，用于判断回调是否来自旧的已替换的 TextureView
+                final TextureView currentTv = secondaryTextureView;
+                if (currentTv != null) {
+                    android.graphics.SurfaceTexture currentSt = currentTv.getSurfaceTexture();
+                    // 如果当前副屏的 SurfaceTexture 不是被销毁的那个，说明是旧的 TextureView
+                    if (currentSt != null && currentSt != surface) {
+                        AppLog.d(TAG, "Ignoring old secondary TextureView destroy callback");
+                        return true;
+                    }
+                }
                 stopSecondaryCameraPreview();
                 if (secondaryCachedSurface != null) {
                     secondaryCachedSurface.release();
@@ -656,6 +674,9 @@ public class BlindSpotService extends Service {
 
     private void stopSecondaryCameraPreview() {
         if (secondaryCamera != null) {
+            // 立即停止推帧并关闭 session，确保 Surface 被释放
+            // 这样新摄像头才能使用同一个 Surface，避免 "connect: already connected"
+            secondaryCamera.stopRepeatingNow();
             secondaryCamera.setSecondaryDisplaySurface(null);
             secondaryCamera.recreateSession();
             secondaryCamera = null;

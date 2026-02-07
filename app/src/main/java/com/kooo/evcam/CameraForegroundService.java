@@ -250,14 +250,11 @@ public class CameraForegroundService extends Service {
             @Override
             public void run() {
                 try {
-                    MainActivity mainActivity = MainActivity.getInstance();
-                    if (mainActivity != null) {
-                        MultiCameraManager cameraManager = mainActivity.getCameraManager();
-                        if (cameraManager != null) {
-                            int repaired = cameraManager.checkAndRepairCameras();
-                            if (repaired > 0) {
-                                AppLog.w(TAG, "Camera repair triggered for " + repaired + " cameras");
-                            }
+                    com.kooo.evcam.camera.MultiCameraManager cameraManager = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+                    if (cameraManager != null) {
+                        int repaired = cameraManager.checkAndRepairCameras();
+                        if (repaired > 0) {
+                            AppLog.w(TAG, "Camera repair triggered for " + repaired + " cameras");
                         }
                     }
                 } catch (Exception e) {

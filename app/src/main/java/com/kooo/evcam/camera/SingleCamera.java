@@ -112,6 +112,8 @@ public class SingleCamera {
     private boolean isConfiguring = false; // 新增：标记是否正在配置中
     private boolean isPendingReconfiguration = false; // 新增：标记是否有待处理的配置请求
     private boolean isSessionClosing = false; // 新增：标记 Session 是否正在关闭中
+    private int configFailRetryCount = 0; // session 配置失败重试计数
+    private static final int MAX_CONFIG_FAIL_RETRIES = 3; // 最大重试次数
     private final Object sessionLock = new Object(); // 新增：用于同步 Session 操作
 
     public SingleCamera(Context context, String cameraId, TextureView textureView) {
@@ -246,6 +248,13 @@ public class SingleCamera {
 
     public String getCameraId() {
         return cameraId;
+    }
+
+    /**
+     * 摄像头硬件是否已打开
+     */
+    public boolean isCameraOpened() {
+        return cameraDevice != null;
     }
 
     /**
@@ -647,6 +656,12 @@ public class SingleCamera {
         // 如果不是主实例，不执行打开操作
         if (!isPrimaryInstance) {
             AppLog.d(TAG, "Camera " + cameraId + " (" + cameraPosition + ") is SECONDARY instance, skipping openCamera");
+            return;
+        }
+
+        // 已经打开，不重复打开
+        if (cameraDevice != null) {
+            AppLog.d(TAG, "Camera " + cameraId + " already opened, skipping openCamera");
             return;
         }
         
@@ -1102,6 +1117,29 @@ public class SingleCamera {
                 }
             }
             
+            // 检查是否有可用的输出 Surface（后台初始化时可能全部为 null）
+            boolean hasAnySurface = (surface != null && surface.isValid())
+                    || (mainFloatingSurface != null && mainFloatingSurface.isValid())
+                    || (secondaryDisplaySurface != null && secondaryDisplaySurface.isValid())
+                    || (recordSurface != null && recordSurface.isValid());
+            if (!hasAnySurface) {
+                AppLog.d(TAG, "Camera " + cameraId + " no available surfaces, skipping session creation (waiting for surface)");
+                // 关闭旧 session，防止继续推帧到已销毁的 Surface（queueBuffer abandoned）
+                if (captureSession != null) {
+                    try {
+                        captureSession.close();
+                    } catch (Exception e) {
+                        // 忽略
+                    }
+                    captureSession = null;
+                    AppLog.d(TAG, "Camera " + cameraId + " closed old session (no surfaces)");
+                }
+                synchronized (sessionLock) {
+                    isConfiguring = false;
+                }
+                return;
+            }
+
             AppLog.d(TAG, "Camera " + cameraId + " Creating capture request...");
             int template = (recordSurface != null) ? CameraDevice.TEMPLATE_RECORD : CameraDevice.TEMPLATE_PREVIEW;
             final CaptureRequest.Builder previewRequestBuilder = cameraDevice.createCaptureRequest(template);
@@ -1228,6 +1266,7 @@ public class SingleCamera {
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     AppLog.d(TAG, "Camera " + cameraId + " Session configured!");
+                    configFailRetryCount = 0; // 成功，重置重试计数
                     
                     boolean pending;
                     synchronized (sessionLock) {
@@ -1321,8 +1360,9 @@ public class SingleCamera {
                         return;
                     }
                     
-                    // 重试逻辑... (保持原有的重试逻辑，但简化一下)
+                    // 重试逻辑
                     if (recordSurface != null) {
+                        // 录制中：丢弃可选 Surface 后重试
                         boolean droppedOptionalSurface = false;
                         if (secondaryDisplaySurface != null) {
                             secondaryDisplaySurface = null;
@@ -1343,8 +1383,36 @@ public class SingleCamera {
                                 if (cameraDevice != null) createCameraPreviewSession();
                             }, 500);
                         }
-                    } else if (callback != null) {
-                        callback.onCameraError(cameraId, -3);
+                    } else {
+                        configFailRetryCount++;
+                        if (configFailRetryCount <= MAX_CONFIG_FAIL_RETRIES) {
+                            // 可能是 Surface 正在从其他摄像头转移（connect: already connected），
+                            // 短暂延迟后重试，等待旧 session 释放 Surface
+                            AppLog.w(TAG, "Camera " + cameraId + " session config failed, retry " + configFailRetryCount + "/" + MAX_CONFIG_FAIL_RETRIES + " in 200ms...");
+                            if (backgroundHandler != null) {
+                                backgroundHandler.postDelayed(() -> {
+                                    if (cameraDevice != null) {
+                                        AppLog.d(TAG, "Camera " + cameraId + " retrying session after config failure");
+                                        createCameraPreviewSession();
+                                    }
+                                }, 200);
+                            }
+                        } else {
+                            // 重试耗尽，丢弃副屏 Surface 后尝试只用主 Surface
+                            AppLog.e(TAG, "Camera " + cameraId + " config retries exhausted (" + configFailRetryCount + "), dropping secondary display surface");
+                            configFailRetryCount = 0;
+                            if (secondaryDisplaySurface != null) {
+                                secondaryDisplaySurface = null;
+                                if (backgroundHandler != null) {
+                                    backgroundHandler.postDelayed(() -> {
+                                        if (cameraDevice != null) createCameraPreviewSession();
+                                    }, 100);
+                                }
+                            }
+                        }
+                        if (callback != null) {
+                            callback.onCameraError(cameraId, -3);
+                        }
                     }
                 }
                 @Override
@@ -1443,6 +1511,21 @@ public class SingleCamera {
      * 增加防抖处理，避免频繁重建导致黑屏
      */
     private final Runnable recreateSessionRunnable = this::createCameraPreviewSession;
+
+    /**
+     * 立即停止当前会话的 repeating request，防止帧继续推到即将销毁的 Surface。
+     * 用于悬浮窗 dismiss 前调用，避免 queueBuffer: BufferQueue has been abandoned 刷屏。
+     */
+    public void stopRepeatingNow() {
+        if (captureSession != null) {
+            try {
+                captureSession.stopRepeating();
+                AppLog.d(TAG, "Camera " + cameraId + " stopRepeating (surface about to be removed)");
+            } catch (Exception e) {
+                // 忽略
+            }
+        }
+    }
 
     public void recreateSession() {
         recreateSession(false);

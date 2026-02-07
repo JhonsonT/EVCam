@@ -14,6 +14,8 @@
         android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@color/text_primary"
+        android:textAlignment="center"
+        android:gravity="center"
         android:layout_marginBottom="12dp" />
 
     <ScrollView
@@ -33,6 +35,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
+                android:textAlignment="center"
+                android:gravity="center"
                 android:lineSpacingExtra="4dp" />
 
             <ImageView
@@ -51,6 +55,8 @@
         android:text="请阅读后等待 20 秒"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
+        android:textAlignment="center"
+        android:gravity="center"
         android:layout_marginTop="12dp" />
 
     <Button
