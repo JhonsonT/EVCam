@@ -73,6 +73,7 @@ public class BlindSpotService extends Service {
 
     private void initSignalObserver() {
         signalObserver = new LogcatSignalObserver((line, data1) -> {
+            if (!appConfig.isBlindSpotGlobalEnabled()) return;
             if (!appConfig.isTurnSignalLinkageEnabled()) return;
 
             String leftKeyword = appConfig.getTurnSignalLeftTriggerLog();
@@ -350,6 +351,24 @@ public class BlindSpotService extends Service {
     }
 
     private void updateWindows() {
+        // 全局开关关闭时，清理所有窗口并停止服务（调整模式和预览模式除外）
+        if (!appConfig.isBlindSpotGlobalEnabled() && !isSecondaryAdjustMode && previewCameraPos == null) {
+            removeSecondaryView();
+            if (mainFloatingWindowView != null) {
+                mainFloatingWindowView.dismiss();
+                mainFloatingWindowView = null;
+            }
+            if (dedicatedBlindSpotWindow != null) {
+                dedicatedBlindSpotWindow.dismiss();
+                dedicatedBlindSpotWindow = null;
+            }
+            removeMockControlWindow();
+            currentSignalCamera = null;
+            isMainTempShown = false;
+            stopSelf();
+            return;
+        }
+
         updateSecondaryDisplay();
         updateMainFloatingWindow();
         updateMockControlWindow();

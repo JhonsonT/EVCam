@@ -50,6 +50,9 @@ public class AppConfig {
     // 录制状态显示配置
     private static final String KEY_RECORDING_STATS_ENABLED = "recording_stats_enabled";  // 录制状态显示开关
     
+    // 补盲功能全局开关
+    private static final String KEY_BLIND_SPOT_GLOBAL_ENABLED = "blind_spot_global_enabled";  // 补盲功能总开关
+    
     // 补盲选项配置 (原副屏显示)
     private static final String KEY_SECONDARY_DISPLAY_ENABLED = "secondary_display_enabled";  // 副屏显示开关
     private static final String KEY_SECONDARY_DISPLAY_CAMERA = "secondary_display_camera";    // 副屏显示的摄像头位置
@@ -1339,6 +1342,26 @@ public class AppConfig {
     public boolean isRecordingStatsEnabled() {
         // 默认开启录制状态显示
         return prefs.getBoolean(KEY_RECORDING_STATS_ENABLED, true);
+    }
+    
+    // ==================== 补盲功能全局开关 ====================
+    
+    /**
+     * 设置补盲功能全局开关
+     * 关闭时，所有补盲子功能（转向灯联动、主屏悬浮窗、副屏显示、模拟按钮、画面矫正）均不生效
+     * @param enabled true 表示启用补盲功能
+     */
+    public void setBlindSpotGlobalEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_BLIND_SPOT_GLOBAL_ENABLED, enabled).apply();
+        AppLog.d(TAG, "补盲功能全局开关: " + (enabled ? "启用" : "禁用"));
+    }
+    
+    /**
+     * 获取补盲功能全局开关状态
+     * @return true 表示补盲功能已启用
+     */
+    public boolean isBlindSpotGlobalEnabled() {
+        return prefs.getBoolean(KEY_BLIND_SPOT_GLOBAL_ENABLED, false);
     }
     
     // ==================== 补盲选项配置相关方法 (原副屏显示) ====================

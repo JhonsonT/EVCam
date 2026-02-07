@@ -35,6 +35,8 @@ public class BlindSpotSettingsFragment extends Fragment {
     private EditText turnSignalLeftLogEditText;
     private EditText turnSignalRightLogEditText;
 
+    private SwitchMaterial blindSpotGlobalSwitch;
+    private android.widget.LinearLayout subFeaturesContainer;
     private SwitchMaterial secondaryBlindSpotSwitch;
     private Button adjustSecondaryBlindSpotWindowButton;
     private SwitchMaterial mockFloatingSwitch;
@@ -67,6 +69,10 @@ public class BlindSpotSettingsFragment extends Fragment {
     }
 
     private void initViews(View view) {
+        // 全局开关
+        blindSpotGlobalSwitch = view.findViewById(R.id.switch_blind_spot_global);
+        subFeaturesContainer = view.findViewById(R.id.blind_spot_sub_features_container);
+
         openLabButton = view.findViewById(R.id.btn_open_lab);
 
         // 转向灯联动
@@ -107,6 +113,11 @@ public class BlindSpotSettingsFragment extends Fragment {
     }
 
     private void loadSettings() {
+        // 全局开关
+        boolean globalEnabled = appConfig.isBlindSpotGlobalEnabled();
+        blindSpotGlobalSwitch.setChecked(globalEnabled);
+        updateSubFeaturesVisibility(globalEnabled);
+
         // 转向灯联动
         turnSignalLinkageSwitch.setChecked(appConfig.isTurnSignalLinkageEnabled());
         int timeout = appConfig.getTurnSignalTimeout();
@@ -122,7 +133,25 @@ public class BlindSpotSettingsFragment extends Fragment {
         blindSpotCorrectionSwitch.setChecked(appConfig.isBlindSpotCorrectionEnabled());
     }
 
+    private void updateSubFeaturesVisibility(boolean globalEnabled) {
+        // 全局开关关闭时，隐藏所有子功能区域
+        subFeaturesContainer.setVisibility(globalEnabled ? View.VISIBLE : View.GONE);
+    }
+
     private void setupListeners() {
+        // 全局开关
+        blindSpotGlobalSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            appConfig.setBlindSpotGlobalEnabled(isChecked);
+            updateSubFeaturesVisibility(isChecked);
+            if (!isChecked) {
+                // 关闭时，停止补盲服务
+                requireContext().stopService(new android.content.Intent(requireContext(), BlindSpotService.class));
+            } else {
+                // 开启时，如果有子功能已配置，启动服务
+                BlindSpotService.update(requireContext());
+            }
+        });
+
         openLabButton.setOnClickListener(v -> {
             if (getActivity() == null) return;
             androidx.fragment.app.FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();

@@ -62,6 +62,54 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- 补盲功能全局开关 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:background="@color/card_background"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="补盲功能总开关"
+                        android:textColor="@color/text_primary"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_blind_spot_global_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="关闭后所有补盲子功能将不生效"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_blind_spot_global"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+
+            <!-- 以下为子功能区域，受全局开关控制 -->
+            <LinearLayout
+                android:id="@+id/blind_spot_sub_features_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
             <!-- 实验室入口 -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -370,6 +418,8 @@
                     android:backgroundTint="@color/button_accent"
                     android:textColor="@color/white" />
             </LinearLayout>
+
+            </LinearLayout> <!-- end blind_spot_sub_features_container -->
 
             <!-- 保存按钮 -->
             <Button
