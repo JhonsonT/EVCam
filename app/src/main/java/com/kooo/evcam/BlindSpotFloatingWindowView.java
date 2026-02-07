@@ -391,14 +391,14 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
     }
 
     public void applyTransformNow() {
-        // 矫正旋转 90/270 时，悬浮窗宽高互换，让画面自然填满不裁切
+        // 矫正旋转更接近竖屏时，悬浮窗宽高互换，让画面自然填满不裁切
         int correctionRotation = 0;
         if (appConfig.isBlindSpotCorrectionEnabled() && cameraPos != null) {
             correctionRotation = appConfig.getBlindSpotCorrectionRotation(cameraPos);
         }
         int baseW = appConfig.getTurnSignalFloatingWidth();
         int baseH = appConfig.getTurnSignalFloatingHeight();
-        boolean shouldSwap = (correctionRotation == 90 || correctionRotation == 270);
+        boolean shouldSwap = BlindSpotCorrection.isCloserToPortrait(correctionRotation);
         isCurrentlySwapped = shouldSwap;
         int targetW = shouldSwap ? baseH : baseW;
         int targetH = shouldSwap ? baseW : baseH;
