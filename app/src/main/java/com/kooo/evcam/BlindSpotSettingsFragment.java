@@ -57,6 +57,8 @@ public class BlindSpotSettingsFragment extends Fragment {
     private SwitchMaterial floatingWindowAnimationSwitch;
     private SwitchMaterial blindSpotCorrectionSwitch;
     private Button adjustBlindSpotCorrectionButton;
+    private SwitchMaterial mainFloatingAspectRatioLockSwitch;
+    private Button resetMainFloatingButton;
     private Button logcatDebugButton;
     private android.widget.EditText logFilterEditText;
     private Button menuButton;
@@ -106,7 +108,10 @@ public class BlindSpotSettingsFragment extends Fragment {
 
         blindSpotCorrectionSwitch = view.findViewById(R.id.switch_blind_spot_correction);
         adjustBlindSpotCorrectionButton = view.findViewById(R.id.btn_adjust_blind_spot_correction);
-        
+
+        mainFloatingAspectRatioLockSwitch = view.findViewById(R.id.switch_main_floating_aspect_ratio_lock);
+        resetMainFloatingButton = view.findViewById(R.id.btn_reset_main_floating);
+
         carApiStatusText = view.findViewById(R.id.tv_car_api_status);
 
         logcatDebugButton = view.findViewById(R.id.btn_logcat_debug);
@@ -173,6 +178,8 @@ public class BlindSpotSettingsFragment extends Fragment {
         floatingWindowAnimationSwitch.setChecked(appConfig.isFloatingWindowAnimationEnabled());
 
         blindSpotCorrectionSwitch.setChecked(appConfig.isBlindSpotCorrectionEnabled());
+
+        mainFloatingAspectRatioLockSwitch.setChecked(appConfig.isMainFloatingAspectRatioLocked());
     }
 
     private void updateSubFeaturesVisibility(boolean globalEnabled) {
@@ -305,6 +312,16 @@ public class BlindSpotSettingsFragment extends Fragment {
         blindSpotCorrectionSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             appConfig.setBlindSpotCorrectionEnabled(isChecked);
             BlindSpotService.update(requireContext());
+        });
+
+        mainFloatingAspectRatioLockSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            appConfig.setMainFloatingAspectRatioLocked(isChecked);
+        });
+
+        resetMainFloatingButton.setOnClickListener(v -> {
+            appConfig.resetMainFloatingBounds();
+            BlindSpotService.update(requireContext());
+            Toast.makeText(requireContext(), "主屏悬浮窗已重置", Toast.LENGTH_SHORT).show();
         });
 
         adjustBlindSpotCorrectionButton.setOnClickListener(v -> {

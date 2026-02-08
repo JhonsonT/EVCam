@@ -160,28 +160,85 @@ public class MainFloatingWindowView extends FrameLayout {
                 float dy = y - lastY;
 
                 if (isResizing) {
-                    // 缩放逻辑
-                    if ((resizeMode & 1) != 0) { // 左
-                        int newWidth = (int) (initialWidth - dx);
-                        if (newWidth > 200) {
+                    boolean aspectLocked = appConfig.isMainFloatingAspectRatioLocked();
+                    if (aspectLocked) {
+                        // 等比例缩放：使用摄像头原始分辨率比例，而非当前窗口比例
+                        float aspectRatio = (float) initialWidth / initialHeight; // fallback
+                        String cameraPos = desiredCameraPos != null ? desiredCameraPos : appConfig.getMainFloatingCamera();
+                        MultiCameraManager cm = CameraManagerHolder.getInstance().getCameraManager();
+                        if (cm != null) {
+                            SingleCamera camera = cm.getCamera(cameraPos);
+                            if (camera != null) {
+                                Size previewSize = camera.getPreviewSize();
+                                if (previewSize != null) {
+                                    if (isCurrentlySwapped) {
+                                        // 矫正旋转导致宽高互换时，比例也互换
+                                        aspectRatio = (float) previewSize.getHeight() / previewSize.getWidth();
+                                    } else {
+                                        aspectRatio = (float) previewSize.getWidth() / previewSize.getHeight();
+                                    }
+                                }
+                            }
+                        }
+                        boolean horizontal = (resizeMode & 3) != 0; // 左或右
+                        boolean vertical = (resizeMode & 12) != 0;  // 上或下
+
+                        int newWidth = initialWidth;
+                        int newHeight = initialHeight;
+
+                        if (horizontal && !vertical) {
+                            // 仅水平边：宽度变化驱动高度
+                            int dw = (resizeMode & 1) != 0 ? (int) -dx : (int) dx;
+                            newWidth = initialWidth + dw;
+                            newHeight = Math.round(newWidth / aspectRatio);
+                        } else if (vertical && !horizontal) {
+                            // 仅垂直边：高度变化驱动宽度
+                            int dh = (resizeMode & 4) != 0 ? (int) -dy : (int) dy;
+                            newHeight = initialHeight + dh;
+                            newWidth = Math.round(newHeight * aspectRatio);
+                        } else {
+                            // 对角：取水平/垂直变化量中绝对值较大的作为主轴
+                            int dw = (resizeMode & 1) != 0 ? (int) -dx : (int) dx;
+                            int dh = (resizeMode & 4) != 0 ? (int) -dy : (int) dy;
+                            if (Math.abs(dw) >= Math.abs(dh)) {
+                                newWidth = initialWidth + dw;
+                                newHeight = Math.round(newWidth / aspectRatio);
+                            } else {
+                                newHeight = initialHeight + dh;
+                                newWidth = Math.round(newHeight * aspectRatio);
+                            }
+                        }
+
+                        if (newWidth > 200 && newHeight > 200) {
                             params.width = newWidth;
-                            params.x = (int) (initialX + dx);
-                        }
-                    }
-                    if ((resizeMode & 2) != 0) { // 右
-                        int newWidth = (int) (initialWidth + dx);
-                        if (newWidth > 200) params.width = newWidth;
-                    }
-                    if ((resizeMode & 4) != 0) { // 上
-                        int newHeight = (int) (initialHeight - dy);
-                        if (newHeight > 200) {
                             params.height = newHeight;
-                            params.y = (int) (initialY + dy);
+                            if ((resizeMode & 1) != 0) params.x = (int) (initialX + (initialWidth - newWidth));
+                            if ((resizeMode & 4) != 0) params.y = (int) (initialY + (initialHeight - newHeight));
                         }
-                    }
-                    if ((resizeMode & 8) != 0) { // 下
-                        int newHeight = (int) (initialHeight + dy);
-                        if (newHeight > 200) params.height = newHeight;
+                    } else {
+                        // 自由缩放逻辑
+                        if ((resizeMode & 1) != 0) { // 左
+                            int newWidth = (int) (initialWidth - dx);
+                            if (newWidth > 200) {
+                                params.width = newWidth;
+                                params.x = (int) (initialX + dx);
+                            }
+                        }
+                        if ((resizeMode & 2) != 0) { // 右
+                            int newWidth = (int) (initialWidth + dx);
+                            if (newWidth > 200) params.width = newWidth;
+                        }
+                        if ((resizeMode & 4) != 0) { // 上
+                            int newHeight = (int) (initialHeight - dy);
+                            if (newHeight > 200) {
+                                params.height = newHeight;
+                                params.y = (int) (initialY + dy);
+                            }
+                        }
+                        if ((resizeMode & 8) != 0) { // 下
+                            int newHeight = (int) (initialHeight + dy);
+                            if (newHeight > 200) params.height = newHeight;
+                        }
                     }
                 } else {
                     // 拖动逻辑
