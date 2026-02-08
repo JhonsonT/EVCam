@@ -63,7 +63,7 @@ public class MainFloatingWindowView extends FrameLayout {
         textureView = findViewById(R.id.secondary_texture_view);
 
         // 圆角裁切
-        float cornerRadius = 16 * getContext().getResources().getDisplayMetrics().density; // 16dp
+        float cornerRadius = 8 * getContext().getResources().getDisplayMetrics().density; // 8dp
         setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
             public void getOutline(View view, android.graphics.Outline outline) {
