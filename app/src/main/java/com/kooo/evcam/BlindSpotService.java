@@ -50,6 +50,7 @@ public class BlindSpotService extends Service {
 
     private LogcatSignalObserver logcatSignalObserver;
     private VhalSignalObserver vhalSignalObserver;
+    private CarSignalManagerObserver carSignalManagerObserver;
     private final Handler hideHandler = new Handler(Looper.getMainLooper());
     private Runnable hideRunnable;
     private Runnable signalKeepAliveRunnable; // 信号保活计时器（debounce）
@@ -78,7 +79,10 @@ public class BlindSpotService extends Service {
         // 停止旧的观察者
         stopSignalObservers();
 
-        if (appConfig.isCarApiTriggerMode()) {
+        String mode = appConfig.getTurnSignalTriggerMode();
+        if (appConfig.isCarSignalManagerTriggerMode()) {
+            initCarSignalManagerObserver();
+        } else if (appConfig.isVhalGrpcTriggerMode()) {
             initVhalSignalObserver();
         } else {
             initLogcatSignalObserver();
@@ -86,7 +90,7 @@ public class BlindSpotService extends Service {
     }
 
     private void initVhalSignalObserver() {
-        AppLog.d(TAG, "Using CarAPI trigger mode");
+        AppLog.d(TAG, "Using VHAL gRPC trigger mode");
 
         vhalSignalObserver = new VhalSignalObserver(new VhalSignalObserver.TurnSignalListener() {
             @Override
@@ -108,6 +112,31 @@ public class BlindSpotService extends Service {
             }
         });
         vhalSignalObserver.start();
+    }
+
+    private void initCarSignalManagerObserver() {
+        AppLog.d(TAG, "Using CarSignalManager API trigger mode");
+
+        carSignalManagerObserver = new CarSignalManagerObserver(this, new CarSignalManagerObserver.TurnSignalListener() {
+            @Override
+            public void onTurnSignal(String direction, boolean on) {
+                if (!appConfig.isBlindSpotGlobalEnabled()) return;
+                if (!appConfig.isTurnSignalLinkageEnabled()) return;
+
+                if (on) {
+                    handleTurnSignal(direction);
+                } else {
+                    // 转向灯关闭，启动隐藏计时器
+                    startHideTimer();
+                }
+            }
+
+            @Override
+            public void onConnectionStateChanged(boolean connected) {
+                AppLog.d(TAG, "CarSignalManager connection: " + (connected ? "connected" : "disconnected"));
+            }
+        });
+        carSignalManagerObserver.start();
     }
 
     private void initLogcatSignalObserver() {
@@ -165,6 +194,10 @@ public class BlindSpotService extends Service {
         if (vhalSignalObserver != null) {
             vhalSignalObserver.stop();
             vhalSignalObserver = null;
+        }
+        if (carSignalManagerObserver != null) {
+            carSignalManagerObserver.stop();
+            carSignalManagerObserver = null;
         }
     }
 

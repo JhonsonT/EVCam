@@ -152,11 +152,18 @@ public class BlindSpotSettingsFragment extends Fragment {
         turnSignalRightLogEditText.setText(currentRight);
 
         // 根据触发模式和当前关键词匹配预设
-        if (appConfig.isCarApiTriggerMode()) {
+        if (appConfig.isCarSignalManagerTriggerMode()) {
+            turnSignalPresetGroup.check(R.id.rb_preset_l6l7);
+            customKeywordsLayout.setVisibility(View.GONE);
+            carApiStatusText.setVisibility(View.VISIBLE);
+            carApiStatusText.setText("CarSignalManager 服务状态: 检测中...");
+            checkCarSignalManagerConnection();
+        } else if (appConfig.isVhalGrpcTriggerMode()) {
             turnSignalPresetGroup.check(R.id.rb_preset_car_api);
             customKeywordsLayout.setVisibility(View.GONE);
             carApiStatusText.setVisibility(View.VISIBLE);
-            checkCarApiConnection();
+            carApiStatusText.setText("VHAL gRPC 服务状态: 检测中...");
+            checkVhalGrpcConnection();
         } else {
             int matchedPreset = findMatchingPreset(currentLeft, currentRight);
             if (matchedPreset == 0) {
@@ -238,12 +245,21 @@ public class BlindSpotSettingsFragment extends Fragment {
 
         // 预设方案选择
         turnSignalPresetGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.rb_preset_car_api) {
-                // CarAPI 模式
+            if (checkedId == R.id.rb_preset_l6l7) {
+                // CarSignalManager API 模式
                 customKeywordsLayout.setVisibility(View.GONE);
                 carApiStatusText.setVisibility(View.VISIBLE);
-                appConfig.setTurnSignalTriggerMode(AppConfig.TRIGGER_MODE_CAR_API);
-                checkCarApiConnection();
+                carApiStatusText.setText("CarSignalManager 服务状态: 检测中...");
+                appConfig.setTurnSignalTriggerMode(AppConfig.TRIGGER_MODE_CAR_SIGNAL_MANAGER);
+                checkCarSignalManagerConnection();
+                BlindSpotService.update(requireContext());
+            } else if (checkedId == R.id.rb_preset_car_api) {
+                // VHAL gRPC 模式
+                customKeywordsLayout.setVisibility(View.GONE);
+                carApiStatusText.setVisibility(View.VISIBLE);
+                carApiStatusText.setText("VHAL gRPC 服务状态: 检测中...");
+                appConfig.setTurnSignalTriggerMode(AppConfig.TRIGGER_MODE_VHAL_GRPC);
+                checkVhalGrpcConnection();
                 BlindSpotService.update(requireContext());
             } else {
                 // Logcat 模式
@@ -427,9 +443,9 @@ public class BlindSpotSettingsFragment extends Fragment {
     /**
      * 异步检查 VHAL gRPC 服务连接状态并更新 UI
      */
-    private void checkCarApiConnection() {
+    private void checkVhalGrpcConnection() {
         if (carApiStatusText == null) return;
-        carApiStatusText.setText("CarAPI 服务状态: 检测中...");
+        carApiStatusText.setText("VHAL gRPC 服务状态: 检测中...");
         carApiStatusText.setTextColor(getResources().getColor(R.color.text_secondary, null));
 
         new Thread(() -> {
@@ -438,10 +454,35 @@ public class BlindSpotSettingsFragment extends Fragment {
                 getActivity().runOnUiThread(() -> {
                     if (carApiStatusText == null) return;
                     if (reachable) {
-                        carApiStatusText.setText("CarAPI 服务状态: ✓ 已连接");
+                        carApiStatusText.setText("VHAL gRPC 服务状态: ✓ 已连接");
                         carApiStatusText.setTextColor(0xFF4CAF50); // green
                     } else {
-                        carApiStatusText.setText("CarAPI 服务状态: ✗ 服务不可达");
+                        carApiStatusText.setText("VHAL gRPC 服务状态: ✗ 服务不可达");
+                        carApiStatusText.setTextColor(0xFFF44336); // red
+                    }
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * 异步检查 CarSignalManager 服务连接状态并更新 UI
+     */
+    private void checkCarSignalManagerConnection() {
+        if (carApiStatusText == null) return;
+        carApiStatusText.setText("CarSignalManager 服务状态: 检测中...");
+        carApiStatusText.setTextColor(getResources().getColor(R.color.text_secondary, null));
+
+        new Thread(() -> {
+            boolean reachable = CarSignalManagerObserver.testConnection(requireContext());
+            if (getActivity() != null && isAdded()) {
+                getActivity().runOnUiThread(() -> {
+                    if (carApiStatusText == null) return;
+                    if (reachable) {
+                        carApiStatusText.setText("CarSignalManager 服务状态: ✓ 已连接");
+                        carApiStatusText.setTextColor(0xFF4CAF50); // green
+                    } else {
+                        carApiStatusText.setText("CarSignalManager 服务状态: ✗ 服务不可达");
                         carApiStatusText.setTextColor(0xFFF44336); // red
                     }
                 });
