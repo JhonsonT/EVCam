@@ -425,7 +425,7 @@ public class BlindSpotSettingsFragment extends Fragment {
     }
 
     /**
-     * 异步检查 CarAPI daemon 连接状态并更新 UI
+     * 异步检查 VHAL gRPC 服务连接状态并更新 UI
      */
     private void checkCarApiConnection() {
         if (carApiStatusText == null) return;
@@ -433,15 +433,15 @@ public class BlindSpotSettingsFragment extends Fragment {
         carApiStatusText.setTextColor(getResources().getColor(R.color.text_secondary, null));
 
         new Thread(() -> {
-            boolean connected = VhalSignalObserver.testConnection();
+            boolean reachable = VhalSignalObserver.testConnection();
             if (getActivity() != null && isAdded()) {
                 getActivity().runOnUiThread(() -> {
                     if (carApiStatusText == null) return;
-                    if (connected) {
+                    if (reachable) {
                         carApiStatusText.setText("CarAPI 服务状态: ✓ 已连接");
                         carApiStatusText.setTextColor(0xFF4CAF50); // green
                     } else {
-                        carApiStatusText.setText("CarAPI 服务状态: ✗ 连接失败（请确认 EVCC daemon 已启动）");
+                        carApiStatusText.setText("CarAPI 服务状态: ✗ 服务不可达");
                         carApiStatusText.setTextColor(0xFFF44336); // red
                     }
                 });

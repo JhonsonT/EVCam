@@ -86,7 +86,7 @@ public class BlindSpotService extends Service {
     }
 
     private void initVhalSignalObserver() {
-        AppLog.d(TAG, "Using CarAPI (VHAL) trigger mode");
+        AppLog.d(TAG, "Using CarAPI trigger mode");
 
         vhalSignalObserver = new VhalSignalObserver(new VhalSignalObserver.TurnSignalListener() {
             @Override
@@ -104,7 +104,7 @@ public class BlindSpotService extends Service {
 
             @Override
             public void onConnectionStateChanged(boolean connected) {
-                AppLog.d(TAG, "EVCC daemon connection: " + (connected ? "connected" : "disconnected"));
+                AppLog.d(TAG, "VHAL gRPC connection: " + (connected ? "connected" : "disconnected"));
             }
         });
         vhalSignalObserver.start();

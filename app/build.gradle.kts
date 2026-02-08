@@ -81,6 +81,10 @@ dependencies {
     // WorkManager 定时任务（用于保活）
     implementation("androidx.work:work-runtime:2.9.0")
 
+    // gRPC (VHAL 转向灯信号监听，连接 localhost:40004)
+    implementation("io.grpc:grpc-okhttp:1.62.2")
+    implementation("io.grpc:grpc-stub:1.62.2")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

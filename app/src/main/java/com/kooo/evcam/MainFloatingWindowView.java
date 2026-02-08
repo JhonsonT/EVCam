@@ -62,6 +62,16 @@ public class MainFloatingWindowView extends FrameLayout {
         LayoutInflater.from(getContext()).inflate(R.layout.presentation_secondary_display, this);
         textureView = findViewById(R.id.secondary_texture_view);
 
+        // 圆角裁切
+        float cornerRadius = 16 * getContext().getResources().getDisplayMetrics().density; // 16dp
+        setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), cornerRadius);
+            }
+        });
+        setClipToOutline(true);
+
         params = new WindowManager.LayoutParams(
                 appConfig.getMainFloatingWidth(),
                 appConfig.getMainFloatingHeight(),
