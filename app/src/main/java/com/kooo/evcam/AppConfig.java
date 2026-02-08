@@ -99,6 +99,9 @@ public class AppConfig {
     // 补盲悬浮窗动效
     private static final String KEY_FLOATING_WINDOW_ANIMATION_ENABLED = "floating_window_animation_enabled"; // 悬浮窗开启/关闭动效
 
+    // 主屏悬浮窗比例锁定
+    private static final String KEY_MAIN_FLOATING_ASPECT_RATIO_LOCKED = "main_floating_aspect_ratio_locked";
+
     // 补盲画面矫正 (Matrix)
     private static final String KEY_BLIND_SPOT_CORRECTION_ENABLED = "blind_spot_correction_enabled";
     private static final String KEY_BLIND_SPOT_CORRECTION_PREFIX = "blind_spot_correction_";
@@ -1490,6 +1493,14 @@ public class AppConfig {
         return prefs.getInt(KEY_SECONDARY_DISPLAY_ALPHA, 100);
     }
 
+    public void setMainFloatingAspectRatioLocked(boolean locked) {
+        prefs.edit().putBoolean(KEY_MAIN_FLOATING_ASPECT_RATIO_LOCKED, locked).apply();
+    }
+
+    public boolean isMainFloatingAspectRatioLocked() {
+        return prefs.getBoolean(KEY_MAIN_FLOATING_ASPECT_RATIO_LOCKED, false);
+    }
+
     public void setBlindSpotCorrectionEnabled(boolean enabled) {
         prefs.edit().putBoolean(KEY_BLIND_SPOT_CORRECTION_ENABLED, enabled).apply();
     }
@@ -1698,6 +1709,18 @@ public class AppConfig {
 
     public int getMainFloatingHeight() {
         return prefs.getInt(KEY_MAIN_FLOATING_HEIGHT, 320);
+    }
+
+    /**
+     * 重置主屏悬浮窗位置和大小为默认值
+     */
+    public void resetMainFloatingBounds() {
+        prefs.edit()
+            .putInt(KEY_MAIN_FLOATING_X, 100)
+            .putInt(KEY_MAIN_FLOATING_Y, 100)
+            .putInt(KEY_MAIN_FLOATING_WIDTH, 480)
+            .putInt(KEY_MAIN_FLOATING_HEIGHT, 320)
+            .apply();
     }
 
     // ==================== 转向灯联动配置相关方法 ====================

@@ -5,11 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +27,7 @@ public class BlindSpotCorrectionFragment extends Fragment {
 
     private Button backButton;
     private Button homeButton;
-    private Spinner cameraSpinner;
+    private Button btnCameraFront, btnCameraBack, btnCameraLeft, btnCameraRight;
 
     private SeekBar seekScaleX;
     private SeekBar seekScaleY;
@@ -56,10 +53,10 @@ public class BlindSpotCorrectionFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_blind_spot_correction, container, false);
         appConfig = new AppConfig(requireContext());
         initViews(view);
-        initSpinners();
         initSeekBars();
         loadFromConfig(currentCameraPos);
         setupListeners();
+        updateCameraButtonStyles();
         startPreview(currentCameraPos);
         return view;
     }
@@ -73,7 +70,10 @@ public class BlindSpotCorrectionFragment extends Fragment {
     private void initViews(View view) {
         backButton = view.findViewById(R.id.btn_back);
         homeButton = view.findViewById(R.id.btn_home);
-        cameraSpinner = view.findViewById(R.id.spinner_camera);
+        btnCameraFront = view.findViewById(R.id.btn_camera_front);
+        btnCameraBack = view.findViewById(R.id.btn_camera_back);
+        btnCameraLeft = view.findViewById(R.id.btn_camera_left);
+        btnCameraRight = view.findViewById(R.id.btn_camera_right);
 
         seekScaleX = view.findViewById(R.id.seek_scale_x);
         seekScaleY = view.findViewById(R.id.seek_scale_y);
@@ -89,14 +89,6 @@ public class BlindSpotCorrectionFragment extends Fragment {
 
         resetButton = view.findViewById(R.id.btn_reset);
         saveButton = view.findViewById(R.id.btn_save_apply);
-    }
-
-    private void initSpinners() {
-        String[] cameraNames = {"前摄像头", "后摄像头", "左摄像头", "右摄像头"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, cameraNames);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        cameraSpinner.setAdapter(adapter);
-        cameraSpinner.setSelection(getCameraIndex(currentCameraPos));
     }
 
     private void initSeekBars() {
@@ -120,25 +112,22 @@ public class BlindSpotCorrectionFragment extends Fragment {
             }
         });
 
-        cameraSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            private boolean first = true;
-
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String newCameraPos = getCameraPos(position);
-                if (first) {
-                    first = false;
-                    currentCameraPos = newCameraPos;
-                    return;
-                }
-                currentCameraPos = newCameraPos;
-                loadFromConfig(currentCameraPos);
-                startPreview(currentCameraPos);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
+        View.OnClickListener cameraClickListener = v -> {
+            String newCameraPos;
+            if (v == btnCameraFront) newCameraPos = "front";
+            else if (v == btnCameraBack) newCameraPos = "back";
+            else if (v == btnCameraLeft) newCameraPos = "left";
+            else if (v == btnCameraRight) newCameraPos = "right";
+            else return;
+            currentCameraPos = newCameraPos;
+            updateCameraButtonStyles();
+            loadFromConfig(currentCameraPos);
+            startPreview(currentCameraPos);
+        };
+        btnCameraFront.setOnClickListener(cameraClickListener);
+        btnCameraBack.setOnClickListener(cameraClickListener);
+        btnCameraLeft.setOnClickListener(cameraClickListener);
+        btnCameraRight.setOnClickListener(cameraClickListener);
 
         SeekBar.OnSeekBarChangeListener seekListener = new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -250,23 +239,19 @@ public class BlindSpotCorrectionFragment extends Fragment {
         requireContext().startService(intent);
     }
 
-    private int getCameraIndex(String pos) {
-        switch (pos) {
-            case "front": return 0;
-            case "back": return 1;
-            case "left": return 2;
-            case "right": return 3;
-            default: return 0;
-        }
-    }
-
-    private String getCameraPos(int index) {
-        switch (index) {
-            case 0: return "front";
-            case 1: return "back";
-            case 2: return "left";
-            case 3: return "right";
-            default: return "front";
+    private void updateCameraButtonStyles() {
+        Button[] buttons = {btnCameraFront, btnCameraBack, btnCameraLeft, btnCameraRight};
+        String[] positions = {"front", "back", "left", "right"};
+        for (int i = 0; i < buttons.length; i++) {
+            if (positions[i].equals(currentCameraPos)) {
+                buttons[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        getResources().getColor(R.color.button_accent, null)));
+                buttons[i].setTextColor(getResources().getColor(R.color.white, null));
+            } else {
+                buttons[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                        getResources().getColor(R.color.button_background, null)));
+                buttons[i].setTextColor(getResources().getColor(R.color.button_text, null));
+            }
         }
     }
 

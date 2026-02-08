@@ -77,12 +77,54 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
-                <Spinner
-                    android:id="@+id/spinner_camera"
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/spinner_background"
-                    android:popupBackground="@color/card_background" />
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_camera_front"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="前"
+                        android:textSize="16sp"
+                        android:backgroundTint="@color/button_accent"
+                        android:textColor="@color/white" />
+
+                    <Button
+                        android:id="@+id/btn_camera_back"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="后"
+                        android:textSize="16sp"
+                        android:backgroundTint="@color/button_background"
+                        android:textColor="@color/button_text" />
+
+                    <Button
+                        android:id="@+id/btn_camera_left"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="左"
+                        android:textSize="16sp"
+                        android:backgroundTint="@color/button_background"
+                        android:textColor="@color/button_text" />
+
+                    <Button
+                        android:id="@+id/btn_camera_right"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="右"
+                        android:textSize="16sp"
+                        android:backgroundTint="@color/button_background"
+                        android:textColor="@color/button_text" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_preview_hint"
