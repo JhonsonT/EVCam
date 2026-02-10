@@ -20,15 +20,19 @@ import io.grpc.stub.MetadataUtils;
 import io.grpc.stub.StreamObserver;
 
 /**
- * 通过 VHAL gRPC 直接监听转向灯信号。
+ * 通过 VHAL gRPC 监听车辆信号（转向灯 + 车门状态）。
  *
  * 连接车机系统内置的 VHAL gRPC 服务（vendor.ecarx.automotive.vehicle），
- * 订阅属性变化流，过滤转向灯 property 回调给调用方。
+ * 订阅属性变化流，过滤转向灯和车门 property 回调给调用方。
  *
  * 无需 root、无需 daemon，系统服务开机即运行。
  *
  * 转向灯属性: TURN_SIGNAL_STATE (0x11400408 / 289408008)
  *   值: 0=无, 1=右转, 2=左转
+ *
+ * 车门属性: DOOR_POS (0x16400B00 / 373295872)
+ *   区域: FL(1)=主驾, FR(4)=副驾, W_FL(16)=左后, W_FR(64)=右后
+ *   值: 1=打开, 2=关闭
  */
 public class VhalSignalObserver {
     private static final String TAG = "VhalSignalObserver";
@@ -39,10 +43,23 @@ public class VhalSignalObserver {
     // TURN_SIGNAL_STATE property ID
     public static final int PROP_TURN_SIGNAL_STATE = 289408008; // 0x11400408
 
+    // DOOR_POS property ID
+    public static final int PROP_DOOR_POS = 373295872; // 0x16400B00
+
     // 转向灯状态值
     private static final int SIGNAL_NONE = 0;
     private static final int SIGNAL_RIGHT = 1;
     private static final int SIGNAL_LEFT = 2;
+
+    // 车门区域 ID
+    private static final int AREA_FL = 1;    // 前左（主驾）
+    private static final int AREA_FR = 4;    // 前右（副驾）
+    private static final int AREA_W_FL = 16; // 左后门
+    private static final int AREA_W_FR = 64; // 右后门
+
+    // 车门状态值
+    private static final int DOOR_OPEN = 1;
+    private static final int DOOR_CLOSED = 2;
 
     /**
      * 转向灯信号回调接口
@@ -54,7 +71,17 @@ public class VhalSignalObserver {
         void onConnectionStateChanged(boolean connected);
     }
 
+    /**
+     * 车门信号回调接口（与 DoorSignalObserver.DoorSignalListener 方法签名一致）
+     */
+    public interface DoorSignalListener {
+        void onDoorOpen(String side);
+        void onDoorClose(String side);
+        void onConnectionStateChanged(boolean connected);
+    }
+
     private final TurnSignalListener listener;
+    private volatile DoorSignalListener doorListener;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     private ManagedChannel grpcChannel;
@@ -64,6 +91,11 @@ public class VhalSignalObserver {
 
     // 上一次的转向灯状态，避免重复回调
     private int lastSignalState = -1;
+
+    // 车门状态跟踪（用于多门关闭逻辑）
+    private volatile boolean isPassDoorOpen = false;     // 副驾门
+    private volatile boolean isLeftRearDoorOpen = false;  // 左后门
+    private volatile boolean isRightRearDoorOpen = false; // 右后门
 
     // 重连参数
     private static final long RECONNECT_DELAY_MS = 3000;
@@ -90,12 +122,22 @@ public class VhalSignalObserver {
     }
 
     /**
+     * 设置车门信号监听器（可在 start() 前后调用）
+     */
+    public void setDoorSignalListener(DoorSignalListener listener) {
+        this.doorListener = listener;
+    }
+
+    /**
      * 启动连接和监听
      */
     public void start() {
         if (running) return;
         running = true;
         lastSignalState = -1;
+        isPassDoorOpen = false;
+        isLeftRearDoorOpen = false;
+        isRightRearDoorOpen = false;
         connectThread = new Thread(this::connectLoop, "VhalGrpcConnect");
         connectThread.setDaemon(true);
         connectThread.start();
@@ -283,44 +325,122 @@ public class VhalSignalObserver {
             byte[] propValueBytes = ProtoDecoder.readMessage(wrapped, 1);
             if (propValueBytes == null) continue;
 
-            // 解码 VehiclePropValue: field 1 = prop (int32), field 5 = int32_values (sint32)
+            // 解码 VehiclePropValue: field 1 = prop (int32)
             int propId = ProtoDecoder.readInt32(propValueBytes, 1);
-            if (propId != PROP_TURN_SIGNAL_STATE) continue;
 
-            // 读取 int32_values (zigzag encoded sint32)
-            List<Integer> int32Values = ProtoDecoder.readPackedSint32(propValueBytes, 5);
-            int signalState = int32Values.isEmpty() ? 0 : int32Values.get(0);
-
-            if (signalState == lastSignalState) continue; // 避免重复回调
-
-            AppLog.d(TAG, "TURN_SIGNAL_STATE changed: " + lastSignalState + " -> " + signalState
-                    + " (" + signalStateName(signalState) + ")");
-
-            int previousState = lastSignalState;
-            lastSignalState = signalState;
-
-            // 分发事件
-            mainHandler.post(() -> {
-                if (listener == null) return;
-
-                switch (signalState) {
-                    case SIGNAL_LEFT:
-                        listener.onTurnSignal("left", true);
-                        break;
-                    case SIGNAL_RIGHT:
-                        listener.onTurnSignal("right", true);
-                        break;
-                    case SIGNAL_NONE:
-                        // 转向灯关闭，根据之前的状态发送 off
-                        if (previousState == SIGNAL_LEFT) {
-                            listener.onTurnSignal("left", false);
-                        } else if (previousState == SIGNAL_RIGHT) {
-                            listener.onTurnSignal("right", false);
-                        }
-                        break;
-                }
-            });
+            if (propId == PROP_TURN_SIGNAL_STATE) {
+                processTurnSignal(propValueBytes);
+            } else if (propId == PROP_DOOR_POS) {
+                processDoorSignal(propValueBytes);
+            }
         }
+    }
+
+    /**
+     * 处理转向灯信号
+     */
+    private void processTurnSignal(byte[] propValueBytes) {
+        // 读取 int32_values (zigzag encoded sint32)
+        List<Integer> int32Values = ProtoDecoder.readPackedSint32(propValueBytes, 5);
+        int signalState = int32Values.isEmpty() ? 0 : int32Values.get(0);
+
+        if (signalState == lastSignalState) return; // 避免重复回调
+
+        AppLog.d(TAG, "TURN_SIGNAL_STATE changed: " + lastSignalState + " -> " + signalState
+                + " (" + signalStateName(signalState) + ")");
+
+        int previousState = lastSignalState;
+        lastSignalState = signalState;
+
+        // 分发事件
+        mainHandler.post(() -> {
+            if (listener == null) return;
+
+            switch (signalState) {
+                case SIGNAL_LEFT:
+                    listener.onTurnSignal("left", true);
+                    break;
+                case SIGNAL_RIGHT:
+                    listener.onTurnSignal("right", true);
+                    break;
+                case SIGNAL_NONE:
+                    // 转向灯关闭，根据之前的状态发送 off
+                    if (previousState == SIGNAL_LEFT) {
+                        listener.onTurnSignal("left", false);
+                    } else if (previousState == SIGNAL_RIGHT) {
+                        listener.onTurnSignal("right", false);
+                    }
+                    break;
+            }
+        });
+    }
+
+    /**
+     * 处理车门信号
+     * 区域映射: FL(1)=主驾(忽略), FR(4)=副驾→right, W_FL(16)=左后→left, W_FR(64)=右后→right
+     * 多门逻辑: 右侧摄像头仅在副驾 AND 右后门都关闭时才触发 onDoorClose
+     */
+    private void processDoorSignal(byte[] propValueBytes) {
+        // VehiclePropValue protobuf 字段:
+        //   field 1 = prop (int32), field 2 = access/config (int32),
+        //   field 4 = area_id (int32), field 5 = int32_values (packed sint32)
+        int areaId = ProtoDecoder.readInt32(propValueBytes, 4);
+        List<Integer> int32Values = ProtoDecoder.readPackedSint32(propValueBytes, 5);
+        int doorState = int32Values.isEmpty() ? 0 : int32Values.get(0);
+
+        AppLog.d(TAG, "DOOR_POS changed: area=" + areaId + " (0x" + Integer.toHexString(areaId)
+                + "), state=" + doorState
+                + " (" + (doorState == DOOR_OPEN ? "open" : doorState == DOOR_CLOSED ? "closed" : "unknown") + ")");
+
+        if (doorListener == null) return;
+
+        switch (areaId) {
+            case AREA_FL: // 主驾门 - 不触发摄像头（与 L6/L7 行为一致）
+                AppLog.d(TAG, "Driver door (FL) state change, ignoring");
+                break;
+
+            case AREA_FR: // 副驾门 → right
+                handleDoorEvent(doorState, "right", true);
+                break;
+
+            case AREA_W_FL: // 左后门 → left
+                handleDoorEvent(doorState, "left", false);
+                break;
+
+            case AREA_W_FR: // 右后门 → right
+                handleDoorEvent(doorState, "right", false);
+                break;
+
+            default:
+                AppLog.d(TAG, "Unknown door area_id: " + areaId);
+                break;
+        }
+    }
+
+    /**
+     * 处理单个车门事件的辅助方法
+     */
+    private void handleDoorEvent(int doorState, String side, boolean isPassenger) {
+        mainHandler.post(() -> {
+            if (doorListener == null) return;
+            if (doorState == DOOR_OPEN) {
+                if (isPassenger) isPassDoorOpen = true;
+                else if ("left".equals(side)) isLeftRearDoorOpen = true;
+                else isRightRearDoorOpen = true;
+                doorListener.onDoorOpen(side);
+            } else if (doorState == DOOR_CLOSED) {
+                if (isPassenger) {
+                    isPassDoorOpen = false;
+                    if (!isRightRearDoorOpen) doorListener.onDoorClose("right");
+                } else if ("left".equals(side)) {
+                    isLeftRearDoorOpen = false;
+                    doorListener.onDoorClose("left");
+                } else {
+                    isRightRearDoorOpen = false;
+                    if (!isPassDoorOpen) doorListener.onDoorClose("right");
+                }
+            }
+        });
     }
 
     private static String signalStateName(int state) {
@@ -336,6 +456,9 @@ public class VhalSignalObserver {
         mainHandler.post(() -> {
             if (listener != null) {
                 listener.onConnectionStateChanged(isConnected);
+            }
+            if (doorListener != null) {
+                doorListener.onConnectionStateChanged(isConnected);
             }
         });
     }

@@ -150,7 +150,9 @@ public class BlindSpotService extends Service {
     }
 
     /**
-     * 初始化车门联动观察者（银河L6/L7 API）
+     * 初始化车门联动观察者
+     * - VHAL gRPC 模式（E5/星舰7）: 复用已有的 VhalSignalObserver，设置 DoorSignalListener
+     * - CarSignalManager 模式（L6/L7/博越L）: 使用独立的 DoorSignalObserver
      */
     private void initDoorSignalObserver() {
         AppLog.i(TAG, "🚪 ========== 开始初始化车门联动观察者 ==========");
@@ -158,66 +160,67 @@ public class BlindSpotService extends Service {
         AppLog.i(TAG, "🚪 车门联动开关: " + appConfig.isDoorLinkageEnabled());
         AppLog.i(TAG, "🚪 车门联动车型: " + appConfig.getTurnSignalPresetSelection() + " (复用转向联动配置)");
         AppLog.i(TAG, "🚪 车门消失延迟: " + appConfig.getTurnSignalTimeout() + "秒 (复用转向联动配置)");
-        
+        AppLog.i(TAG, "🚪 触发模式: " + appConfig.getTurnSignalTriggerMode());
+
+        if (appConfig.isVhalGrpcTriggerMode()) {
+            // E5/星舰7: 通过 VHAL gRPC 监听车门状态
+            initVhalDoorSignalObserver();
+        } else if (appConfig.isCarSignalManagerTriggerMode()) {
+            // L6/L7/博越L: 通过 CarSignalManager API 监听车门状态
+            initCarSignalManagerDoorObserver();
+        } else {
+            AppLog.w(TAG, "🚪 当前触发模式不支持车门联动: " + appConfig.getTurnSignalTriggerMode());
+        }
+
+        AppLog.i(TAG, "🚪 ========== 车门联动观察者初始化完成 ==========");
+    }
+
+    /**
+     * VHAL gRPC 车门联动（E5/星舰7）
+     * 复用已有的 VhalSignalObserver gRPC 连接，附加 DoorSignalListener
+     */
+    private void initVhalDoorSignalObserver() {
+        AppLog.i(TAG, "🚪 使用 VHAL gRPC 车门联动 (E5/星舰7)");
+
+        VhalSignalObserver.DoorSignalListener doorCallback = createDoorSignalCallback();
+
+        if (vhalSignalObserver != null) {
+            // 转向联动已启动 VhalSignalObserver，直接附加车门监听
+            AppLog.i(TAG, "🚪 复用已有的 VhalSignalObserver，附加车门监听");
+            vhalSignalObserver.setDoorSignalListener(doorCallback);
+        } else {
+            // 转向联动未启动，需要单独创建 VhalSignalObserver（仅用于车门）
+            AppLog.i(TAG, "🚪 转向联动未启动，创建 VhalSignalObserver 用于车门联动");
+            vhalSignalObserver = new VhalSignalObserver(new VhalSignalObserver.TurnSignalListener() {
+                @Override
+                public void onTurnSignal(String direction, boolean on) {
+                    // 转向联动未启用，忽略转向灯事件
+                }
+                @Override
+                public void onConnectionStateChanged(boolean connected) {
+                    AppLog.d(TAG, "VHAL gRPC connection (door-only): " + (connected ? "connected" : "disconnected"));
+                }
+            });
+            vhalSignalObserver.setDoorSignalListener(doorCallback);
+            vhalSignalObserver.start();
+        }
+    }
+
+    /**
+     * CarSignalManager 车门联动（L6/L7/博越L）
+     */
+    private void initCarSignalManagerDoorObserver() {
+        AppLog.i(TAG, "🚪 使用 CarSignalManager API 车门联动 (L6/L7/博越L)");
+
         doorSignalObserver = new DoorSignalObserver(this, new DoorSignalObserver.DoorSignalListener() {
             @Override
             public void onDoorOpen(String side) {
-                AppLog.i(TAG, "🚪🚪🚪 收到车门打开事件: " + side);
-                
-                if (!appConfig.isBlindSpotGlobalEnabled()) {
-                    AppLog.w(TAG, "🚪 补盲功能未启用，跳过车门触发");
-                    return;
-                }
-                if (!appConfig.isDoorLinkageEnabled()) {
-                    AppLog.w(TAG, "🚪 车门联动未启用，跳过车门触发");
-                    return;
-                }
-                
-                // 如果当前有转向灯激活，车门联动让路（转向灯优先级更高）
-                if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
-                    AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，车门联动让路");
-                    return;
-                }
-                
-                // 如果同侧摄像头已经在显示（车门联动触发的），跳过重复显示
-                if (isMainTempShown && mainFloatingWindowView != null) {
-                    AppLog.i(TAG, "🚪 车门联动摄像头已在显示，跳过重复创建");
-                    // 但需要取消隐藏计时器（门重新打开了）
-                    if (hideRunnable != null) {
-                        hideHandler.removeCallbacks(hideRunnable);
-                        hideRunnable = null;
-                        AppLog.i(TAG, "🚪 取消隐藏计时器（门重新打开）");
-                    }
-                    return;
-                }
-                
-                AppLog.i(TAG, "🚪 ✅ 车门打开: " + side + "，准备显示摄像头");
-                showDoorCamera(side);
+                handleDoorOpen(side);
             }
 
             @Override
             public void onDoorClose(String side) {
-                AppLog.i(TAG, "🚪🚪🚪 收到车门关闭事件: " + side);
-                
-                if (!appConfig.isDoorLinkageEnabled()) {
-                    AppLog.w(TAG, "🚪 车门联动未启用，跳过关闭逻辑");
-                    return;
-                }
-                
-                // 只有在没有转向灯激活时才关闭车门摄像头
-                if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
-                    AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，不关闭车门摄像头");
-                    return;
-                }
-                
-                // 检查是否有车门联动触发的窗口在显示
-                if (!isMainTempShown && dedicatedBlindSpotWindow == null) {
-                    AppLog.i(TAG, "🚪 没有车门联动窗口在显示，跳过关闭逻辑");
-                    return;
-                }
-                
-                AppLog.i(TAG, "🚪 ✅ 车门关闭: " + side + "，准备延迟关闭摄像头");
-                startDoorHideTimer();
+                handleDoorClose(side);
             }
 
             @Override
@@ -225,9 +228,94 @@ public class BlindSpotService extends Service {
                 AppLog.i(TAG, "🚪 车门监听连接状态: " + (connected ? "✅ 已连接" : "❌ 未连接"));
             }
         });
-        
+
         doorSignalObserver.start();
-        AppLog.i(TAG, "🚪 ========== 车门联动观察者启动完成 ==========");
+    }
+
+    /**
+     * 创建 VHAL gRPC 车门信号回调（复用相同的车门处理逻辑）
+     */
+    private VhalSignalObserver.DoorSignalListener createDoorSignalCallback() {
+        return new VhalSignalObserver.DoorSignalListener() {
+            @Override
+            public void onDoorOpen(String side) {
+                handleDoorOpen(side);
+            }
+
+            @Override
+            public void onDoorClose(String side) {
+                handleDoorClose(side);
+            }
+
+            @Override
+            public void onConnectionStateChanged(boolean connected) {
+                AppLog.i(TAG, "🚪 VHAL车门监听连接状态: " + (connected ? "✅ 已连接" : "❌ 未连接"));
+            }
+        };
+    }
+
+    /**
+     * 处理车门打开事件（VHAL gRPC 和 CarSignalManager 共用）
+     */
+    private void handleDoorOpen(String side) {
+        AppLog.i(TAG, "🚪🚪🚪 收到车门打开事件: " + side);
+
+        if (!appConfig.isBlindSpotGlobalEnabled()) {
+            AppLog.w(TAG, "🚪 补盲功能未启用，跳过车门触发");
+            return;
+        }
+        if (!appConfig.isDoorLinkageEnabled()) {
+            AppLog.w(TAG, "🚪 车门联动未启用，跳过车门触发");
+            return;
+        }
+
+        // 如果当前有转向灯激活，车门联动让路（转向灯优先级更高）
+        if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
+            AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，车门联动让路");
+            return;
+        }
+
+        // 如果同侧摄像头已经在显示（车门联动触发的），跳过重复显示
+        if (isMainTempShown && mainFloatingWindowView != null) {
+            AppLog.i(TAG, "🚪 车门联动摄像头已在显示，跳过重复创建");
+            // 但需要取消隐藏计时器（门重新打开了）
+            if (hideRunnable != null) {
+                hideHandler.removeCallbacks(hideRunnable);
+                hideRunnable = null;
+                AppLog.i(TAG, "🚪 取消隐藏计时器（门重新打开）");
+            }
+            return;
+        }
+
+        AppLog.i(TAG, "🚪 ✅ 车门打开: " + side + "，准备显示摄像头");
+        showDoorCamera(side);
+    }
+
+    /**
+     * 处理车门关闭事件（VHAL gRPC 和 CarSignalManager 共用）
+     */
+    private void handleDoorClose(String side) {
+        AppLog.i(TAG, "🚪🚪🚪 收到车门关闭事件: " + side);
+
+        if (!appConfig.isDoorLinkageEnabled()) {
+            AppLog.w(TAG, "🚪 车门联动未启用，跳过关闭逻辑");
+            return;
+        }
+
+        // 只有在没有转向灯激活时才关闭车门摄像头
+        if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
+            AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，不关闭车门摄像头");
+            return;
+        }
+
+        // 检查是否有车门联动触发的窗口在显示
+        if (!isMainTempShown && dedicatedBlindSpotWindow == null) {
+            AppLog.i(TAG, "🚪 没有车门联动窗口在显示，跳过关闭逻辑");
+            return;
+        }
+
+        AppLog.i(TAG, "🚪 ✅ 车门关闭: " + side + "，准备延迟关闭摄像头");
+        startDoorHideTimer();
     }
 
     private void initLogcatSignalObserver() {
@@ -283,6 +371,7 @@ public class BlindSpotService extends Service {
             logcatSignalObserver = null;
         }
         if (vhalSignalObserver != null) {
+            vhalSignalObserver.setDoorSignalListener(null); // 清除车门监听
             vhalSignalObserver.stop();
             vhalSignalObserver = null;
         }

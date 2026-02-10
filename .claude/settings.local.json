@@ -25,7 +25,9 @@
       "Bash(adb shell:*)",
       "Bash(timeout:*)",
       "Bash(dir:*)",
-      "Bash(git config:*)"
+      "Bash(git config:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge PR #2: Add door linkage camera feature for L6/L7/BoyueL\n\nFrom gitee.com/rahman/EVCam \\(AbuCoder\\)\n- New DoorSignalObserver: polls CarSignalManager API for door state\n- BlindSpotService: door open/close triggers blind spot camera display\n- AppConfig: door linkage configuration options\n- UI: door linkage toggle in blind spot settings \\(L6/L7/BoyueL only\\)\n- Turn signal takes priority over door linkage\nEOF\n\\)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

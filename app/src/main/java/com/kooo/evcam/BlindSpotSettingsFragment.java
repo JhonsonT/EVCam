@@ -217,18 +217,20 @@ public class BlindSpotSettingsFragment extends Fragment {
     
     /**
      * 根据转向联动的车型选择，更新车门联动区域的可见性
-     * 只有选择了银河L6/L7或博越L时，才显示车门联动开关（独立于转向联动开关状态）
+     * 选择了银河L6/L7、博越L或车载API(E5/星舰7)时，显示车门联动开关
      */
     private void updateDoorLinkageVisibility() {
         // 检查车型选择
         String turnSignalPreset = appConfig.getTurnSignalPresetSelection();
-        boolean isL6L7OrBoyueL = "l6l7".equals(turnSignalPreset) || "boyue_l".equals(turnSignalPreset);
-        
-        // 只要车型是L6/L7或博越L，就显示车门联动（不依赖转向联动开关）
-        doorLinkageSectionLayout.setVisibility(isL6L7OrBoyueL ? View.VISIBLE : View.GONE);
-        
+        boolean supportsDoorLinkage = "l6l7".equals(turnSignalPreset)
+                || "boyue_l".equals(turnSignalPreset)
+                || "car_api".equals(turnSignalPreset);
+
+        // 支持车门联动的车型才显示（不依赖转向联动开关）
+        doorLinkageSectionLayout.setVisibility(supportsDoorLinkage ? View.VISIBLE : View.GONE);
+
         // 如果不应该显示（切换到其他车型），自动关闭车门联动
-        if (!isL6L7OrBoyueL && appConfig.isDoorLinkageEnabled()) {
+        if (!supportsDoorLinkage && appConfig.isDoorLinkageEnabled()) {
             appConfig.setDoorLinkageEnabled(false);
             doorLinkageSwitch.setChecked(false);
         }
