@@ -39,6 +39,10 @@ public class BlindSpotSettingsFragment extends Fragment {
     private EditText turnSignalLeftLogEditText;
     private EditText turnSignalRightLogEditText;
     private boolean isUpdatingFromPreset = false; // 防止 TextWatcher 在预设填充时触发
+    
+    // 车门联动UI控件
+    private LinearLayout doorLinkageSectionLayout; // 车门联动区域
+    private SwitchMaterial doorLinkageSwitch; // 车门联动开关
 
     // 转向灯触发log预设方案
     private static final String[][] TURN_SIGNAL_PRESETS = {
@@ -102,6 +106,10 @@ public class BlindSpotSettingsFragment extends Fragment {
 
         secondaryBlindSpotSwitch = view.findViewById(R.id.switch_secondary_blind_spot_display);
         adjustSecondaryBlindSpotWindowButton = view.findViewById(R.id.btn_adjust_secondary_blind_spot_window);
+        
+        // 车门联动UI初始化
+        doorLinkageSectionLayout = view.findViewById(R.id.ll_door_linkage_section);
+        doorLinkageSwitch = view.findViewById(R.id.switch_door_linkage);
         
         mockFloatingSwitch = view.findViewById(R.id.switch_mock_floating);
         floatingWindowAnimationSwitch = view.findViewById(R.id.switch_floating_window_animation);
@@ -198,11 +206,36 @@ public class BlindSpotSettingsFragment extends Fragment {
         blindSpotCorrectionSwitch.setChecked(appConfig.isBlindSpotCorrectionEnabled());
 
         mainFloatingAspectRatioLockSwitch.setChecked(appConfig.isMainFloatingAspectRatioLocked());
+        
+        // 车门联动配置加载
+        doorLinkageSwitch.setChecked(appConfig.isDoorLinkageEnabled());
+        
+        // 根据转向联动的车型选择，决定是否显示车门联动区域
+        updateDoorLinkageVisibility();
     }
 
     private void updateSubFeaturesVisibility(boolean globalEnabled) {
         // 全局开关关闭时，隐藏所有子功能区域
         subFeaturesContainer.setVisibility(globalEnabled ? View.VISIBLE : View.GONE);
+    }
+    
+    /**
+     * 根据转向联动的车型选择，更新车门联动区域的可见性
+     * 只有选择了银河L6/L7或博越L时，才显示车门联动开关（独立于转向联动开关状态）
+     */
+    private void updateDoorLinkageVisibility() {
+        // 检查车型选择
+        String turnSignalPreset = appConfig.getTurnSignalPresetSelection();
+        boolean isL6L7OrBoyueL = "l6l7".equals(turnSignalPreset) || "boyue_l".equals(turnSignalPreset);
+        
+        // 只要车型是L6/L7或博越L，就显示车门联动（不依赖转向联动开关）
+        doorLinkageSectionLayout.setVisibility(isL6L7OrBoyueL ? View.VISIBLE : View.GONE);
+        
+        // 如果不应该显示（切换到其他车型），自动关闭车门联动
+        if (!isL6L7OrBoyueL && appConfig.isDoorLinkageEnabled()) {
+            appConfig.setDoorLinkageEnabled(false);
+            doorLinkageSwitch.setChecked(false);
+        }
     }
 
     private void setupListeners() {
@@ -270,6 +303,9 @@ public class BlindSpotSettingsFragment extends Fragment {
                     appConfig.setTurnSignalPresetSelection("l6l7");
                 }
                 
+                // 更新车门联动区域可见性
+                updateDoorLinkageVisibility();
+                
                 checkCarSignalManagerConnection();
                 BlindSpotService.update(requireContext());
             } else if (checkedId == R.id.rb_preset_car_api) {
@@ -278,19 +314,35 @@ public class BlindSpotSettingsFragment extends Fragment {
                 carApiStatusText.setVisibility(View.VISIBLE);
                 carApiStatusText.setText("VHAL gRPC 服务状态: 检测中...");
                 appConfig.setTurnSignalTriggerMode(AppConfig.TRIGGER_MODE_VHAL_GRPC);
+                appConfig.setTurnSignalPresetSelection("car_api");
+                
+                // 更新车门联动区域可见性（会自动处理关闭逻辑）
+                updateDoorLinkageVisibility();
+                
                 checkVhalGrpcConnection();
                 BlindSpotService.update(requireContext());
             } else {
                 // Logcat 模式
                 carApiStatusText.setVisibility(View.GONE);
                 appConfig.setTurnSignalTriggerMode(AppConfig.TRIGGER_MODE_LOGCAT);
+                
+                // 保存具体选择的预设
                 if (checkedId == R.id.rb_preset_custom) {
+                    appConfig.setTurnSignalPresetSelection("custom");
                     customKeywordsLayout.setVisibility(View.VISIBLE);
-                } else {
+                } else if (checkedId == R.id.rb_preset_xinghan7) {
+                    appConfig.setTurnSignalPresetSelection("xinghan7");
                     customKeywordsLayout.setVisibility(View.GONE);
-                    int presetIndex = (checkedId == R.id.rb_preset_xinghan7) ? 0 : 1;
-                    applyPreset(presetIndex);
+                    applyPreset(0);
+                } else {
+                    appConfig.setTurnSignalPresetSelection("e5");
+                    customKeywordsLayout.setVisibility(View.GONE);
+                    applyPreset(1);
                 }
+                
+                // 更新车门联动区域可见性（会自动处理关闭逻辑）
+                updateDoorLinkageVisibility();
+                
                 BlindSpotService.update(requireContext());
             }
         });
@@ -344,6 +396,19 @@ public class BlindSpotSettingsFragment extends Fragment {
             BlindSpotService.update(requireContext());
         });
 
+        // ==================== 车门联动监听器 ====================
+        
+        doorLinkageSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked && !WakeUpHelper.hasOverlayPermission(requireContext())) {
+                doorLinkageSwitch.setChecked(false);
+                Toast.makeText(requireContext(), "请先授予悬浮窗权限", Toast.LENGTH_SHORT).show();
+                WakeUpHelper.requestOverlayPermission(requireContext());
+                return;
+            }
+            appConfig.setDoorLinkageEnabled(isChecked);
+            BlindSpotService.update(requireContext());
+        });
+
         blindSpotCorrectionSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             appConfig.setBlindSpotCorrectionEnabled(isChecked);
             BlindSpotService.update(requireContext());
@@ -385,6 +450,7 @@ public class BlindSpotSettingsFragment extends Fragment {
             transaction.commit();
         });
 
+        // 调整车门副屏悬浮窗位置按钮
         logcatDebugButton.setOnClickListener(v -> {
             String keyword = logFilterEditText.getText().toString().trim();
             if (keyword.isEmpty()) {
@@ -509,4 +575,7 @@ public class BlindSpotSettingsFragment extends Fragment {
         }).start();
     }
 
+    /**
+     * 检查车门API连接状态
+     */
 }
