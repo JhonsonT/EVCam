@@ -89,8 +89,8 @@ public class AppConfig {
     private static final String KEY_TURN_SIGNAL_PRESET_SELECTION = "turn_signal_preset_selection"; // 用户选择的预设选项（博越L/L6L7等）
 
     // 转向灯触发模式常量
-    public static final String TRIGGER_MODE_LOGCAT = "logcat";            // Logcat 日志触发（默认）
-    public static final String TRIGGER_MODE_VHAL_GRPC = "vhal_grpc";      // VHAL gRPC 触发（银河E5）
+    public static final String TRIGGER_MODE_LOGCAT = "logcat";            // Logcat 日志触发
+    public static final String TRIGGER_MODE_VHAL_GRPC = "vhal_grpc";      // VHAL gRPC 触发（银河E5/26款星舰7，默认）
     public static final String TRIGGER_MODE_CAR_SIGNAL_MANAGER = "car_signal_manager"; // CarSignalManager API 触发（银河L6/L7）
     
     // 兼容性别名（保持向后兼容）
@@ -1807,7 +1807,7 @@ public class AppConfig {
      * 获取转向灯触发模式
      */
     public String getTurnSignalTriggerMode() {
-        return prefs.getString(KEY_TURN_SIGNAL_TRIGGER_MODE, TRIGGER_MODE_LOGCAT);
+        return prefs.getString(KEY_TURN_SIGNAL_TRIGGER_MODE, TRIGGER_MODE_VHAL_GRPC);
     }
 
     /**

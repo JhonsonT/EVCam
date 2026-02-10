@@ -390,6 +390,16 @@
                         android:orientation="vertical">
 
                         <RadioButton
+                            android:id="@+id/rb_preset_car_api"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:text="银河E5/26款星舰7-API触发"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:buttonTint="@color/colorPrimary" />
+
+                        <RadioButton
                             android:id="@+id/rb_preset_xinghan7"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -400,31 +410,11 @@
                             android:buttonTint="@color/colorPrimary" />
 
                         <RadioButton
-                            android:id="@+id/rb_preset_e5"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="40dp"
-                            android:text="银河E5-Logcat触发"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp"
-                            android:buttonTint="@color/colorPrimary" />
-
-                        <RadioButton
                             android:id="@+id/rb_preset_custom"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:minHeight="40dp"
                             android:text="自定义Logcat触发"
-                            android:textColor="@color/text_primary"
-                            android:textSize="14sp"
-                            android:buttonTint="@color/colorPrimary" />
-
-                        <RadioButton
-                            android:id="@+id/rb_preset_car_api"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:minHeight="40dp"
-                            android:text="银河E5-API触发"
                             android:textColor="@color/text_primary"
                             android:textSize="14sp"
                             android:buttonTint="@color/colorPrimary" />

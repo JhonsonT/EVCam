@@ -44,7 +44,6 @@ public class BlindSpotSettingsFragment extends Fragment {
     private static final String[][] TURN_SIGNAL_PRESETS = {
         // { presetId, leftKeyword, rightKeyword }
         { "xinghan7", "left front turn signal:1", "right front turn signal:1" },
-        { "e5", "PA_GpioTurnLeftLamp, value:1", "PA_GpioTurnRightLamp, value:1" },
     };
 
     private TextView carApiStatusText;
@@ -180,9 +179,6 @@ public class BlindSpotSettingsFragment extends Fragment {
             if (matchedPreset == 0) {
                 turnSignalPresetGroup.check(R.id.rb_preset_xinghan7);
                 customKeywordsLayout.setVisibility(View.GONE);
-            } else if (matchedPreset == 1) {
-                turnSignalPresetGroup.check(R.id.rb_preset_e5);
-                customKeywordsLayout.setVisibility(View.GONE);
             } else {
                 turnSignalPresetGroup.check(R.id.rb_preset_custom);
                 customKeywordsLayout.setVisibility(View.VISIBLE);
@@ -288,8 +284,7 @@ public class BlindSpotSettingsFragment extends Fragment {
                     customKeywordsLayout.setVisibility(View.VISIBLE);
                 } else {
                     customKeywordsLayout.setVisibility(View.GONE);
-                    int presetIndex = (checkedId == R.id.rb_preset_xinghan7) ? 0 : 1;
-                    applyPreset(presetIndex);
+                    applyPreset(0);
                 }
                 BlindSpotService.update(requireContext());
             }
@@ -421,7 +416,7 @@ public class BlindSpotSettingsFragment extends Fragment {
 
     /**
      * 根据当前关键词匹配预设方案
-     * @return 预设索引（0=星舰7, 1=E5），-1 表示自定义
+     * @return 预设索引（0=星舰7），-1 表示自定义
      */
     private int findMatchingPreset(String leftKeyword, String rightKeyword) {
         if (leftKeyword == null || rightKeyword == null) return -1;
