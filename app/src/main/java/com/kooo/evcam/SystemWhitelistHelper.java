@@ -22,6 +22,7 @@ public class SystemWhitelistHelper {
 
     private static final String TAG = "SystemWhitelistHelper";
     private static final String SCRIPT_ASSET_NAME = "add_evcam_config.sh";
+    private static final String RESTORE_SCRIPT_ASSET_NAME = "restore_evcam_config.sh";
 
     private final Context context;
     private AdbPermissionHelper adbHelper;
@@ -50,7 +51,7 @@ public class SystemWhitelistHelper {
         // 步骤 1：将脚本从 assets 复制到缓存目录
         callback.onLog("[INFO] 正在准备脚本文件...");
 
-        File scriptFile = copyScriptFromAssets();
+        File scriptFile = copyScriptFromAssets(SCRIPT_ASSET_NAME);
         if (scriptFile == null) {
             callback.onLog("[ERROR] 无法准备脚本文件");
             callback.onComplete(false);
@@ -83,13 +84,51 @@ public class SystemWhitelistHelper {
     }
 
     /**
+     * 执行白名单恢复。
+     * 1. 将恢复脚本从 assets 复制到应用缓存目录
+     * 2. 通过 ADB TCP 协议执行脚本
+     * 3. 实时输出脚本日志
+     */
+    public void executeWhitelistRestore(Callback callback) {
+        callback.onLog("[INFO] 正在准备恢复脚本...");
+
+        File scriptFile = copyScriptFromAssets(RESTORE_SCRIPT_ASSET_NAME);
+        if (scriptFile == null) {
+            callback.onLog("[ERROR] 无法准备恢复脚本");
+            callback.onComplete(false);
+            return;
+        }
+        callback.onLog("[OK] 脚本已准备: " + scriptFile.getAbsolutePath());
+        callback.onLog("");
+
+        if (adbHelper == null) {
+            adbHelper = new AdbPermissionHelper(context);
+        }
+
+        adbHelper.executeScriptFile(scriptFile.getAbsolutePath(), new AdbPermissionHelper.Callback() {
+            @Override
+            public void onLog(String message) {
+                callback.onLog(message);
+            }
+
+            @Override
+            public void onComplete(boolean allSuccess) {
+                if (scriptFile.exists()) {
+                    scriptFile.delete();
+                }
+                callback.onComplete(allSuccess);
+            }
+        });
+    }
+
+    /**
      * 将脚本文件从 assets 复制到应用缓存目录
      */
-    private File copyScriptFromAssets() {
+    private File copyScriptFromAssets(String assetName) {
         File cacheDir = context.getCacheDir();
-        File scriptFile = new File(cacheDir, SCRIPT_ASSET_NAME);
+        File scriptFile = new File(cacheDir, assetName);
 
-        try (InputStream is = context.getAssets().open(SCRIPT_ASSET_NAME);
+        try (InputStream is = context.getAssets().open(assetName);
              OutputStream os = new FileOutputStream(scriptFile)) {
 
             byte[] buffer = new byte[4096];

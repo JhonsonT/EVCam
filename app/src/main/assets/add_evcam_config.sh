@@ -267,14 +267,16 @@ modify_files() {
         { print }
         ' "$LIFECTL_FILE" > "$TEMP_FILE"
         
-        if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ]; then
+        if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ] && grep -q '<services>' "$TEMP_FILE" && grep -q '</services>' "$TEMP_FILE" && grep -q "$PACKAGE_NAME" "$TEMP_FILE"; then
             mv "$TEMP_FILE" "$LIFECTL_FILE"
             chmod 644 "$LIFECTL_FILE"
+            sync
             print_success "已修改 $LIFECTL_FILE"
         else
-            print_error "修改 $LIFECTL_FILE 失败！"
+            print_error "修改 $LIFECTL_FILE 失败！输出文件验证未通过"
             rm -f "$TEMP_FILE"
             cp "$LIFECTL_BACKUP" "$LIFECTL_FILE"
+            sync
             return 1
         fi
     else
@@ -305,14 +307,16 @@ modify_files() {
         { print }
         ' "$WHITELIST_FILE" > "$TEMP_FILE"
         
-        if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ]; then
+        if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ] && grep -q '<whitelist>' "$TEMP_FILE" && grep -q '</whitelist>' "$TEMP_FILE" && grep -q "$PACKAGE_NAME" "$TEMP_FILE"; then
             mv "$TEMP_FILE" "$WHITELIST_FILE"
             chmod 644 "$WHITELIST_FILE"
+            sync
             print_success "已修改 $WHITELIST_FILE"
         else
-            print_error "修改 $WHITELIST_FILE 失败！"
+            print_error "修改 $WHITELIST_FILE 失败！输出文件验证未通过"
             rm -f "$TEMP_FILE"
             cp "$WHITELIST_BACKUP" "$WHITELIST_FILE"
+            sync
             return 1
         fi
     else
@@ -324,64 +328,103 @@ modify_files() {
         print_info "备份 $BGMS_FILE ..."
         BGMS_BACKUP="${BACKUP_DIR}/bgms_config.xml.bak.${TIMESTAMP}"
         cp "$BGMS_FILE" "$BGMS_BACKUP"
-        
+
         if [ $? -ne 0 ]; then
             print_error "备份失败！"
             return 1
         fi
         print_success "已备份到 $BGMS_BACKUP"
-        
+
         print_info "添加 EVCam 到 BGMS 白名单（3个位置）..."
-        
+
+        # 使用 cp + 逐个 sed 行号插入，避免 toybox awk 多 flag 状态追踪导致输出异常
         TEMP_FILE="${BGMS_FILE}.tmp"
-        
-        awk '
-        BEGIN {
-            in_whitelist = 0
-            in_active_throttle = 0
-            in_strwhitelist = 0
-            pkg_line = "    <pkg>com.kooo.evcam</pkg>"
-        }
-        
-        /<array name="whitelist">/ { in_whitelist = 1 }
-        /<array name="active_throttle_whitelist">/ { in_active_throttle = 1 }
-        /<array name="strwhitelist">/ { in_strwhitelist = 1 }
-        
-        /<\/array>/ {
-            if (in_whitelist == 1) {
-                print "    <!-- EVCam 保活配置 -->"
-                print pkg_line
-                in_whitelist = 0
-            }
-            if (in_active_throttle == 1) {
-                print "    <!-- EVCam 保活配置 -->"
-                print pkg_line
-                in_active_throttle = 0
-            }
-            if (in_strwhitelist == 1) {
-                print "    <!-- EVCam 保活配置 (STR白名单) -->"
-                print pkg_line
-                in_strwhitelist = 0
-            }
-        }
-        
-        { print }
-        ' "$BGMS_FILE" > "$TEMP_FILE"
-        
-        if [ $? -eq 0 ] && [ -s "$TEMP_FILE" ]; then
+        cp "$BGMS_FILE" "$TEMP_FILE"
+        BGMS_MODIFY_OK=1
+
+        for ARRAY_NAME in "whitelist" "active_throttle_whitelist" "strwhitelist"; do
+            # 找到 <array name="ARRAYNAME"> 的行号
+            OPEN_LINE=$(grep -n "<array name=\"${ARRAY_NAME}\">" "$TEMP_FILE" | head -1 | cut -d: -f1)
+            if [ -z "$OPEN_LINE" ]; then
+                print_warning "未找到 <array name=\"${ARRAY_NAME}\">，跳过"
+                continue
+            fi
+
+            # 找到该开标签之后的第一个 </array> 行号
+            CLOSE_LINE=$(tail -n +"$OPEN_LINE" "$TEMP_FILE" | grep -n '</array>' | head -1 | cut -d: -f1)
+            if [ -z "$CLOSE_LINE" ]; then
+                print_warning "未找到 ${ARRAY_NAME} 的 </array>，跳过"
+                continue
+            fi
+            # CLOSE_LINE 是相对于 OPEN_LINE 的偏移，转为绝对行号
+            CLOSE_LINE=$((OPEN_LINE + CLOSE_LINE - 1))
+
+            # 在 </array> 行之前插入 EVCam 条目
+            TEMP_FILE2="${TEMP_FILE}.2"
+            sed "${CLOSE_LINE}i\\
+    <!-- EVCam 保活配置 -->\\
+    <pkg>com.kooo.evcam</pkg>" "$TEMP_FILE" > "$TEMP_FILE2"
+
+            if [ $? -ne 0 ] || [ ! -s "$TEMP_FILE2" ]; then
+                print_error "sed 插入 ${ARRAY_NAME} 失败"
+                rm -f "$TEMP_FILE2"
+                BGMS_MODIFY_OK=0
+                break
+            fi
+
+            mv "$TEMP_FILE2" "$TEMP_FILE"
+            print_info "  已插入到 ${ARRAY_NAME}"
+        done
+
+        # 综合验证
+        if [ "$BGMS_MODIFY_OK" = "1" ]; then
+            # 验证输出文件包含有效 XML 内容（非 NULL 字节填充）
+            if ! grep -q '<device' "$TEMP_FILE"; then
+                print_error "输出文件不包含有效 XML（可能为 NULL 字节填充）"
+                BGMS_MODIFY_OK=0
+            fi
+            # 验证根元素闭合
+            if ! grep -q '</device>' "$TEMP_FILE"; then
+                print_error "输出文件缺少 </device> 闭合标签"
+                BGMS_MODIFY_OK=0
+            fi
+            # 验证关键系统条目未丢失（全景影像）
+            if ! grep -q 'com.geely.avm_app' "$TEMP_FILE"; then
+                print_error "关键条目 com.geely.avm_app 丢失！中止操作以保护全景影像功能"
+                BGMS_MODIFY_OK=0
+            fi
+            # 验证 EVCam 条目已添加
+            EVCAM_COUNT=$(grep -c "$PACKAGE_NAME" "$TEMP_FILE")
+            if [ "$EVCAM_COUNT" -lt 3 ]; then
+                print_warning "EVCam 条目仅添加了 ${EVCAM_COUNT} 处（预期 3 处）"
+            fi
+            # 验证文件大小合理（修改后应比原文件大）
+            ORIG_SIZE=$(wc -c < "$BGMS_FILE" | tr -d ' ')
+            NEW_SIZE=$(wc -c < "$TEMP_FILE" | tr -d ' ')
+            if [ "$NEW_SIZE" -lt "$ORIG_SIZE" ]; then
+                print_error "输出文件 (${NEW_SIZE}B) 小于原文件 (${ORIG_SIZE}B)，数据可能损坏"
+                BGMS_MODIFY_OK=0
+            fi
+        fi
+
+        if [ "$BGMS_MODIFY_OK" = "1" ]; then
             mv "$TEMP_FILE" "$BGMS_FILE"
             chmod 644 "$BGMS_FILE"
+            sync
             print_success "已修改 $BGMS_FILE"
         else
-            print_error "修改 $BGMS_FILE 失败！"
-            rm -f "$TEMP_FILE"
+            print_error "修改 $BGMS_FILE 失败！正在恢复备份..."
+            rm -f "$TEMP_FILE" "${TEMP_FILE}.2"
             cp "$BGMS_BACKUP" "$BGMS_FILE"
+            chmod 644 "$BGMS_FILE"
+            sync
             return 1
         fi
     else
         print_info "跳过 $BGMS_FILE（已存在配置）"
     fi
-    
+
+    sync
     return 0
 }
 

@@ -568,6 +568,37 @@
                         android:fontFamily="monospace"
                         android:lineSpacingExtra="2dp" />
                 </ScrollView>
+
+                <!-- 恢复系统白名单 -->
+                <Button
+                    android:id="@+id/btn_restore_whitelist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="恢复系统白名单"
+                    android:textSize="16sp"
+                    android:backgroundTint="#FFFF9800"
+                    android:textColor="#FFFFFFFF" />
+
+                <ScrollView
+                    android:id="@+id/scroll_restore_log"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/page_background"
+                    android:padding="10dp"
+                    android:visibility="gone"
+                    android:fillViewport="false">
+
+                    <TextView
+                        android:id="@+id/tv_restore_log"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:fontFamily="monospace"
+                        android:lineSpacingExtra="2dp" />
+                </ScrollView>
             </LinearLayout>
 
         </LinearLayout>

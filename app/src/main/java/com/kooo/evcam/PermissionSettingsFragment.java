@@ -70,6 +70,13 @@ public class PermissionSettingsFragment extends Fragment {
     private boolean isWhitelistRunning = false;
     private boolean autoScrollWhitelistLog = true;
 
+    // 恢复系统白名单
+    private Button btnRestoreWhitelist;
+    private ScrollView scrollRestoreLog;
+    private TextView tvRestoreLog;
+    private boolean isRestoreRunning = false;
+    private boolean autoScrollRestoreLog = true;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -158,7 +165,19 @@ public class PermissionSettingsFragment extends Fragment {
             }
             return false;
         });
-        
+
+        // 恢复系统白名单
+        btnRestoreWhitelist = view.findViewById(R.id.btn_restore_whitelist);
+        scrollRestoreLog = view.findViewById(R.id.scroll_restore_log);
+        tvRestoreLog = view.findViewById(R.id.tv_restore_log);
+        scrollRestoreLog.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
+                autoScrollRestoreLog = false;
+            }
+            return false;
+        });
+
         // 根据系统版本显示/隐藏某些选项
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             layoutNotificationPermission.setVisibility(View.VISIBLE);
@@ -213,6 +232,9 @@ public class PermissionSettingsFragment extends Fragment {
         
         // 系统白名单（E245）
         btnSystemWhitelist.setOnClickListener(v -> showWhitelistRiskDialog());
+
+        // 恢复系统白名单
+        btnRestoreWhitelist.setOnClickListener(v -> showRestoreConfirmDialog());
     }
 
     @Override
@@ -625,6 +647,74 @@ public class PermissionSettingsFragment extends Fragment {
                     tvWhitelistStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark, null));
                 } else {
                     tvWhitelistStatus.setText("配置失败 - 请查看日志了解详情");
+                    tvWhitelistStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
+                }
+            }
+        });
+    }
+
+    // ==================== E245 恢复系统白名单 ====================
+
+    /**
+     * 显示恢复确认对话框
+     */
+    private void showRestoreConfirmDialog() {
+        if (getContext() == null) return;
+
+        new MaterialAlertDialogBuilder(getContext(), R.style.Theme_Cam_MaterialAlertDialog)
+                .setTitle("恢复确认")
+                .setMessage("此操作将从备份恢复车机系统白名单配置：\n\n"
+                        + "1. 恢复后 EVCam 的白名单配置将被移除\n"
+                        + "2. 系统配置文件将还原为修改前的状态\n"
+                        + "3. 需要重启车机才能生效\n"
+                        + "4. 如果之前「一键配置」导致全景影像等功能异常，恢复后应恢复正常\n\n"
+                        + "确认要恢复吗？")
+                .setPositiveButton("确认恢复", (dialog, which) -> startWhitelistRestore())
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    /**
+     * 启动系统白名单恢复
+     */
+    private void startWhitelistRestore() {
+        if (isRestoreRunning) return;
+        if (getContext() == null) return;
+
+        isRestoreRunning = true;
+        autoScrollRestoreLog = true;
+        btnRestoreWhitelist.setEnabled(false);
+        btnRestoreWhitelist.setText("正在恢复...");
+        scrollRestoreLog.setVisibility(View.VISIBLE);
+        tvRestoreLog.setText("");
+
+        if (whitelistHelper == null) {
+            whitelistHelper = new SystemWhitelistHelper(getContext());
+        }
+
+        whitelistHelper.executeWhitelistRestore(new SystemWhitelistHelper.Callback() {
+            @Override
+            public void onLog(String message) {
+                if (getContext() == null) return;
+                tvRestoreLog.append(message + "\n");
+                if (autoScrollRestoreLog) {
+                    scrollRestoreLog.post(() -> scrollRestoreLog.fullScroll(View.FOCUS_DOWN));
+                }
+            }
+
+            @Override
+            public void onComplete(boolean success) {
+                isRestoreRunning = false;
+                btnRestoreWhitelist.setEnabled(true);
+                btnRestoreWhitelist.setText("恢复系统白名单");
+
+                if (getContext() == null) return;
+
+                if (success) {
+                    tvWhitelistStatus.setText("已恢复 - 请重启车机使配置生效");
+                    tvWhitelistStatus.setTextColor(getResources().getColor(android.R.color.holo_green_dark, null));
+                } else {
+                    tvWhitelistStatus.setText("恢复失败 - 请查看日志了解详情");
                     tvWhitelistStatus.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
                 }
             }
