@@ -51,6 +51,7 @@ public class BlindSpotService extends Service {
     private LogcatSignalObserver logcatSignalObserver;
     private VhalSignalObserver vhalSignalObserver;
     private CarSignalManagerObserver carSignalManagerObserver;
+    private DoorSignalObserver doorSignalObserver; // 车门联动观察者
     private final Handler hideHandler = new Handler(Looper.getMainLooper());
     private Runnable hideRunnable;
     private Runnable signalKeepAliveRunnable; // 信号保活计时器（debounce）
@@ -86,6 +87,11 @@ public class BlindSpotService extends Service {
             initVhalSignalObserver();
         } else {
             initLogcatSignalObserver();
+        }
+        
+        // 车门联动（独立于转向灯联动）
+        if (appConfig.isDoorLinkageEnabled()) {
+            initDoorSignalObserver();
         }
     }
 
@@ -141,6 +147,87 @@ public class BlindSpotService extends Service {
             }
         });
         carSignalManagerObserver.start();
+    }
+
+    /**
+     * 初始化车门联动观察者（银河L6/L7 API）
+     */
+    private void initDoorSignalObserver() {
+        AppLog.i(TAG, "🚪 ========== 开始初始化车门联动观察者 ==========");
+        AppLog.i(TAG, "🚪 补盲功能总开关: " + appConfig.isBlindSpotGlobalEnabled());
+        AppLog.i(TAG, "🚪 车门联动开关: " + appConfig.isDoorLinkageEnabled());
+        AppLog.i(TAG, "🚪 车门联动车型: " + appConfig.getTurnSignalPresetSelection() + " (复用转向联动配置)");
+        AppLog.i(TAG, "🚪 车门消失延迟: " + appConfig.getTurnSignalTimeout() + "秒 (复用转向联动配置)");
+        
+        doorSignalObserver = new DoorSignalObserver(this, new DoorSignalObserver.DoorSignalListener() {
+            @Override
+            public void onDoorOpen(String side) {
+                AppLog.i(TAG, "🚪🚪🚪 收到车门打开事件: " + side);
+                
+                if (!appConfig.isBlindSpotGlobalEnabled()) {
+                    AppLog.w(TAG, "🚪 补盲功能未启用，跳过车门触发");
+                    return;
+                }
+                if (!appConfig.isDoorLinkageEnabled()) {
+                    AppLog.w(TAG, "🚪 车门联动未启用，跳过车门触发");
+                    return;
+                }
+                
+                // 如果当前有转向灯激活，车门联动让路（转向灯优先级更高）
+                if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
+                    AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，车门联动让路");
+                    return;
+                }
+                
+                // 如果同侧摄像头已经在显示（车门联动触发的），跳过重复显示
+                if (isMainTempShown && mainFloatingWindowView != null) {
+                    AppLog.i(TAG, "🚪 车门联动摄像头已在显示，跳过重复创建");
+                    // 但需要取消隐藏计时器（门重新打开了）
+                    if (hideRunnable != null) {
+                        hideHandler.removeCallbacks(hideRunnable);
+                        hideRunnable = null;
+                        AppLog.i(TAG, "🚪 取消隐藏计时器（门重新打开）");
+                    }
+                    return;
+                }
+                
+                AppLog.i(TAG, "🚪 ✅ 车门打开: " + side + "，准备显示摄像头");
+                showDoorCamera(side);
+            }
+
+            @Override
+            public void onDoorClose(String side) {
+                AppLog.i(TAG, "🚪🚪🚪 收到车门关闭事件: " + side);
+                
+                if (!appConfig.isDoorLinkageEnabled()) {
+                    AppLog.w(TAG, "🚪 车门联动未启用，跳过关闭逻辑");
+                    return;
+                }
+                
+                // 只有在没有转向灯激活时才关闭车门摄像头
+                if (currentSignalCamera != null && !currentSignalCamera.isEmpty()) {
+                    AppLog.w(TAG, "🚪 转向灯正在使用(" + currentSignalCamera + ")，不关闭车门摄像头");
+                    return;
+                }
+                
+                // 检查是否有车门联动触发的窗口在显示
+                if (!isMainTempShown && dedicatedBlindSpotWindow == null) {
+                    AppLog.i(TAG, "🚪 没有车门联动窗口在显示，跳过关闭逻辑");
+                    return;
+                }
+                
+                AppLog.i(TAG, "🚪 ✅ 车门关闭: " + side + "，准备延迟关闭摄像头");
+                startDoorHideTimer();
+            }
+
+            @Override
+            public void onConnectionStateChanged(boolean connected) {
+                AppLog.i(TAG, "🚪 车门监听连接状态: " + (connected ? "✅ 已连接" : "❌ 未连接"));
+            }
+        });
+        
+        doorSignalObserver.start();
+        AppLog.i(TAG, "🚪 ========== 车门联动观察者启动完成 ==========");
     }
 
     private void initLogcatSignalObserver() {
@@ -203,16 +290,29 @@ public class BlindSpotService extends Service {
             carSignalManagerObserver.stop();
             carSignalManagerObserver = null;
         }
+        if (doorSignalObserver != null) {
+            doorSignalObserver.stop();
+            doorSignalObserver = null;
+        }
     }
 
     /**
      * 显示盲区摄像头（用于 CarSignalManager API，不使用 debounce）
      */
     private void showBlindSpotCamera(String cameraPos) {
+        AppLog.i(TAG, "🚦 转向灯触发摄像头: " + cameraPos);
+        
+        // 如果车门联动窗口在显示，先关闭（转向灯优先级更高）
+        if (isMainTempShown) {
+            AppLog.i(TAG, "🚦 检测到车门联动窗口，转向灯接管（优先级更高）");
+            isMainTempShown = false;
+        }
+        
         // 取消隐藏计时器
         if (hideRunnable != null) {
             hideHandler.removeCallbacks(hideRunnable);
             hideRunnable = null;
+            AppLog.d(TAG, "🚦 已取消隐藏计时器");
         }
 
         // 取消信号保活计时器（如果之前从其他模式切换过来）
@@ -227,7 +327,7 @@ public class BlindSpotService extends Service {
         }
 
         currentSignalCamera = cameraPos;
-        AppLog.d(TAG, "转向灯触发摄像头(CarSignalManager): " + cameraPos);
+        AppLog.i(TAG, "🚦 转向灯激活，设置 currentSignalCamera = " + cameraPos);
 
         // 确保前台服务已启动
         CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
@@ -489,11 +589,12 @@ public class BlindSpotService extends Service {
         }
 
         int timeout = appConfig.getTurnSignalTimeout();
-        AppLog.d(TAG, "转向灯熄灭，启动隐藏计时器: " + timeout + "s");
+        AppLog.i(TAG, "🚦 转向灯熄灭，启动隐藏计时器: " + timeout + "秒后关闭摄像头");
 
         hideRunnable = () -> {
-            AppLog.d(TAG, "转向灯超时，隐藏补盲画面");
+            AppLog.i(TAG, "🚦 ⏰ 转向灯超时(" + timeout + "秒)，隐藏补盲画面");
             currentSignalCamera = null;
+            AppLog.i(TAG, "🚦 清除 currentSignalCamera，车门联动恢复可用");
             
             // 恢复主屏悬浮窗状态
             if (isMainTempShown && mainFloatingWindowView != null) {
@@ -520,6 +621,139 @@ public class BlindSpotService extends Service {
             hideRunnable = null;
         };
 
+        hideHandler.postDelayed(hideRunnable, timeout * 1000L);
+    }
+
+    // ==================== 车门联动相关方法 ====================
+    
+    /**
+     * 显示车门摄像头（专用于车门联动）
+     */
+    private void showDoorCamera(String side) {
+        AppLog.i(TAG, "🚪 ========== showDoorCamera 开始执行 ==========");
+        AppLog.i(TAG, "🚪 触发侧: " + side);
+        
+        // 取消车门隐藏计时器
+        if (hideRunnable != null) {
+            hideHandler.removeCallbacks(hideRunnable);
+            hideRunnable = null;
+            AppLog.d(TAG, "🚪 已取消隐藏计时器");
+        }
+        
+        // 取消信号保活计时器
+        if (signalKeepAliveRunnable != null) {
+            hideHandler.removeCallbacks(signalKeepAliveRunnable);
+            signalKeepAliveRunnable = null;
+            AppLog.d(TAG, "🚪 已取消信号保活计时器");
+        }
+        
+        // 确保前台服务已启动
+        AppLog.d(TAG, "🚪 启动前台服务");
+        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
+        
+        // 确保摄像头已初始化
+        AppLog.d(TAG, "🚪 初始化摄像头管理器");
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
+        
+        // 副屏窗口预创建（复用转向联动的配置）
+        if (appConfig.isSecondaryDisplayEnabled()) {
+            if (secondaryFloatingView == null) {
+                AppLog.d(TAG, "🚪 显示副屏");
+                showSecondaryDisplay();
+            }
+        }
+        
+        boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
+        AppLog.i(TAG, "🚪 复用主屏悬浮窗: " + reuseMain + " (复用转向联动配置)");
+        
+        if (reuseMain) {
+            // 复用主屏悬浮窗
+            if (mainFloatingWindowView != null) {
+                mainFloatingWindowView.dismiss();
+                mainFloatingWindowView = null;
+                AppLog.d(TAG, "🚪 已关闭旧的主屏悬浮窗");
+            }
+            if (WakeUpHelper.hasOverlayPermission(this)) {
+                AppLog.i(TAG, "🚪 创建主屏悬浮窗，显示 " + side + " 侧摄像头");
+                mainFloatingWindowView = new MainFloatingWindowView(this);
+                mainFloatingWindowView.updateCamera(side, true);
+                mainFloatingWindowView.show();
+                isMainTempShown = true;
+                AppLog.i(TAG, "🚪 ✅ 主屏车门临时补盲悬浮窗已显示");
+            } else {
+                AppLog.e(TAG, "🚪 ❌ 没有悬浮窗权限！");
+            }
+        } else {
+            // 使用独立补盲悬浮窗
+            if (mainFloatingWindowView != null) {
+                mainFloatingWindowView.dismiss();
+                mainFloatingWindowView = null;
+                isMainTempShown = false;
+                AppLog.d(TAG, "🚪 已关闭主屏悬浮窗");
+            }
+            if (dedicatedBlindSpotWindow != null) {
+                dedicatedBlindSpotWindow.dismiss();
+                dedicatedBlindSpotWindow = null;
+                AppLog.d(TAG, "🚪 已关闭旧的独立补盲窗");
+            }
+            AppLog.i(TAG, "🚪 创建独立补盲窗，显示 " + side + " 侧摄像头");
+            dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
+            dedicatedBlindSpotWindow.setCameraPos(side);
+            dedicatedBlindSpotWindow.show();
+            dedicatedBlindSpotWindow.setCamera(side);
+            AppLog.i(TAG, "🚪 ✅ 独立补盲窗已显示");
+        }
+        
+        // 副屏摄像头预览（复用转向联动的配置）
+        if (appConfig.isSecondaryDisplayEnabled()) {
+            AppLog.d(TAG, "🚪 启动副屏摄像头预览: " + side);
+            startSecondaryCameraPreviewDirectly(side);
+        }
+        
+        AppLog.i(TAG, "🚪 ========== showDoorCamera 执行完成 ==========");
+    }
+    
+    /**
+     * 启动车门隐藏计时器（复用转向联动的延迟配置）
+     */
+    private void startDoorHideTimer() {
+        if (hideRunnable != null) {
+            hideHandler.removeCallbacks(hideRunnable);
+        }
+        
+        int timeout = appConfig.getTurnSignalTimeout();
+        AppLog.i(TAG, "🚪 车门关闭，启动隐藏计时器: " + timeout + "秒后关闭摄像头 (复用转向联动配置)");
+        
+        hideRunnable = () -> {
+            AppLog.i(TAG, "🚪 ⏰ 车门超时(" + timeout + "秒)，隐藏补盲画面");
+            
+            // 恢复主屏悬浮窗状态
+            if (isMainTempShown && mainFloatingWindowView != null) {
+                mainFloatingWindowView.dismiss();
+                mainFloatingWindowView = null;
+                isMainTempShown = false;
+                AppLog.i(TAG, "🚪 ✅ 主屏车门临时悬浮窗已关闭");
+            } else if (mainFloatingWindowView != null) {
+                mainFloatingWindowView.updateCamera(appConfig.getMainFloatingCamera());
+            }
+            
+            // 隐藏独立补盲窗
+            if (dedicatedBlindSpotWindow != null) {
+                dedicatedBlindSpotWindow.dismiss();
+                dedicatedBlindSpotWindow = null;
+                AppLog.i(TAG, "🚪 ✅ 独立补盲窗已关闭");
+                
+                // 如果原本主屏悬浮窗就是开启的，补盲结束后需要恢复它
+                if (appConfig.isMainFloatingEnabled()) {
+                    updateMainFloatingWindow();
+                }
+            }
+            
+            // 副屏显示恢复
+            updateSecondaryDisplay();
+            hideRunnable = null;
+        };
+        
         hideHandler.postDelayed(hideRunnable, timeout * 1000L);
     }
 
@@ -621,21 +855,24 @@ public class BlindSpotService extends Service {
         applyTransforms();
         
         if (isSecondaryAdjustMode
-                || appConfig.isMainFloatingEnabled()
-                || appConfig.isTurnSignalLinkageEnabled()
-                || appConfig.isMockTurnSignalFloatingEnabled()
-                || currentSignalCamera != null
+                || appConfig.isMainFloatingEnabled() // 加入主屏悬浮窗检查
+                || appConfig.isTurnSignalLinkageEnabled() // 加入转向灯联动检查
+                || appConfig.isDoorLinkageEnabled()  // 加入车门联动检查
+                || appConfig.isMockTurnSignalFloatingEnabled() // 加入模拟转向灯检查
+                || currentSignalCamera != null // 加入转向灯联动检查
                 || previewCameraPos != null) {
             CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
         }
         
         // 如果两个功能都关闭了，可以考虑停止服务
-        // 但若转向灯联动开启，仍需要服务常驻以便“主关副关”时弹出临时补盲窗口
+        // 但若转向灯联动或车门联动开启，仍需要服务常驻以便触发补盲窗口
         if (!isSecondaryAdjustMode
                 && !appConfig.isMainFloatingEnabled()
                 && !appConfig.isTurnSignalLinkageEnabled()
+                && !appConfig.isDoorLinkageEnabled()  // 加入车门联动检查
                 && !appConfig.isMockTurnSignalFloatingEnabled()
                 && previewCameraPos == null) {
+            AppLog.i(TAG, "🚪 所有功能都关闭，停止服务");
             stopSelf();
         }
     }

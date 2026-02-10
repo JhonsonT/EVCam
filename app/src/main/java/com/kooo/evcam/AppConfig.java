@@ -77,6 +77,14 @@ public class AppConfig {
     // 转向灯联动配置 (补盲选项新增)
     private static final String KEY_TURN_SIGNAL_LINKAGE_ENABLED = "turn_signal_linkage_enabled"; // 转向灯联动开关
     private static final String KEY_TURN_SIGNAL_TIMEOUT = "turn_signal_timeout";               // 转向灯熄灭后延迟消失时间 (秒)
+    
+    // 车门联动配置
+    private static final String KEY_DOOR_LINKAGE_ENABLED = "door_linkage_enabled";             // 车门联动开关
+    private static final String KEY_DOOR_TIMEOUT = "door_timeout";                             // 车门关闭后延迟消失时间 (秒)
+    private static final String KEY_DOOR_PRESET_SELECTION = "door_preset_selection";           // 车门联动车型选择 (l6l7/boyue_l)
+    private static final String KEY_DOOR_REUSE_MAIN_FLOATING = "door_reuse_main_floating";     // 车门联动是否复用主屏悬浮窗
+    private static final String KEY_DOOR_SECONDARY_DISPLAY_ENABLED = "door_secondary_display_enabled"; // 车门联动副屏显示开关
+    
     private static final String KEY_TURN_SIGNAL_REUSE_MAIN_FLOATING = "turn_signal_reuse_main_floating"; // 是否复用主屏悬浮窗
     private static final String KEY_TURN_SIGNAL_FLOATING_X = "turn_signal_floating_x";          // 独立补盲悬浮窗X
     private static final String KEY_TURN_SIGNAL_FLOATING_Y = "turn_signal_floating_y";          // 独立补盲悬浮窗Y
@@ -1847,6 +1855,70 @@ public class AppConfig {
      */
     public String getTurnSignalPresetSelection() {
         return prefs.getString(KEY_TURN_SIGNAL_PRESET_SELECTION, "l6l7"); // 默认返回 l6l7
+    }
+
+    // ==================== 车门联动配置 ====================
+    
+    /**
+     * 设置车门联动开关（左右补盲）
+     */
+    public void setDoorLinkageEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_DOOR_LINKAGE_ENABLED, enabled).apply();
+        AppLog.d(TAG, "车门联动设置: " + (enabled ? "启用" : "禁用"));
+    }
+
+    public boolean isDoorLinkageEnabled() {
+        return prefs.getBoolean(KEY_DOOR_LINKAGE_ENABLED, false);
+    }
+
+    /**
+     * 设置车门关闭后延迟消失时间
+     */
+    public void setDoorTimeout(int seconds) {
+        prefs.edit().putInt(KEY_DOOR_TIMEOUT, seconds).apply();
+    }
+
+    public int getDoorTimeout() {
+        return prefs.getInt(KEY_DOOR_TIMEOUT, 10); // 默认10秒
+    }
+
+    /**
+     * 保存用户选择的车门联动预设选项（用于恢复具体的 RadioButton 选择）
+     * @param presetName 预设名称，如 "l6l7" 或 "boyue_l"
+     */
+    public void setDoorPresetSelection(String presetName) {
+        prefs.edit().putString(KEY_DOOR_PRESET_SELECTION, presetName).apply();
+        AppLog.d(TAG, "保存车门联动预设选择: " + presetName);
+    }
+
+    /**
+     * 获取用户选择的车门联动预设选项
+     * @return 预设名称，如 "l6l7" 或 "boyue_l"
+     */
+    public String getDoorPresetSelection() {
+        return prefs.getString(KEY_DOOR_PRESET_SELECTION, "l6l7"); // 默认返回 l6l7
+    }
+
+    /**
+     * 设置车门联动是否复用主屏悬浮窗
+     */
+    public void setDoorReuseMainFloating(boolean reuse) {
+        prefs.edit().putBoolean(KEY_DOOR_REUSE_MAIN_FLOATING, reuse).apply();
+    }
+
+    public boolean isDoorReuseMainFloating() {
+        return prefs.getBoolean(KEY_DOOR_REUSE_MAIN_FLOATING, true); // 默认复用
+    }
+
+    /**
+     * 设置车门联动副屏显示开关
+     */
+    public void setDoorSecondaryDisplayEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_DOOR_SECONDARY_DISPLAY_ENABLED, enabled).apply();
+    }
+
+    public boolean isDoorSecondaryDisplayEnabled() {
+        return prefs.getBoolean(KEY_DOOR_SECONDARY_DISPLAY_ENABLED, false); // 默认关闭
     }
 
     /**
