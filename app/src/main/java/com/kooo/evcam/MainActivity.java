@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
     private AutoFitTextureView textureFront, textureBack, textureLeft, textureRight;
     private final java.util.Map<String, android.graphics.Matrix> previewBaseTransforms = new java.util.HashMap<>();
     private PreviewCorrectionFloatingWindow previewCorrectionFloatingWindow;
+    private FisheyeCorrectionFloatingWindow fisheyeCorrectionFloatingWindow;
 
     // 调试信息覆盖层（连点5下空白处显示）
     private TextView tvDebugOverlay;
@@ -3173,6 +3174,45 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
         if (previewCorrectionFloatingWindow != null) {
             previewCorrectionFloatingWindow.dismiss();
             previewCorrectionFloatingWindow = null;
+        }
+    }
+
+    // ==================== 鱼眼矫正 ====================
+
+    /**
+     * 鱼眼矫正开关切换后刷新所有摄像头预览
+     * 需要重建 Camera session（切换直接 Surface / GL 中间层）
+     */
+    public void refreshFisheyeCorrection() {
+        MultiCameraManager cm = cameraManager;
+        if (cm == null) return;
+        String[] positions = {"front", "back", "left", "right"};
+        for (String pos : positions) {
+            com.kooo.evcam.camera.SingleCamera camera = cm.getCamera(pos);
+            if (camera != null) {
+                camera.recreateForFisheyeToggle();
+            }
+        }
+    }
+
+    /**
+     * 显示鱼眼矫正悬浮窗
+     */
+    public void showFisheyeCorrectionFloating() {
+        if (fisheyeCorrectionFloatingWindow != null && fisheyeCorrectionFloatingWindow.isShowing()) {
+            return;
+        }
+        fisheyeCorrectionFloatingWindow = new FisheyeCorrectionFloatingWindow(this);
+        fisheyeCorrectionFloatingWindow.show();
+    }
+
+    /**
+     * 关闭鱼眼矫正悬浮窗
+     */
+    public void dismissFisheyeCorrectionFloating() {
+        if (fisheyeCorrectionFloatingWindow != null) {
+            fisheyeCorrectionFloatingWindow.dismiss();
+            fisheyeCorrectionFloatingWindow = null;
         }
     }
 

@@ -61,6 +61,13 @@ public class SettingsFragment extends Fragment {
     private Button resetPreviewCorrectionButton;
     private PreviewCorrectionFloatingWindow previewCorrectionFloatingWindow;
     
+    // 鱼眼矫正相关
+    private SwitchMaterial fisheyeCorrectionSwitch;
+    private LinearLayout fisheyeCorrectionButtonsLayout;
+    private Button openFisheyeCorrectionFloatingButton;
+    private Button resetFisheyeCorrectionButton;
+    private FisheyeCorrectionFloatingWindow fisheyeCorrectionFloatingWindow;
+    
     private AppConfig appConfig;
     
     // 悬浮窗相关
@@ -313,6 +320,54 @@ public class SettingsFragment extends Fragment {
                 MainActivity mainActivity = MainActivity.getInstance();
                 if (mainActivity != null) {
                     mainActivity.refreshPreviewCorrection();
+                }
+            }
+        });
+
+        // 初始化鱼眼矫正
+        fisheyeCorrectionSwitch = view.findViewById(R.id.switch_fisheye_correction);
+        fisheyeCorrectionButtonsLayout = view.findViewById(R.id.layout_fisheye_correction_buttons);
+        openFisheyeCorrectionFloatingButton = view.findViewById(R.id.btn_open_fisheye_correction_floating);
+        resetFisheyeCorrectionButton = view.findViewById(R.id.btn_reset_fisheye_correction);
+        if (getContext() != null && appConfig != null) {
+            boolean fisheyeEnabled = appConfig.isFisheyeCorrectionEnabled();
+            fisheyeCorrectionSwitch.setChecked(fisheyeEnabled);
+            fisheyeCorrectionButtonsLayout.setVisibility(fisheyeEnabled ? View.VISIBLE : View.GONE);
+        }
+        fisheyeCorrectionSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (getContext() != null && appConfig != null) {
+                appConfig.setFisheyeCorrectionEnabled(isChecked);
+                fisheyeCorrectionButtonsLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+                // 需要重建 session 来切换 Surface（直接 / GL 中间层）
+                MainActivity mainActivity = MainActivity.getInstance();
+                if (mainActivity != null) {
+                    mainActivity.refreshFisheyeCorrection();
+                }
+                String message = isChecked ? "鱼眼矫正已开启" : "鱼眼矫正已关闭";
+                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+            }
+        });
+        openFisheyeCorrectionFloatingButton.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            if (!WakeUpHelper.hasOverlayPermission(requireContext())) {
+                Toast.makeText(requireContext(), "请先授予悬浮窗权限", Toast.LENGTH_SHORT).show();
+                WakeUpHelper.requestOverlayPermission(requireContext());
+                return;
+            }
+            // 先回到主界面再打开悬浮窗，方便实时预览
+            MainActivity mainActivity = MainActivity.getInstance();
+            if (mainActivity != null) {
+                mainActivity.goToRecordingInterface();
+                mainActivity.showFisheyeCorrectionFloating();
+            }
+        });
+        resetFisheyeCorrectionButton.setOnClickListener(v -> {
+            if (getContext() != null && appConfig != null) {
+                appConfig.resetAllFisheyeCorrection();
+                Toast.makeText(getContext(), "所有鱼眼矫正参数已恢复默认", Toast.LENGTH_SHORT).show();
+                MainActivity mainActivity = MainActivity.getInstance();
+                if (mainActivity != null) {
+                    mainActivity.refreshFisheyeCorrection();
                 }
             }
         });

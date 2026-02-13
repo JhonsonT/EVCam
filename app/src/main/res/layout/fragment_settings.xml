@@ -457,6 +457,80 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 鱼眼矫正 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@color/card_background"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="鱼眼矫正"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="对预览画面进行鱼眼畸变矫正，不影响录制"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="16sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_fisheye_correction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_fisheye_correction_buttons"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone">
+
+                    <Button
+                        android:id="@+id/btn_open_fisheye_correction_floating"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="打开矫正悬浮窗"
+                        android:backgroundTint="@color/button_accent"
+                        android:textColor="@color/white"
+                        android:layout_marginEnd="8dp" />
+
+                    <Button
+                        android:id="@+id/btn_reset_fisheye_correction"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="恢复默认参数"
+                        android:backgroundTint="@color/button_background"
+                        android:textColor="@color/button_text" />
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- 录制摄像头选择 -->
             <LinearLayout
                 android:id="@+id/layout_recording_camera_selection"

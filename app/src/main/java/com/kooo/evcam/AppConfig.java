@@ -124,6 +124,10 @@ public class AppConfig {
     private static final String KEY_PREVIEW_CORRECTION_ENABLED = "preview_correction_enabled";
     private static final String KEY_PREVIEW_CORRECTION_PREFIX = "preview_correction_";
 
+    // 鱼眼矫正配置
+    private static final String KEY_FISHEYE_CORRECTION_ENABLED = "fisheye_correction_enabled";
+    private static final String KEY_FISHEYE_CORRECTION_PREFIX = "fisheye_correction_";
+
     // 时间角标配置
     private static final String KEY_TIMESTAMP_WATERMARK_ENABLED = "timestamp_watermark_enabled";  // 时间角标开关
     
@@ -1669,6 +1673,96 @@ public class AppConfig {
         resetPreviewCorrection("left");
         resetPreviewCorrection("right");
         AppLog.d(TAG, "所有预览画面矫正参数已重置");
+    }
+
+    // ==================== 鱼眼矫正配置相关方法 ====================
+
+    /**
+     * 设置鱼眼矫正开关
+     */
+    public void setFisheyeCorrectionEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_FISHEYE_CORRECTION_ENABLED, enabled).apply();
+        AppLog.d(TAG, "鱼眼矫正设置: " + (enabled ? "启用" : "禁用"));
+    }
+
+    /**
+     * 获取鱼眼矫正开关
+     */
+    public boolean isFisheyeCorrectionEnabled() {
+        return prefs.getBoolean(KEY_FISHEYE_CORRECTION_ENABLED, false);
+    }
+
+    private String getFisheyeCorrectionKey(String cameraPos, String suffix) {
+        return KEY_FISHEYE_CORRECTION_PREFIX + cameraPos + "_" + suffix;
+    }
+
+    // --- K1 (主畸变系数) ---
+    public void setFisheyeCorrectionK1(String cameraPos, float k1) {
+        prefs.edit().putFloat(getFisheyeCorrectionKey(cameraPos, "k1"), k1).apply();
+    }
+
+    public float getFisheyeCorrectionK1(String cameraPos) {
+        return prefs.getFloat(getFisheyeCorrectionKey(cameraPos, "k1"), 0.0f);
+    }
+
+    // --- K2 (二次畸变系数) ---
+    public void setFisheyeCorrectionK2(String cameraPos, float k2) {
+        prefs.edit().putFloat(getFisheyeCorrectionKey(cameraPos, "k2"), k2).apply();
+    }
+
+    public float getFisheyeCorrectionK2(String cameraPos) {
+        return prefs.getFloat(getFisheyeCorrectionKey(cameraPos, "k2"), 0.0f);
+    }
+
+    // --- Zoom (矫正后缩放) ---
+    public void setFisheyeCorrectionZoom(String cameraPos, float zoom) {
+        prefs.edit().putFloat(getFisheyeCorrectionKey(cameraPos, "zoom"), zoom).apply();
+    }
+
+    public float getFisheyeCorrectionZoom(String cameraPos) {
+        return prefs.getFloat(getFisheyeCorrectionKey(cameraPos, "zoom"), 1.0f);
+    }
+
+    // --- CenterX (畸变中心X偏移) ---
+    public void setFisheyeCorrectionCenterX(String cameraPos, float cx) {
+        prefs.edit().putFloat(getFisheyeCorrectionKey(cameraPos, "center_x"), cx).apply();
+    }
+
+    public float getFisheyeCorrectionCenterX(String cameraPos) {
+        return prefs.getFloat(getFisheyeCorrectionKey(cameraPos, "center_x"), 0.5f);
+    }
+
+    // --- CenterY (畸变中心Y偏移) ---
+    public void setFisheyeCorrectionCenterY(String cameraPos, float cy) {
+        prefs.edit().putFloat(getFisheyeCorrectionKey(cameraPos, "center_y"), cy).apply();
+    }
+
+    public float getFisheyeCorrectionCenterY(String cameraPos) {
+        return prefs.getFloat(getFisheyeCorrectionKey(cameraPos, "center_y"), 0.5f);
+    }
+
+    /**
+     * 重置单路摄像头的鱼眼矫正参数
+     */
+    public void resetFisheyeCorrection(String cameraPos) {
+        prefs.edit()
+                .putFloat(getFisheyeCorrectionKey(cameraPos, "k1"), 0.0f)
+                .putFloat(getFisheyeCorrectionKey(cameraPos, "k2"), 0.0f)
+                .putFloat(getFisheyeCorrectionKey(cameraPos, "zoom"), 1.0f)
+                .putFloat(getFisheyeCorrectionKey(cameraPos, "center_x"), 0.5f)
+                .putFloat(getFisheyeCorrectionKey(cameraPos, "center_y"), 0.5f)
+                .apply();
+    }
+
+    /**
+     * 重置所有摄像头的鱼眼矫正参数
+     */
+    public void resetAllFisheyeCorrection() {
+        resetFisheyeCorrection("front");
+        resetFisheyeCorrection("back");
+        resetFisheyeCorrection("left");
+        resetFisheyeCorrection("right");
+        AppLog.d(TAG, "所有鱼眼矫正参数已重置");
     }
 
     // ==================== 主屏悬浮窗配置相关方法 ====================
