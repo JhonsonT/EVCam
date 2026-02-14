@@ -495,12 +495,6 @@ public class BlindSpotService extends Service {
     }
 
     private void handleTurnSignal(String cameraPos) {
-        // 全景影像避让：目标Activity在前台时不弹出补盲窗口
-        if (isAvmAvoidanceActive) {
-            AppLog.d(TAG, "全景影像避让中，忽略转向灯信号: " + cameraPos);
-            return;
-        }
-
         // 取消隐藏计时器
         if (hideRunnable != null) {
             hideHandler.removeCallbacks(hideRunnable);
@@ -537,38 +531,43 @@ public class BlindSpotService extends Service {
             }
         }
 
-        boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
+        // 全景影像避让：目标Activity在前台时只跳过主屏窗口，副屏仍正常工作
+        if (!isAvmAvoidanceActive) {
+            boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
 
-        if (reuseMain) {
-            // --- 复用主屏悬浮窗逻辑 ---
-            // 切换方向时重建悬浮窗，确保窗口尺寸/旋转参数与新摄像头匹配
-            if (mainFloatingWindowView != null) {
-                mainFloatingWindowView.dismiss();
-                mainFloatingWindowView = null;
-            }
-            if (WakeUpHelper.hasOverlayPermission(this)) {
-                mainFloatingWindowView = new MainFloatingWindowView(this);
-                mainFloatingWindowView.updateCamera(cameraPos, true);
-                mainFloatingWindowView.show();
-                isMainTempShown = true;
-                AppLog.d(TAG, "主屏开启临时补盲悬浮窗");
+            if (reuseMain) {
+                // --- 复用主屏悬浮窗逻辑 ---
+                // 切换方向时重建悬浮窗，确保窗口尺寸/旋转参数与新摄像头匹配
+                if (mainFloatingWindowView != null) {
+                    mainFloatingWindowView.dismiss();
+                    mainFloatingWindowView = null;
+                }
+                if (WakeUpHelper.hasOverlayPermission(this)) {
+                    mainFloatingWindowView = new MainFloatingWindowView(this);
+                    mainFloatingWindowView.updateCamera(cameraPos, true);
+                    mainFloatingWindowView.show();
+                    isMainTempShown = true;
+                    AppLog.d(TAG, "主屏开启临时补盲悬浮窗");
+                }
+            } else {
+                // --- 使用独立补盲悬浮窗逻辑 ---
+                // 切换方向时重建悬浮窗
+                if (mainFloatingWindowView != null) {
+                    mainFloatingWindowView.dismiss();
+                    mainFloatingWindowView = null;
+                    isMainTempShown = false;
+                }
+                if (dedicatedBlindSpotWindow != null) {
+                    dedicatedBlindSpotWindow.dismiss();
+                    dedicatedBlindSpotWindow = null;
+                }
+                dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
+                dedicatedBlindSpotWindow.setCameraPos(cameraPos); // 先设置摄像头位置，再 show
+                dedicatedBlindSpotWindow.show();
+                dedicatedBlindSpotWindow.setCamera(cameraPos);
             }
         } else {
-            // --- 使用独立补盲悬浮窗逻辑 ---
-            // 切换方向时重建悬浮窗
-            if (mainFloatingWindowView != null) {
-                mainFloatingWindowView.dismiss();
-                mainFloatingWindowView = null;
-                isMainTempShown = false;
-            }
-            if (dedicatedBlindSpotWindow != null) {
-                dedicatedBlindSpotWindow.dismiss();
-                dedicatedBlindSpotWindow = null;
-            }
-            dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
-            dedicatedBlindSpotWindow.setCameraPos(cameraPos); // 先设置摄像头位置，再 show
-            dedicatedBlindSpotWindow.show();
-            dedicatedBlindSpotWindow.setCamera(cameraPos);
+            AppLog.d(TAG, "全景影像避让中，跳过主屏窗口创建，副屏正常处理: " + cameraPos);
         }
 
         // --- 副屏摄像头预览 ---
