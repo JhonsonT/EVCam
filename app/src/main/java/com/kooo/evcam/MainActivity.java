@@ -479,10 +479,13 @@ public class MainActivity extends AppCompatActivity implements WechatRemoteManag
             }, 500);
         }
 
-        // 启动补盲选项服务 (副屏/主屏悬浮窗/转向灯联动/模拟按钮)
-        if (appConfig.isBlindSpotGlobalEnabled()
+        // 启动补盲选项服务 (副屏/主屏悬浮窗/转向灯联动/模拟按钮/全景避让)
+        // 定制键唤醒独立于补盲全局开关，单独判断
+        if ((appConfig.isBlindSpotGlobalEnabled()
                 && (appConfig.isSecondaryDisplayEnabled() || appConfig.isMainFloatingEnabled()
-                    || appConfig.isTurnSignalLinkageEnabled() || appConfig.isMockTurnSignalFloatingEnabled())) {
+                    || appConfig.isTurnSignalLinkageEnabled() || appConfig.isMockTurnSignalFloatingEnabled()
+                    || appConfig.isAvmAvoidanceEnabled()))
+                || appConfig.isCustomKeyWakeupEnabled()) {
             BlindSpotService.update(this);
             AppLog.d(TAG, "补盲选项服务已启动");
         }

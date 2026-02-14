@@ -104,6 +104,16 @@ public class AppConfig {
     // 兼容性别名（保持向后兼容）
     public static final String TRIGGER_MODE_CAR_API = TRIGGER_MODE_VHAL_GRPC;
 
+    // 全景影像避让配置
+    private static final String KEY_AVM_AVOIDANCE_ENABLED = "avm_avoidance_enabled";  // 全景影像避让开关
+    private static final String KEY_AVM_AVOIDANCE_ACTIVITY = "avm_avoidance_activity"; // 全景影像避让的Activity名
+
+    // 定制键唤醒配置
+    private static final String KEY_CUSTOM_KEY_WAKEUP_ENABLED = "custom_key_wakeup_enabled"; // 定制键唤醒开关
+    private static final String KEY_CUSTOM_KEY_SPEED_THRESHOLD = "custom_key_speed_threshold"; // 速度阈值（秒速 m/s）
+    private static final String KEY_CUSTOM_KEY_SPEED_PROP_ID = "custom_key_speed_prop_id"; // 速度属性ID
+    private static final String KEY_CUSTOM_KEY_BUTTON_PROP_ID = "custom_key_button_prop_id"; // 按钮属性ID
+
     // 桌面悬浮模拟按钮 (补盲选项新增)
     private static final String KEY_MOCK_TURN_SIGNAL_FLOATING_ENABLED = "mock_turn_signal_floating_enabled"; // 悬浮模拟按钮开关
     private static final String KEY_MOCK_TURN_SIGNAL_FLOATING_X = "mock_turn_signal_floating_x";             // 悬浮模拟按钮X
@@ -2610,5 +2620,97 @@ public class AppConfig {
      */
     public boolean hasUpdateServerUrl() {
         return getUpdateServerUrl() != null;
+    }
+
+    // ==================== 全景影像避让配置相关方法 ====================
+
+    /**
+     * 设置全景影像避让开关
+     */
+    public void setAvmAvoidanceEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_AVM_AVOIDANCE_ENABLED, enabled).apply();
+        AppLog.d(TAG, "全景影像避让设置: " + (enabled ? "启用" : "禁用"));
+    }
+
+    /**
+     * 获取全景影像避让开关状态
+     */
+    public boolean isAvmAvoidanceEnabled() {
+        return prefs.getBoolean(KEY_AVM_AVOIDANCE_ENABLED, false);
+    }
+
+    /**
+     * 设置全景影像避让的Activity名称
+     */
+    public void setAvmAvoidanceActivity(String activityName) {
+        prefs.edit().putString(KEY_AVM_AVOIDANCE_ACTIVITY, activityName).apply();
+        AppLog.d(TAG, "全景影像避让Activity: " + activityName);
+    }
+
+    /**
+     * 获取全景影像避让的Activity名称
+     */
+    public String getAvmAvoidanceActivity() {
+        return prefs.getString(KEY_AVM_AVOIDANCE_ACTIVITY, "com.geely.avm_app.AvmRenderActivity");
+    }
+
+    // ==================== 定制键唤醒配置相关方法 ====================
+
+    /**
+     * 设置定制键唤醒开关
+     */
+    public void setCustomKeyWakeupEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_CUSTOM_KEY_WAKEUP_ENABLED, enabled).apply();
+        AppLog.d(TAG, "定制键唤醒设置: " + (enabled ? "启用" : "禁用"));
+    }
+
+    /**
+     * 获取定制键唤醒开关状态
+     */
+    public boolean isCustomKeyWakeupEnabled() {
+        return prefs.getBoolean(KEY_CUSTOM_KEY_WAKEUP_ENABLED, false);
+    }
+
+    /**
+     * 设置速度阈值（秒速 m/s）
+     */
+    public void setCustomKeySpeedThreshold(float threshold) {
+        prefs.edit().putFloat(KEY_CUSTOM_KEY_SPEED_THRESHOLD, threshold).apply();
+        AppLog.d(TAG, "定制键速度阈值: " + threshold + " m/s");
+    }
+
+    /**
+     * 获取速度阈值（秒速 m/s），默认8.34
+     */
+    public float getCustomKeySpeedThreshold() {
+        return prefs.getFloat(KEY_CUSTOM_KEY_SPEED_THRESHOLD, 8.34f);
+    }
+
+    /**
+     * 设置速度属性ID
+     */
+    public void setCustomKeySpeedPropId(int propId) {
+        prefs.edit().putInt(KEY_CUSTOM_KEY_SPEED_PROP_ID, propId).apply();
+    }
+
+    /**
+     * 获取速度属性ID，默认291504647
+     */
+    public int getCustomKeySpeedPropId() {
+        return prefs.getInt(KEY_CUSTOM_KEY_SPEED_PROP_ID, 291504647);
+    }
+
+    /**
+     * 设置按钮属性ID
+     */
+    public void setCustomKeyButtonPropId(int propId) {
+        prefs.edit().putInt(KEY_CUSTOM_KEY_BUTTON_PROP_ID, propId).apply();
+    }
+
+    /**
+     * 获取按钮属性ID，默认557872183
+     */
+    public int getCustomKeyButtonPropId() {
+        return prefs.getInt(KEY_CUSTOM_KEY_BUTTON_PROP_ID, 557872183);
     }
 }

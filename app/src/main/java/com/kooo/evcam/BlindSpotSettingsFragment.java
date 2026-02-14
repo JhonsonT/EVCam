@@ -44,6 +44,11 @@ public class BlindSpotSettingsFragment extends Fragment {
     private LinearLayout doorLinkageSectionLayout; // 车门联动区域
     private SwitchMaterial doorLinkageSwitch; // 车门联动开关
 
+    // 全景影像避让UI控件
+    private SwitchMaterial avmAvoidanceSwitch;
+    private LinearLayout avmAvoidanceDetailLayout;
+    private EditText avmAvoidanceActivityEditText;
+
     // 转向灯触发log预设方案
     private static final String[][] TURN_SIGNAL_PRESETS = {
         // { presetId, leftKeyword, rightKeyword }
@@ -109,7 +114,12 @@ public class BlindSpotSettingsFragment extends Fragment {
         // 车门联动UI初始化
         doorLinkageSectionLayout = view.findViewById(R.id.ll_door_linkage_section);
         doorLinkageSwitch = view.findViewById(R.id.switch_door_linkage);
-        
+
+        // 全景影像避让UI初始化
+        avmAvoidanceSwitch = view.findViewById(R.id.switch_avm_avoidance);
+        avmAvoidanceDetailLayout = view.findViewById(R.id.layout_avm_avoidance_detail);
+        avmAvoidanceActivityEditText = view.findViewById(R.id.et_avm_avoidance_activity);
+
         mockFloatingSwitch = view.findViewById(R.id.switch_mock_floating);
         floatingWindowAnimationSwitch = view.findViewById(R.id.switch_floating_window_animation);
 
@@ -208,6 +218,13 @@ public class BlindSpotSettingsFragment extends Fragment {
         
         // 根据转向联动的车型选择，决定是否显示车门联动区域
         updateDoorLinkageVisibility();
+
+        // 全景影像避让配置加载
+        boolean avmEnabled = appConfig.isAvmAvoidanceEnabled();
+        avmAvoidanceSwitch.setChecked(avmEnabled);
+        avmAvoidanceDetailLayout.setVisibility(avmEnabled ? View.VISIBLE : View.GONE);
+        avmAvoidanceActivityEditText.setText(appConfig.getAvmAvoidanceActivity());
+
     }
 
     private void updateSubFeaturesVisibility(boolean globalEnabled) {
@@ -481,6 +498,30 @@ public class BlindSpotSettingsFragment extends Fragment {
                 ((MainActivity) getActivity()).goToRecordingInterface();
             }
         });
+
+        // ==================== 全景影像避让监听器 ====================
+
+        avmAvoidanceSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            appConfig.setAvmAvoidanceEnabled(isChecked);
+            avmAvoidanceDetailLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            BlindSpotService.update(requireContext());
+        });
+
+        avmAvoidanceActivityEditText.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+                String activity = s.toString().trim();
+                if (!activity.isEmpty()) {
+                    appConfig.setAvmAvoidanceActivity(activity);
+                    BlindSpotService.update(requireContext());
+                }
+            }
+        });
+
     }
 
     /**

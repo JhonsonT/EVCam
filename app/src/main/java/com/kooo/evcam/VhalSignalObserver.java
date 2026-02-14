@@ -80,9 +80,25 @@ public class VhalSignalObserver {
         void onConnectionStateChanged(boolean connected);
     }
 
+    /**
+     * 定制键唤醒回调接口
+     */
+    public interface CustomKeyListener {
+        /** 按钮触发（值变为1）且速度条件满足 */
+        void onCustomKeyTriggered();
+    }
+
     private final TurnSignalListener listener;
     private volatile DoorSignalListener doorListener;
+    private volatile CustomKeyListener customKeyListener;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    // 定制键唤醒状态跟踪
+    private volatile int customKeySpeedPropId = 291504647;
+    private volatile int customKeyButtonPropId = 557872183;
+    private volatile float customKeySpeedThreshold = 8.34f;
+    private volatile float currentSpeed = 0f;
+    private volatile int lastButtonState = -1;
 
     private ManagedChannel grpcChannel;
     private Thread connectThread;
@@ -126,6 +142,29 @@ public class VhalSignalObserver {
      */
     public void setDoorSignalListener(DoorSignalListener listener) {
         this.doorListener = listener;
+    }
+
+    /**
+     * 设置定制键唤醒监听器
+     */
+    public void setCustomKeyListener(CustomKeyListener listener) {
+        this.customKeyListener = listener;
+    }
+
+    /**
+     * 获取当前速度值（用于定制键唤醒速度条件判断）
+     */
+    public float getCurrentSpeed() {
+        return currentSpeed;
+    }
+
+    /**
+     * 配置定制键唤醒参数
+     */
+    public void configureCustomKey(int speedPropId, int buttonPropId, float speedThreshold) {
+        this.customKeySpeedPropId = speedPropId;
+        this.customKeyButtonPropId = buttonPropId;
+        this.customKeySpeedThreshold = speedThreshold;
     }
 
     /**
@@ -332,6 +371,10 @@ public class VhalSignalObserver {
                 processTurnSignal(propValueBytes);
             } else if (propId == PROP_SIGNAL_B) {
                 processDoorSignal(propValueBytes);
+            } else if (propId == customKeySpeedPropId) {
+                processCustomKeySpeed(propValueBytes);
+            } else if (propId == customKeyButtonPropId) {
+                processCustomKeyButton(propValueBytes);
             }
         }
     }
@@ -441,6 +484,44 @@ public class VhalSignalObserver {
                 }
             }
         });
+    }
+
+    /**
+     * 处理定制键速度属性（float类型）
+     */
+    private void processCustomKeySpeed(byte[] propValueBytes) {
+        // 该 vendor 属性的 float 值存在 field 7（非标准 field 6）
+        List<Float> floatValues = ProtoDecoder.readPackedFloat(propValueBytes, 7);
+        if (floatValues.isEmpty()) {
+            // 回退到标准 field 6
+            floatValues = ProtoDecoder.readPackedFloat(propValueBytes, 6);
+        }
+        if (!floatValues.isEmpty()) {
+            currentSpeed = floatValues.get(0);
+        }
+    }
+
+    /**
+     * 处理定制键按钮属性（int32类型）
+     * 值变为1时触发，并检查速度条件
+     */
+    private void processCustomKeyButton(byte[] propValueBytes) {
+        List<Integer> int32Values = ProtoDecoder.readPackedSint32(propValueBytes, 5);
+        int buttonState = int32Values.isEmpty() ? 0 : int32Values.get(0);
+
+        // 检测边缘触发：值变为1
+        if (buttonState == 1 && lastButtonState != 1) {
+            AppLog.d(TAG, "Custom key button pressed, speed=" + currentSpeed
+                    + ", threshold=" + customKeySpeedThreshold);
+            if (customKeyListener != null) {
+                mainHandler.post(() -> {
+                    if (customKeyListener != null) {
+                        customKeyListener.onCustomKeyTriggered();
+                    }
+                });
+            }
+        }
+        lastButtonState = buttonState;
     }
 
     private static String signalStateName(int state) {
@@ -632,6 +713,65 @@ public class VhalSignalObserver {
                         pos = v[1];
                         int decoded = (v[0] >>> 1) ^ -(v[0] & 1);
                         results.add(decoded);
+                    }
+                } else {
+                    if (wireType == 0) {
+                        int[] v = readVarint(data, pos);
+                        pos = v[1];
+                    } else if (wireType == 2) {
+                        int[] lenResult = readVarint(data, pos);
+                        pos = lenResult[1] + lenResult[0];
+                    } else if (wireType == 5) {
+                        pos += 4;
+                    } else if (wireType == 1) {
+                        pos += 8;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return results;
+        }
+
+        /**
+         * 读取 packed repeated float 字段 (fixed32 编码)。
+         * 也兼容非 packed 的逐个 fixed32 编码。
+         */
+        static List<Float> readPackedFloat(byte[] data, int fieldNumber) {
+            List<Float> results = new ArrayList<>();
+            int pos = 0;
+            while (pos < data.length) {
+                int[] tagResult = readVarint(data, pos);
+                int tag = tagResult[0];
+                pos = tagResult[1];
+                int wireType = tag & 0x07;
+                int field = tag >>> 3;
+
+                if (field == fieldNumber) {
+                    if (wireType == 2) {
+                        // packed: length-delimited containing fixed32 values
+                        int[] lenResult = readVarint(data, pos);
+                        int len = lenResult[0];
+                        pos = lenResult[1];
+                        int end = pos + len;
+                        while (pos + 4 <= end) {
+                            int bits = (data[pos] & 0xFF)
+                                    | ((data[pos + 1] & 0xFF) << 8)
+                                    | ((data[pos + 2] & 0xFF) << 16)
+                                    | ((data[pos + 3] & 0xFF) << 24);
+                            results.add(Float.intBitsToFloat(bits));
+                            pos += 4;
+                        }
+                    } else if (wireType == 5) {
+                        // non-packed: single fixed32
+                        if (pos + 4 <= data.length) {
+                            int bits = (data[pos] & 0xFF)
+                                    | ((data[pos + 1] & 0xFF) << 8)
+                                    | ((data[pos + 2] & 0xFF) << 16)
+                                    | ((data[pos + 3] & 0xFF) << 24);
+                            results.add(Float.intBitsToFloat(bits));
+                            pos += 4;
+                        }
                     }
                 } else {
                     if (wireType == 0) {

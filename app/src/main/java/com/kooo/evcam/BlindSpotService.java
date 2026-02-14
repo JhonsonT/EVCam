@@ -1,6 +1,10 @@
 package com.kooo.evcam;
 
+import android.app.ActivityManager;
 import android.app.Service;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -22,6 +26,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.kooo.evcam.camera.MultiCameraManager;
 import com.kooo.evcam.camera.SingleCamera;
@@ -64,6 +72,14 @@ public class BlindSpotService extends Service {
     private AppConfig appConfig;
     private DisplayManager displayManager;
 
+    // 全景影像避让
+    private Runnable avmCheckRunnable;
+    private boolean isAvmAvoidanceActive = false; // 当前是否处于避让状态
+    private static final long AVM_CHECK_INTERVAL_MS = 1000; // 前台检测轮询间隔
+
+    // 定制键唤醒
+    private boolean isCustomKeyPreviewShown = false; // 定制键唤醒的预览是否已显示
+
     private WindowManager mockControlWindowManager;
     private View mockControlView;
     private WindowManager.LayoutParams mockControlParams;
@@ -74,6 +90,8 @@ public class BlindSpotService extends Service {
         appConfig = new AppConfig(this);
         displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
         initSignalObserver();
+        initAvmAvoidance();
+        initCustomKeyWakeup();
     }
 
     private void initSignalObserver() {
@@ -372,6 +390,7 @@ public class BlindSpotService extends Service {
         }
         if (vhalSignalObserver != null) {
             vhalSignalObserver.setDoorSignalListener(null); // 清除车门监听
+            vhalSignalObserver.setCustomKeyListener(null); // 清除定制键监听
             vhalSignalObserver.stop();
             vhalSignalObserver = null;
         }
@@ -389,6 +408,12 @@ public class BlindSpotService extends Service {
      * 显示盲区摄像头（用于 CarSignalManager API，不使用 debounce）
      */
     private void showBlindSpotCamera(String cameraPos) {
+        // 全景影像避让：目标Activity在前台时不弹出补盲窗口
+        if (isAvmAvoidanceActive) {
+            AppLog.d(TAG, "全景影像避让中，忽略CarSignalManager转向灯信号: " + cameraPos);
+            return;
+        }
+
         AppLog.i(TAG, "🚦 转向灯触发摄像头: " + cameraPos);
         
         // 如果车门联动窗口在显示，先关闭（转向灯优先级更高）
@@ -470,6 +495,12 @@ public class BlindSpotService extends Service {
     }
 
     private void handleTurnSignal(String cameraPos) {
+        // 全景影像避让：目标Activity在前台时不弹出补盲窗口
+        if (isAvmAvoidanceActive) {
+            AppLog.d(TAG, "全景影像避让中，忽略转向灯信号: " + cameraPos);
+            return;
+        }
+
         // 取消隐藏计时器
         if (hideRunnable != null) {
             hideHandler.removeCallbacks(hideRunnable);
@@ -719,6 +750,12 @@ public class BlindSpotService extends Service {
      * 显示车门摄像头（专用于车门联动）
      */
     private void showDoorCamera(String side) {
+        // 全景影像避让：目标Activity在前台时不弹出补盲窗口
+        if (isAvmAvoidanceActive) {
+            AppLog.d(TAG, "全景影像避让中，忽略车门信号: " + side);
+            return;
+        }
+
         AppLog.i(TAG, "🚪 ========== showDoorCamera 开始执行 ==========");
         AppLog.i(TAG, "🚪 触发侧: " + side);
         
@@ -888,6 +925,10 @@ public class BlindSpotService extends Service {
                 return START_STICKY;
             }
         }
+        // 重新初始化新功能（设置变更时通过 update() 触发）
+        appConfig = new AppConfig(this);
+        initAvmAvoidance();
+        initCustomKeyWakeup();
         updateWindows();
         return START_STICKY;
     }
@@ -920,7 +961,7 @@ public class BlindSpotService extends Service {
     }
 
     private void updateWindows() {
-        // 全局开关关闭时，清理所有窗口并停止服务（调整模式和预览模式除外）
+        // 全局开关关闭时，清理所有补盲窗口（调整模式和预览模式除外）
         if (!appConfig.isBlindSpotGlobalEnabled() && !isSecondaryAdjustMode && previewCameraPos == null) {
             removeSecondaryView();
             if (mainFloatingWindowView != null) {
@@ -934,7 +975,10 @@ public class BlindSpotService extends Service {
             removeMockControlWindow();
             currentSignalCamera = null;
             isMainTempShown = false;
-            stopSelf();
+            // 定制键唤醒独立于补盲全局开关，仅当它也关闭时才停止服务
+            if (!appConfig.isCustomKeyWakeupEnabled()) {
+                stopSelf();
+            }
             return;
         }
 
@@ -948,6 +992,8 @@ public class BlindSpotService extends Service {
                 || appConfig.isTurnSignalLinkageEnabled() // 加入转向灯联动检查
                 || appConfig.isDoorLinkageEnabled()  // 加入车门联动检查
                 || appConfig.isMockTurnSignalFloatingEnabled() // 加入模拟转向灯检查
+                || appConfig.isAvmAvoidanceEnabled() // 全景影像避让
+                || appConfig.isCustomKeyWakeupEnabled() // 定制键唤醒
                 || currentSignalCamera != null // 加入转向灯联动检查
                 || previewCameraPos != null) {
             CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
@@ -960,6 +1006,8 @@ public class BlindSpotService extends Service {
                 && !appConfig.isTurnSignalLinkageEnabled()
                 && !appConfig.isDoorLinkageEnabled()  // 加入车门联动检查
                 && !appConfig.isMockTurnSignalFloatingEnabled()
+                && !appConfig.isAvmAvoidanceEnabled() // 全景影像避让
+                && !appConfig.isCustomKeyWakeupEnabled() // 定制键唤醒
                 && previewCameraPos == null) {
             AppLog.i(TAG, "🚪 所有功能都关闭，停止服务");
             stopSelf();
@@ -1222,6 +1270,12 @@ public class BlindSpotService extends Service {
     }
 
     private void updateMainFloatingWindow() {
+        // 全景影像避让：目标Activity在前台时不显示主屏补盲窗口
+        if (isAvmAvoidanceActive) {
+            AppLog.d(TAG, "全景影像避让中，跳过主屏悬浮窗更新");
+            return;
+        }
+
         if (appConfig.isMainFloatingEnabled()) {
             isMainTempShown = false; // 用户开启
             if (mainFloatingWindowView == null) {
@@ -1386,9 +1440,211 @@ public class BlindSpotService extends Service {
         mockControlParams = null;
     }
 
+    // ==================== 全景影像避让 ====================
+
+    /**
+     * 初始化全景影像避让（前台Activity检测轮询）
+     */
+    private void initAvmAvoidance() {
+        stopAvmAvoidance();
+        if (!appConfig.isAvmAvoidanceEnabled()) return;
+
+        AppLog.d(TAG, "启动全景影像避让检测，目标Activity: " + appConfig.getAvmAvoidanceActivity());
+        avmCheckRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!appConfig.isAvmAvoidanceEnabled()) {
+                    stopAvmAvoidance();
+                    return;
+                }
+                checkAvmForeground();
+                hideHandler.postDelayed(this, AVM_CHECK_INTERVAL_MS);
+            }
+        };
+        hideHandler.post(avmCheckRunnable);
+    }
+
+    /**
+     * 停止全景影像避让检测
+     */
+    private void stopAvmAvoidance() {
+        if (avmCheckRunnable != null) {
+            hideHandler.removeCallbacks(avmCheckRunnable);
+            avmCheckRunnable = null;
+        }
+        if (isAvmAvoidanceActive) {
+            isAvmAvoidanceActive = false;
+            // 恢复窗口显示
+            updateMainFloatingWindow();
+        }
+    }
+
+    /**
+     * 检测目标Activity是否在前台，并相应隐藏/恢复主屏补盲窗口
+     */
+    private void checkAvmForeground() {
+        String targetActivity = appConfig.getAvmAvoidanceActivity();
+        if (targetActivity == null || targetActivity.isEmpty()) return;
+
+        boolean isForeground = isActivityInForeground(targetActivity)
+                || isPackageInForeground(getPackageName());
+
+        if (isForeground && !isAvmAvoidanceActive) {
+            // 目标Activity或自身应用在前台，隐藏主屏补盲窗口
+            isAvmAvoidanceActive = true;
+            AppLog.i(TAG, "全景影像避让：检测到前台应用需要避让，隐藏主屏补盲窗口");
+            if (mainFloatingWindowView != null) {
+                mainFloatingWindowView.dismiss();
+                mainFloatingWindowView = null;
+            }
+            if (dedicatedBlindSpotWindow != null) {
+                dedicatedBlindSpotWindow.dismiss();
+                dedicatedBlindSpotWindow = null;
+            }
+        } else if (!isForeground && isAvmAvoidanceActive) {
+            // 目标Activity离开前台，恢复窗口显示
+            isAvmAvoidanceActive = false;
+            AppLog.i(TAG, "全景影像避让：" + targetActivity + " 已离开前台，恢复主屏补盲窗口");
+            updateMainFloatingWindow();
+        }
+    }
+
+    /**
+     * 检测指定Activity（完整类名）是否在前台
+     * 使用 UsageEvents 精确到 Activity 级别（需 PACKAGE_USAGE_STATS 权限）
+     * 查询最近5分钟的事件，追踪最后一次前台/后台切换来判断当前状态
+     */
+    private boolean isActivityInForeground(String activityClassName) {
+        try {
+            UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usm == null) return false;
+
+            long now = System.currentTimeMillis();
+            android.app.usage.UsageEvents events = usm.queryEvents(now - 300000, now);
+            if (events == null) return false;
+
+            android.app.usage.UsageEvents.Event event = new android.app.usage.UsageEvents.Event();
+            Boolean targetLastState = null;
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event);
+                String className = event.getClassName();
+                if (activityClassName.equals(className)) {
+                    if (event.getEventType() == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                        targetLastState = true;
+                    } else if (event.getEventType() == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                        targetLastState = false;
+                    }
+                }
+            }
+
+            return targetLastState != null && targetLastState;
+        } catch (Exception e) {
+            AppLog.e(TAG, "检测前台Activity失败: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * 检测指定包名的应用是否在前台
+     * 使用 UsageEvents 查询最近5分钟的事件，追踪该包名下任意Activity的最后前台/后台状态
+     */
+    private boolean isPackageInForeground(String packageName) {
+        try {
+            UsageStatsManager usm = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+            if (usm == null) return false;
+
+            long now = System.currentTimeMillis();
+            android.app.usage.UsageEvents events = usm.queryEvents(now - 300000, now);
+            if (events == null) return false;
+
+            android.app.usage.UsageEvents.Event event = new android.app.usage.UsageEvents.Event();
+            Boolean lastState = null;
+
+            while (events.hasNextEvent()) {
+                events.getNextEvent(event);
+                if (packageName.equals(event.getPackageName())) {
+                    if (event.getEventType() == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                        lastState = true;
+                    } else if (event.getEventType() == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                        lastState = false;
+                    }
+                }
+            }
+
+            return lastState != null && lastState;
+        } catch (Exception e) {
+            AppLog.e(TAG, "检测前台包名失败: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // ==================== 定制键唤醒 ====================
+
+    /**
+     * 初始化定制键唤醒（配置 VhalSignalObserver 的 CustomKeyListener）
+     */
+    private void initCustomKeyWakeup() {
+        if (!appConfig.isCustomKeyWakeupEnabled()) return;
+
+        AppLog.d(TAG, "启动定制键唤醒，速度属性=" + appConfig.getCustomKeySpeedPropId()
+                + "，按钮属性=" + appConfig.getCustomKeyButtonPropId()
+                + "，速度阈值=" + appConfig.getCustomKeySpeedThreshold());
+
+        // 如果 vhalSignalObserver 还未创建，先创建一个
+        if (vhalSignalObserver == null) {
+            vhalSignalObserver = new VhalSignalObserver(new VhalSignalObserver.TurnSignalListener() {
+                @Override
+                public void onTurnSignal(String direction, boolean on) {
+                    // 转向联动未启用，忽略
+                }
+                @Override
+                public void onConnectionStateChanged(boolean connected) {
+                    AppLog.d(TAG, "VHAL gRPC connection (custom key): " + (connected ? "connected" : "disconnected"));
+                }
+            });
+            vhalSignalObserver.start();
+        }
+
+        vhalSignalObserver.configureCustomKey(
+                appConfig.getCustomKeySpeedPropId(),
+                appConfig.getCustomKeyButtonPropId(),
+                appConfig.getCustomKeySpeedThreshold()
+        );
+
+        vhalSignalObserver.setCustomKeyListener(() -> {
+            AppLog.d(TAG, "定制键唤醒：按钮触发");
+            toggleCustomKeyPreview();
+        });
+    }
+
+    /**
+     * 切换定制键唤醒的预览状态
+     */
+    private void toggleCustomKeyPreview() {
+        if (isCustomKeyPreviewShown) {
+            // 当前已显示，退出到后台
+            AppLog.d(TAG, "定制键唤醒：退出预览到后台");
+            isCustomKeyPreviewShown = false;
+            WakeUpHelper.sendBackgroundBroadcast(this);
+        } else {
+            // 检查速度条件
+            float speedThreshold = appConfig.getCustomKeySpeedThreshold();
+            if (vhalSignalObserver != null && vhalSignalObserver.getCurrentSpeed() < speedThreshold) {
+                AppLog.d(TAG, "定制键唤醒：速度未达到阈值，忽略");
+                return;
+            }
+            // 唤醒预览界面
+            AppLog.d(TAG, "定制键唤醒：唤醒预览界面");
+            isCustomKeyPreviewShown = true;
+            WakeUpHelper.launchForForeground(this);
+        }
+    }
+
     @Override
     public void onDestroy() {
         stopSignalObservers();
+        stopAvmAvoidance();
         if (hideRunnable != null) {
             hideHandler.removeCallbacks(hideRunnable);
         }

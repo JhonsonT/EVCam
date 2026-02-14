@@ -129,6 +129,13 @@ public class SettingsFragment extends Fragment {
     private Button checkUpdateButton;
     private VersionUpdateManager versionUpdateManager;
 
+    // 定制键唤醒相关
+    private SwitchMaterial customKeyWakeupSwitch;
+    private LinearLayout customKeyWakeupDetailLayout;
+    private EditText customKeySpeedThresholdEditText;
+    private EditText customKeySpeedPropIdEditText;
+    private EditText customKeyButtonPropIdEditText;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -454,6 +461,9 @@ public class SettingsFragment extends Fragment {
 
         // 初始化悬浮窗设置
         initFloatingWindowSettings(view);
+
+        // 初始化定制键唤醒设置
+        initCustomKeyWakeupSettings(view);
         
         // 沉浸式状态栏兼容
         View toolbar = view.findViewById(R.id.toolbar);
@@ -641,6 +651,80 @@ public class SettingsFragment extends Fragment {
         
         // 初始化悬浮窗透明度滑块
         initFloatingWindowAlphaSeekBar();
+    }
+
+    /**
+     * 初始化定制键唤醒设置
+     */
+    private void initCustomKeyWakeupSettings(View view) {
+        customKeyWakeupSwitch = view.findViewById(R.id.switch_custom_key_wakeup);
+        customKeyWakeupDetailLayout = view.findViewById(R.id.layout_custom_key_wakeup_detail);
+        customKeySpeedThresholdEditText = view.findViewById(R.id.et_custom_key_speed_threshold);
+        customKeySpeedPropIdEditText = view.findViewById(R.id.et_custom_key_speed_prop_id);
+        customKeyButtonPropIdEditText = view.findViewById(R.id.et_custom_key_button_prop_id);
+
+        if (customKeyWakeupSwitch == null || getContext() == null || appConfig == null) return;
+
+        // 加载配置
+        boolean enabled = appConfig.isCustomKeyWakeupEnabled();
+        customKeyWakeupSwitch.setChecked(enabled);
+        customKeyWakeupDetailLayout.setVisibility(enabled ? View.VISIBLE : View.GONE);
+        customKeySpeedThresholdEditText.setText(String.valueOf(appConfig.getCustomKeySpeedThreshold()));
+        customKeySpeedPropIdEditText.setText(String.valueOf(appConfig.getCustomKeySpeedPropId()));
+        customKeyButtonPropIdEditText.setText(String.valueOf(appConfig.getCustomKeyButtonPropId()));
+
+        // 开关监听
+        customKeyWakeupSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (getContext() == null || appConfig == null) return;
+            appConfig.setCustomKeyWakeupEnabled(isChecked);
+            customKeyWakeupDetailLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
+            BlindSpotService.update(requireContext());
+        });
+
+        // 速度阈值监听
+        customKeySpeedThresholdEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    float threshold = Float.parseFloat(s.toString());
+                    appConfig.setCustomKeySpeedThreshold(threshold);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+
+        // 速度属性ID监听
+        customKeySpeedPropIdEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    int propId = Integer.parseInt(s.toString());
+                    appConfig.setCustomKeySpeedPropId(propId);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
+
+        // 按钮属性ID监听
+        customKeyButtonPropIdEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                try {
+                    int propId = Integer.parseInt(s.toString());
+                    appConfig.setCustomKeyButtonPropId(propId);
+                } catch (NumberFormatException ignored) {}
+            }
+        });
     }
     
     /**

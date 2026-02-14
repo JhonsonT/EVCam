@@ -1206,6 +1206,160 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- 定制键唤醒 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@color/card_background"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="定制键唤醒"
+                            android:textColor="@color/text_primary"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="车速超过阈值时按下定制键唤醒/退出EVCam预览（需VHAL gRPC）"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switch_custom_key_wakeup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layout_custom_key_wakeup_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone">
+
+                    <!-- 速度阈值 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="速度阈值"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/et_custom_key_speed_threshold"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:minHeight="40dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/spinner_background"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:inputType="numberDecimal"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:hint="8.34" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=" m/s"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <!-- 速度属性ID -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="速度属性ID"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/et_custom_key_speed_prop_id"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:minHeight="40dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/spinner_background"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:inputType="number"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:hint="291504647" />
+                    </LinearLayout>
+
+                    <!-- 按钮属性ID -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="100dp"
+                            android:layout_height="wrap_content"
+                            android:text="按钮属性ID"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+
+                        <EditText
+                            android:id="@+id/et_custom_key_button_prop_id"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:minHeight="40dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/spinner_background"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp"
+                            android:inputType="number"
+                            android:textColor="@color/text_primary"
+                            android:textSize="14sp"
+                            android:hint="557872183" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
             <!-- Debug 模式 -->
             <LinearLayout
                 android:layout_width="match_parent"
