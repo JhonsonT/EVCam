@@ -306,15 +306,8 @@ public class MainFloatingWindowView extends FrameLayout {
         if (!currentCamera.isCameraOpened()) {
             currentCamera.setMainFloatingSurface(surface);
             AppLog.d(TAG, "Camera not opened yet, opening now for " + cameraPos);
-            // 先打开当前需要的摄像头（优先保证能显示）
+            // 只打开当前需要的摄像头，不打开其他不相关的摄像头
             currentCamera.openCamera();
-            // openCamera 是异步的，打开成功后会自动调用 createCameraPreviewSession
-            // 延迟一小段时间后再打开其他摄像头，避免批量打开时被系统 CAMERA_DISABLED 拦截
-            final MultiCameraManager cm = cameraManager;
-            mainHandler.postDelayed(() -> {
-                AppLog.d(TAG, "Deferred opening remaining cameras");
-                cm.openAllCameras(); // 已打开的会跳过（isCameraOpened guard）
-            }, 500);
         } else {
             currentCamera.setMainFloatingSurface(surface);
             currentCamera.recreateSession(urgent);

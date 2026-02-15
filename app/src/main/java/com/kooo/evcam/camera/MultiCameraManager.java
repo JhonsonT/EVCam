@@ -42,6 +42,7 @@ public class MultiCameraManager {
     private int maxOpenCameras = DEFAULT_MAX_OPEN_CAMERAS;
 
     private boolean isRecording = false;
+    private volatile boolean repairSuppressed = false;  // 主动关闭摄像头时抑制 repair loop
     private boolean useCodecRecording = false;  // 是否使用软编码录制（用于 L6/L7）
     private boolean useRelayWrite = false;      // 是否使用中转写入（录制到内部存储，异步传输到U盘）
     private File finalSaveDir = null;           // 最终存储目录（用于中转写入模式）
@@ -704,6 +705,7 @@ public class MultiCameraManager {
      */
     public void openAllCameras() {
         AppLog.d(TAG, "Opening all cameras...");
+        repairSuppressed = false;
 
         activeCameraKeys.clear();
         int opened = 0;
@@ -729,10 +731,11 @@ public class MultiCameraManager {
      * 关闭所有摄像头
      */
     public void closeAllCameras() {
+        repairSuppressed = true;
         for (SingleCamera camera : cameras.values()) {
             camera.closeCamera();
         }
-        AppLog.d(TAG, "All cameras closed");
+        AppLog.d(TAG, "All cameras closed (repair suppressed)");
     }
 
     /**
@@ -2041,6 +2044,9 @@ public class MultiCameraManager {
      * @return 需要重新打开的摄像头数量
      */
     public int checkAndRepairCameras() {
+        if (repairSuppressed) {
+            return 0;
+        }
         int disconnectedCount = 0;
         
         for (Map.Entry<String, SingleCamera> entry : cameras.entrySet()) {
@@ -2064,6 +2070,7 @@ public class MultiCameraManager {
      */
     public void forceReopenAllCameras() {
         AppLog.d(TAG, "Force reopening all cameras...");
+        repairSuppressed = false;
         for (SingleCamera camera : cameras.values()) {
             camera.forceReopen();
         }

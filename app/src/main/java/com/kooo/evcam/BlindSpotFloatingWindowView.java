@@ -294,14 +294,8 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
         // 如果摄像头硬件还未打开（后台初始化时不打开），先打开
         if (!currentCamera.isCameraOpened()) {
             AppLog.d(TAG, "Camera not opened yet, opening now for " + cameraPos);
-            // 先打开当前需要的摄像头
+            // 只打开当前需要的摄像头，不打开其他不相关的摄像头
             currentCamera.openCamera();
-            // 延迟打开其他摄像头
-            final MultiCameraManager cm = cameraManager;
-            mainHandler.postDelayed(() -> {
-                AppLog.d(TAG, "Deferred opening remaining cameras");
-                cm.openAllCameras();
-            }, 500);
         } else {
             currentCamera.recreateSession(urgent);
         }
