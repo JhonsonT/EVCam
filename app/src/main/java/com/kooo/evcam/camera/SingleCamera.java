@@ -122,6 +122,9 @@ public class SingleCamera {
     private static final int MAX_CONFIG_FAIL_RETRIES = 3; // 最大重试次数
     private final Object sessionLock = new Object(); // 新增：用于同步 Session 操作
 
+    // 相机打开后的一次性回调（用于副屏等待相机就绪后立即绑定 Surface）
+    private final java.util.List<Runnable> onCameraOpenedCallbacks = new java.util.ArrayList<>();
+
     public SingleCamera(Context context, String cameraId, TextureView textureView) {
         this.context = context;
         this.cameraId = cameraId;
@@ -262,6 +265,36 @@ public class SingleCamera {
      */
     public boolean isCameraOpened() {
         return cameraDevice != null;
+    }
+
+    /**
+     * 注册一次性回调：相机打开后立即执行（在 createCameraPreviewSession 之前）。
+     * 如果相机已经打开，立即执行。
+     */
+    public void addOnCameraOpenedCallback(Runnable callback) {
+        if (cameraDevice != null) {
+            callback.run();
+            return;
+        }
+        synchronized (onCameraOpenedCallbacks) {
+            onCameraOpenedCallbacks.add(callback);
+        }
+    }
+
+    private void fireOnCameraOpenedCallbacks() {
+        java.util.List<Runnable> copy;
+        synchronized (onCameraOpenedCallbacks) {
+            if (onCameraOpenedCallbacks.isEmpty()) return;
+            copy = new java.util.ArrayList<>(onCameraOpenedCallbacks);
+            onCameraOpenedCallbacks.clear();
+        }
+        for (Runnable cb : copy) {
+            try {
+                cb.run();
+            } catch (Exception e) {
+                AppLog.e(TAG, "Camera " + cameraId + " onCameraOpened callback error: " + e.getMessage());
+            }
+        }
     }
 
     /**
@@ -981,6 +1014,9 @@ public class SingleCamera {
                     callback.onCameraOpened(cameraId);
                 }
             }
+            // 触发一次性回调（副屏绑定等），在 createCameraPreviewSession 之前执行
+            // 这样回调中设置的 Surface 能被第一次 Session 包含，避免重建
+            fireOnCameraOpenedCallbacks();
             createCameraPreviewSession();
         }
 
@@ -2128,6 +2164,11 @@ public class SingleCamera {
                 isSessionClosing = false;
                 isConfiguring = false;
                 isPendingReconfiguration = false;
+            }
+
+            // 清除未触发的回调
+            synchronized (onCameraOpenedCallbacks) {
+                onCameraOpenedCallbacks.clear();
             }
 
             // 关闭会话（捕获异常）
