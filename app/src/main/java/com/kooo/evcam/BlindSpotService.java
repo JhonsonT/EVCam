@@ -40,6 +40,7 @@ import com.kooo.evcam.camera.SingleCamera;
  */
 public class BlindSpotService extends Service {
     private static final String TAG = "BlindSpotService";
+    private static BlindSpotService sInstance;
 
     private WindowManager secondaryWindowManager;
     private View secondaryFloatingView;
@@ -90,6 +91,18 @@ public class BlindSpotService extends Service {
         isSelfInForeground = false;
     }
 
+    /**
+     * 检查是否有活跃的摄像头悬浮窗（补盲悬浮窗、常驻悬浮窗、副屏）正在使用摄像头。
+     * 用于 MainActivity.onPause() 判断是否应该保持摄像头连接。
+     */
+    public static boolean hasActiveCameraWindows() {
+        BlindSpotService inst = sInstance;
+        if (inst == null) return false;
+        return inst.mainFloatingWindowView != null
+                || inst.secondaryFloatingView != null
+                || inst.dedicatedBlindSpotWindow != null;
+    }
+
     // 定制键唤醒
     private boolean isCustomKeyPreviewShown = false; // 定制键唤醒的预览是否已显示
 
@@ -100,6 +113,7 @@ public class BlindSpotService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        sInstance = this;
         appConfig = new AppConfig(this);
         displayManager = (DisplayManager) getSystemService(Context.DISPLAY_SERVICE);
         initSignalObserver();
@@ -751,6 +765,9 @@ public class BlindSpotService extends Service {
             // --- 副屏显示恢复 ---
             updateSecondaryDisplay();
             hideRunnable = null;
+            
+            // 补盲结束，如果没有持久 Surface 在用且 Activity 在后台，释放相机
+            closeCamerasIfIdle();
         };
 
         hideHandler.postDelayed(hideRunnable, timeout * 1000L);
@@ -890,9 +907,30 @@ public class BlindSpotService extends Service {
             // 副屏显示恢复
             updateSecondaryDisplay();
             hideRunnable = null;
+            
+            // 补盲结束，如果没有持久 Surface 在用且 Activity 在后台，释放相机
+            closeCamerasIfIdle();
         };
         
         hideHandler.postDelayed(hideRunnable, timeout * 1000L);
+    }
+
+    /**
+     * 补盲结束后，检查是否可以释放相机资源。
+     * 条件：Activity 在后台 且 没有持久悬浮窗/副屏在使用相机。
+     */
+    private void closeCamerasIfIdle() {
+        if (isSelfInForeground) {
+            return; // Activity 在前台，由 Activity 管理相机
+        }
+        if (mainFloatingWindowView != null || secondaryFloatingView != null) {
+            return; // 仍有持久 Surface 在使用相机
+        }
+        MultiCameraManager cameraManager = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+        if (cameraManager != null) {
+            AppLog.d(TAG, "补盲结束且无持久 Surface，释放相机资源");
+            cameraManager.closeAllCameras();
+        }
     }
 
     @Override
@@ -1705,6 +1743,7 @@ public class BlindSpotService extends Service {
         if (previewBlindSpotWindow != null) {
             previewBlindSpotWindow.dismiss();
         }
+        sInstance = null;
         super.onDestroy();
     }
 
