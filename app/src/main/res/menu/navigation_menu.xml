@@ -40,11 +40,6 @@
                 android:icon="@drawable/ic_nav_heartbeat"
                 android:checkable="true"
                 android:title="心跳推图" />
-            <item
-                android:id="@+id/nav_wechat_mini"
-                android:icon="@drawable/ic_nav_wechat"
-                android:checkable="true"
-                android:title="微信小程序" />
         </menu>
     </item>
 

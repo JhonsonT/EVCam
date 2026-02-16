@@ -19,15 +19,14 @@
 
 ## 📱 项目简介
 
-该应用支持吉利银河系列车型（银河E5、银河L6/L7等），理论上其它龙鹰一号无高阶智驾车型也可通用，同时支持手机端预览。支持同时从最多 **4 个摄像头**进行视频录制与拍照，支持通过**钉钉机器人**或**微信小程序**远程发送录制、拍照、实时预览指令进行远程监看。
+该应用支持吉利银河系列车型（银河E5、银河L6/L7等），理论上其它龙鹰一号无高阶智驾车型也可通用，同时支持手机端预览。支持同时从最多 **4 个摄像头**进行视频录制与拍照，支持通过**钉钉机器人**远程发送录制、拍照、实时预览指令进行远程监看。
 
 ### ✨ 核心特性
 
 - 🎨 **仿FlymeAuto官方UI** - 仿照FlymeAuto官方界面设计，沉浸式状态栏，美观且符合车机使用习惯
 - 🎥 **视频录制与照片抓拍** - 支持多摄像头同步录制和实时拍照，可选择参与录制的摄像头
-- 👁️ **千里眼远程监看** - 支持钉钉机器人和微信小程序两种方式远程查看摄像头画面
-- 📱 **微信小程序控制** - 扫码绑定设备，支持远程拍照、录像、实时预览和文件管理
-- 🚗 **不受车速限制** - 随时可开启录制功能，突破官方30km/h车速限制
+- 👁️ **千里眼远程监看** - 支持钉钉机器人远程查看摄像头画面
+-  **不受车速限制** - 随时可开启录制功能，突破官方30km/h车速限制
 - 🔄 **自启动与后台保活** - 开机自启动 + 前台服务 + WorkManager + 无障碍服务多重保活机制
 - 💾 **多存储位置支持** - 支持内部存储和U盘存储，自动清理超出限制的旧文件
 - 🎬 **分段录制** - 支持1/3/5分钟自动分段，方便管理和回放
@@ -50,7 +49,6 @@
 - **图片加载**: Glide 4.16.0
 - **网络库**: OkHttp 4.12.0
 - **钉钉集成**: DingTalk Stream SDK 1.3.12
-- **微信云开发**: 微信小程序 + 云函数 + 云数据库 + 云存储
 - **后台任务**: WorkManager 2.9.0
 
 ### 🚗 支持车型
@@ -122,47 +120,6 @@ public class DingTalkConfig {
 **注意**: 
 - 钉钉已将旧版的 AppKey/AppSecret 更名为 Client ID/Client Secret
 - 如果不需要钉钉功能，可以在 `MainActivity.java` 中注释掉相关代码
-
-### 微信小程序配置
-
-如需使用微信小程序远程控制功能：
-
-#### 1. 小程序端配置
-
-1. 在微信开发者工具中打开 `wechat-miniprogram/` 目录
-2. 创建云开发环境（微信开发者工具 → 云开发 → 创建环境）
-3. 修改 `app.js` 中的云开发环境ID：
-
-```javascript
-wx.cloud.init({
-  env: 'your-cloud-env-id',  // 替换为您的云开发环境ID
-  traceUser: true,
-});
-```
-
-4. 部署云函数（右键 `cloudfunctions/` 下每个文件夹 → 上传并部署）
-
-#### 2. 车机端配置
-
-创建 `app/src/main/java/com/kooo/evcam/wechat/WechatMiniConfig.java`：
-
-```java
-package com.kooo.evcam.wechat;
-
-public class WechatMiniConfig {
-    // 微信小程序凭证
-    public static final String APP_ID = "你的小程序AppID";
-    public static final String APP_SECRET = "你的小程序AppSecret";
-    
-    // 云开发环境ID
-    public static final String CLOUD_ENV = "your-cloud-env-id";
-}
-```
-
-**注意**: 
-- 需要已认证的小程序才能使用云开发
-- 云数据库需要创建 `devices`、`commands`、`files` 三个集合
-- 详细架构说明参见 `wechat-miniprogram/ARCHITECTURE.md`
 
 ---
 
@@ -274,22 +231,6 @@ adb install app\build\outputs\apk\debug\app-debug.apk
 - `状态` - 查询应用运行状态
 - `预览` - 获取当前摄像头预览截图
 
-### 微信小程序远程控制
-
-使用微信小程序控制车机：
-
-1. **扫码绑定** - 点击车机端菜单中的"小程序设置"，用微信扫描二维码绑定设备
-2. **远程拍照** - 在小程序首页点击"一键拍照"
-3. **远程录像** - 点击"一键录像"，可设置录制时长
-4. **实时预览** - 进入预览页面，每2秒刷新一帧画面
-5. **文件管理** - 查看、下载、删除云端存储的照片和视频
-
-**小程序功能入口**:
-- **首页** - 设备状态、快捷操作
-- **控制页** - 录像/拍照参数设置
-- **预览页** - 实时画面预览
-- **文件页** - 云端文件管理
-
 ### 软件设置
 
 点击菜单 → "软件设置"，可配置：
@@ -353,10 +294,6 @@ EVCam/
 │   ├── DingTalkCommandReceiver.java # 命令解析与执行
 │   ├── PhotoUploadService.java    # 照片上传服务
 │   └── VideoUploadService.java    # 视频上传服务
-├── wechat/                        # 微信小程序集成模块
-│   ├── WechatCloudManager.java    # 微信云开发API管理
-│   ├── WechatMiniConfig.java      # 设备ID与二维码管理
-│   └── WechatRemoteManager.java   # 远程命令处理
 ├── FloatingWindowService.java     # 悬浮窗服务
 ├── StorageHelper.java             # 存储路径管理（含U盘检测）
 ├── StorageCleanupManager.java     # 存储自动清理
@@ -409,7 +346,6 @@ SingleCamera 将录制 Surface 添加到 CaptureSession
 - **Codec 编码线程**: CodecVideoRecorder 的独立编码线程
 - **Logcat 读取线程**: 独立线程读取系统日志
 - **钉钉 Stream 线程**: WebSocket 连接和消息处理
-- **微信云开发线程**: 心跳上报、命令轮询、文件上传
 - **WorkManager 后台任务**: 定时保活任务
 - **存储清理线程**: 定时检查并清理超限文件
 
@@ -556,41 +492,12 @@ gradlew.bat connectedAndroidTest
 - 应用会自动使用中转写入机制缓解慢速U盘问题
 - 如U盘不可用，应用会自动回退到内部存储
 
-### 7. 微信小程序无法连接
-
-**可能原因**:
-- 云开发环境配置错误
-- AppID/AppSecret 配置错误
-- Access Token 获取失败
-- 设备未正确注册
-
-**解决方案**:
-- 检查 `WechatMiniConfig.java` 中的配置
-- 确认云开发环境ID与小程序端一致
-- 查看日志中的 "WechatCloud" 相关错误
-- 重新生成设备二维码并扫码绑定
-
-### 8. 微信小程序预览不显示
-
-**可能原因**:
-- 车机端未正确启动预览流
-- 云存储上传失败
-- 小程序端图片路径错误
-- 网络连接不稳定
-
-**解决方案**:
-- 检查车机端是否收到 `start_preview` 命令
-- 查看云存储 `preview/{deviceId}/frame.jpg` 是否有更新
-- 确保车机网络连接正常
-- 尝试重新启动预览
-
 ---
 
 ## 📋 待办事项
 
 - [x] ~~添加视频清晰度选择（高清/标清/流畅）~~ ✅ 已实现码率选择
 - [x] ~~实现时间戳水印功能~~ ✅ 已实现
-- [x] ~~微信小程序远程控制~~ ✅ 已实现（拍照、录像、预览、文件管理）
 - [ ] 车外扬声器喊话功能
 - [ ] 更多远程车控功能（空调、车窗、车门等）
 - [ ] 根据指定车辆状态自动启动录制

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EVCam is an Android dashcam app for Geely Galaxy vehicles (E5, L6, L7). Written in Java using Camera2 API, it supports up to 4 simultaneous cameras, segmented recording, and remote control via DingTalk, Telegram, Feishu, and WeChat Mini Program. Licensed under GPL-3.0.
+EVCam is an Android dashcam app for Geely Galaxy vehicles (E5, L6, L7). Written in Java using Camera2 API, it supports up to 4 simultaneous cameras, segmented recording, and remote control via DingTalk, Telegram, and Feishu. Licensed under GPL-3.0.
 
 ## Build Commands
 
@@ -44,7 +44,6 @@ Single-module Android project (`app/`). Package: `com.kooo.evcam`.
 | `dingtalk/` | DingTalk bot integration (Stream SDK) |
 | `telegram/` | Telegram bot integration (HTTP polling) |
 | `feishu/` | Feishu/Lark bot integration (OkHttp WebSocket, custom protobuf-lite) |
-| `wechat/` | WeChat Mini Program cloud integration |
 | `remote/` | Unified remote command abstraction layer (`RemoteCommandDispatcher`, per-platform handlers) |
 | `heartbeat/` | Status heartbeat reporting system |
 | `playback/` | Video/photo gallery and playback UI |
@@ -71,11 +70,7 @@ Single-module Android project (`app/`). Package: `com.kooo.evcam`.
 
 ### Remote Control Architecture
 
-All 4 platforms (DingTalk, Telegram, Feishu, WeChat) route through `remote/RemoteCommandDispatcher` with platform-specific handlers in `remote/handler/`. Upload logic uses `remote/upload/MediaUploadService` and `MediaFileFinder`.
-
-### WeChat Mini Program
-
-Separate project in `wechat-miniprogram/` with 5 pages and 13 cloud functions. Communication: Android app polls WeChat Cloud via HTTP; Mini Program uses Cloud SDK. See `wechat-miniprogram/ARCHITECTURE.md` for details.
+All 3 platforms (DingTalk, Telegram, Feishu) route through `remote/RemoteCommandDispatcher` with platform-specific handlers in `remote/handler/`. Upload logic uses `remote/upload/MediaUploadService` and `MediaFileFinder`.
 
 ## Coding Conventions
 
@@ -96,17 +91,17 @@ These rules originate from `.cursor/rules/` and apply at all times.
 
 ```java
 // ❌ BAD - 把业务逻辑写在 MainActivity
-private void uploadWechatVideos(String commandId, String timestamp) {
+private void uploadVideos(String commandId, String timestamp) {
     // 查找文件、上传、传输...大量业务代码
 }
 
 // ✅ GOOD - 委托给专门的 Manager 类
-wechatRemoteManager.handleRecordingComplete(commandId, timestamp, callback);
+remoteCommandDispatcher.handleRecordingComplete(commandId, timestamp, callback);
 ```
 
 - 新增远程平台功能时，参考 `DingTalkHandler`、`TelegramHandler` 等已验证的实现模式
 - 使用现有工具类如 `MediaFileFinder`、`WakeUpHelper` 等
-- 每个功能模块应有独立的包结构（如 `com.kooo.evcam.wechat`），逻辑自包含，可独立理解和修改
+- 每个功能模块应有独立的包结构（如 `com.kooo.evcam.dingtalk`），逻辑自包含，可独立理解和修改
 
 ### 2. 版本名时间戳 — 每次修改代码后更新 versionName
 
@@ -150,7 +145,6 @@ These files contain credentials and must be created locally:
 - `app/src/main/java/com/kooo/evcam/dingtalk/DingTalkConfig.java` — DingTalk Client ID/Secret
 - `app/src/main/java/com/kooo/evcam/telegram/TelegramConfig.java` — Telegram Bot Token
 - `app/src/main/java/com/kooo/evcam/feishu/FeishuConfig.java` — Feishu App credentials
-- `app/src/main/java/com/kooo/evcam/wechat/WechatMiniConfig.java` — WeChat AppID/Secret/Cloud env
 - `app/src/main/java/com/kooo/evcam/heartbeat/HeartbeatConfig.java` — Heartbeat API config
 
 ## Key Dependencies

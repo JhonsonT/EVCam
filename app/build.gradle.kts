@@ -71,7 +71,7 @@ dependencies {
     // JSON 解析
     implementation("com.google.code.gson:gson:2.10.1")
 
-    // ZXing 二维码生成（微信小程序绑定）
+    // ZXing 二维码生成
     implementation("com.google.zxing:core:3.5.1")
 
     // Glide 图片加载库（用于缓存和优化缩略图加载）
