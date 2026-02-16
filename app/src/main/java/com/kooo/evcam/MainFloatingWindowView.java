@@ -49,6 +49,23 @@ public class MainFloatingWindowView extends FrameLayout {
     private boolean isResizing = false;
     private int resizeMode = 0; // 0: 拖动, 1: 左, 2: 右, 4: 上, 8: 下 (位运算组合)
     private boolean isCurrentlySwapped = false;
+    private boolean isDragEnabled = false; // 长按后才允许拖动
+    private static final long LONG_PRESS_DURATION = 1000; // 长按1秒后才能拖动
+    private static final int TOUCH_SLOP = 20; // 移动超过此距离取消长按检测
+    private final Runnable longPressRunnable = () -> {
+        isDragEnabled = true;
+        // 触发轻微震动反馈，提示用户可以拖动了
+        try {
+            android.os.Vibrator vibrator = (android.os.Vibrator) getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            if (vibrator != null && vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE));
+                } else {
+                    vibrator.vibrate(50);
+                }
+            }
+        } catch (Exception ignored) {}
+    };
 
     public MainFloatingWindowView(Context context) {
         this(context, new AppConfig(context));
@@ -167,11 +184,21 @@ public class MainFloatingWindowView extends FrameLayout {
                 if (localY > getHeight() - RESIZE_THRESHOLD) resizeMode |= 8; // 下
                 
                 isResizing = resizeMode != 0;
+                isDragEnabled = false;
+                mainHandler.postDelayed(longPressRunnable, LONG_PRESS_DURATION);
                 return true;
 
             case MotionEvent.ACTION_MOVE:
                 float dx = x - lastX;
                 float dy = y - lastY;
+
+                if (!isDragEnabled) {
+                    // 长按未达标，检查手指是否移动过远（取消长按检测）
+                    if (Math.abs(dx) > TOUCH_SLOP || Math.abs(dy) > TOUCH_SLOP) {
+                        mainHandler.removeCallbacks(longPressRunnable);
+                    }
+                    return true;
+                }
 
                 if (isResizing) {
                     boolean aspectLocked = appConfig.isMainFloatingAspectRatioLocked();
@@ -264,6 +291,9 @@ public class MainFloatingWindowView extends FrameLayout {
                 return true;
 
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mainHandler.removeCallbacks(longPressRunnable);
+                isDragEnabled = false;
                 isResizing = false;
                 // 保存配置：若宽高因矫正旋转而交换过，保存前还原为基础值
                 int saveW = params.width;
@@ -275,7 +305,7 @@ public class MainFloatingWindowView extends FrameLayout {
                 appConfig.setMainFloatingBounds(params.x, params.y, saveW, saveH);
                 return true;
         }
-        return super.onTouchEvent(event);
+        return true;
     }
 
     private void startCameraPreview(Surface surface) {

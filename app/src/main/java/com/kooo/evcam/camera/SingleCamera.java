@@ -114,6 +114,7 @@ public class SingleCamera {
     private boolean isPausedByLifecycle = false;  // 是否因生命周期暂停（用于区分主动关闭和系统剥夺）
     private boolean isReconnecting = false;  // 是否正在重连中（防止多个重连任务同时运行）
     private volatile boolean isOpening = false;  // 是否正在打开中（防止并行触发时重复调用 openCamera）
+    private volatile boolean deferSessionCreation = false;  // 延迟 Session 创建（与 Surface 并行打开相机时使用）
     private final Object reconnectLock = new Object();  // 重连锁
     private boolean isPrimaryInstance = true;  // 是否是主实例（用于多实例共享同一个cameraId时，只有主实例负责重连）
     private boolean isConfiguring = false; // 新增：标记是否正在配置中
@@ -910,6 +911,17 @@ public class SingleCamera {
     }
 
     /**
+     * 打开相机，但延迟 Session 创建。
+     * 用于与 Surface 创建并行：camera 打开后不立即创建 Session，
+     * 等待 setMainFloatingSurface 后再创建，避免没有 floating Surface 的空 Session 需要重建。
+     */
+    public void openCameraDeferred() {
+        if (cameraDevice != null) return; // 已打开，无需延迟
+        deferSessionCreation = true;
+        openCamera();
+    }
+
+    /**
      * 调度重连任务
      */
     private void scheduleReconnect() {
@@ -1045,7 +1057,18 @@ public class SingleCamera {
             // 触发一次性回调（副屏绑定等），在 createCameraPreviewSession 之前执行
             // 这样回调中设置的 Surface 能被第一次 Session 包含，避免重建
             fireOnCameraOpenedCallbacks();
-            createCameraPreviewSession();
+            if (deferSessionCreation) {
+                deferSessionCreation = false;
+                if (mainFloatingSurface != null && mainFloatingSurface.isValid()) {
+                    // Surface 已先于相机打开就绪，立即创建 Session
+                    createCameraPreviewSession();
+                } else {
+                    // 相机先于 Surface 打开，等 Surface 到达后由调用方触发 Session 创建
+                    AppLog.d(TAG, "Camera " + cameraId + " opened (deferred), waiting for surface");
+                }
+            } else {
+                createCameraPreviewSession();
+            }
         }
 
         @Override
@@ -2182,6 +2205,7 @@ public class SingleCamera {
             reconnectAttempts = 0;  // 重置重连计数
             isReconnecting = false;  // 清除重连状态
             isOpening = false;  // 清除打开中状态
+            deferSessionCreation = false;  // 清除延迟标志
             stopHealthMonitor();
 
             // 取消待处理的重连任务
