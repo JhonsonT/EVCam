@@ -470,19 +470,7 @@ public class BlindSpotService extends Service {
         currentSignalCamera = cameraPos;
         AppLog.i(TAG, "🚦 转向灯激活，设置 currentSignalCamera = " + cameraPos);
 
-        // 确保前台服务已启动
-        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
-
-        // 确保摄像头已初始化
-        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
-
-        // 副屏窗口预创建
-        if (appConfig.isSecondaryDisplayEnabled()) {
-            if (secondaryFloatingView == null) {
-                showSecondaryDisplay();
-            }
-        }
-
+        // --- 1. 尽早创建窗口 UI（addView 触发布局，与后续 IPC 并行，Surface 就绪更快） ---
         boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
 
         if (reuseMain) {
@@ -512,6 +500,33 @@ public class BlindSpotService extends Service {
             dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
             dedicatedBlindSpotWindow.setCameraPos(cameraPos);
             dedicatedBlindSpotWindow.show();
+            // setCamera 需要 CameraManager，延后到初始化之后调用
+        }
+
+        // 副屏窗口预创建（addView 触发布局）
+        if (appConfig.isSecondaryDisplayEnabled()) {
+            if (secondaryFloatingView == null) {
+                showSecondaryDisplay();
+            }
+        }
+
+        // --- 2. 异步启动前台服务和初始化相机（与 UI 布局并行） ---
+        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
+
+        // --- 3. 提前打开相机（与 Surface 创建并行，节省 ~20-60ms） ---
+        {
+            MultiCameraManager cm = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+            if (cm != null) {
+                SingleCamera cam = cm.getCamera(cameraPos);
+                if (cam != null && !cam.isCameraOpened()) {
+                    CameraForegroundService.whenReady(this, cam::openCameraDeferred);
+                }
+            }
+        }
+
+        // --- 4. 需要 CameraManager 的操作 ---
+        if (!reuseMain && dedicatedBlindSpotWindow != null) {
             dedicatedBlindSpotWindow.setCamera(cameraPos);
         }
 
@@ -540,23 +555,11 @@ public class BlindSpotService extends Service {
         currentSignalCamera = cameraPos;
         AppLog.d(TAG, "转向灯触发摄像头: " + cameraPos);
 
-        // 确保前台服务已启动（带 camera 类型的前台服务是后台访问摄像头的前提条件）
-        // 冷启动时 CameraForegroundService 可能还未启动，导致摄像头被系统 CAMERA_DISABLED 拦截
-        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
-
-        // 确保摄像头已初始化（通过全局 Holder，不依赖 MainActivity）
-        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
-
-        // --- 副屏窗口预创建 ---
-        if (appConfig.isSecondaryDisplayEnabled()) {
-            if (secondaryFloatingView == null) {
-                showSecondaryDisplay();
-            }
-        }
-
+        // --- 1. 尽早创建窗口 UI（addView 触发布局，与后续 IPC 并行，Surface 就绪更快） ---
+        boolean reuseMain = false;
         // 全景影像避让：目标Activity在前台时只跳过主屏窗口，副屏仍正常工作
         if (!isAvmAvoidanceActive) {
-            boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
+            reuseMain = appConfig.isTurnSignalReuseMainFloating();
 
             if (reuseMain) {
                 // --- 复用主屏悬浮窗逻辑 ---
@@ -587,10 +590,42 @@ public class BlindSpotService extends Service {
                 dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
                 dedicatedBlindSpotWindow.setCameraPos(cameraPos); // 先设置摄像头位置，再 show
                 dedicatedBlindSpotWindow.show();
-                dedicatedBlindSpotWindow.setCamera(cameraPos);
+                // setCamera 需要 CameraManager，延后到初始化之后调用
             }
         } else {
             AppLog.d(TAG, "全景影像避让中，跳过主屏窗口创建，副屏正常处理: " + cameraPos);
+        }
+
+        // --- 副屏窗口预创建（addView 触发布局） ---
+        if (appConfig.isSecondaryDisplayEnabled()) {
+            if (secondaryFloatingView == null) {
+                showSecondaryDisplay();
+            }
+        }
+
+        // --- 2. 异步启动前台服务和初始化相机（与 UI 布局并行） ---
+        // 前台服务是后台访问摄像头的前提条件，但 addView 不需要它
+        // 冷启动时 CameraForegroundService 可能还未启动，导致摄像头被系统 CAMERA_DISABLED 拦截
+        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
+
+        // 确保摄像头已初始化（通过全局 Holder，不依赖 MainActivity）
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
+
+        // --- 3. 提前打开相机（与 Surface 创建并行，节省 ~20-60ms） ---
+        {
+            MultiCameraManager cm = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+            if (cm != null) {
+                SingleCamera cam = cm.getCamera(cameraPos);
+                if (cam != null && !cam.isCameraOpened()) {
+                    CameraForegroundService.whenReady(this, cam::openCameraDeferred);
+                }
+            }
+        }
+
+        // --- 4. 需要 CameraManager 的操作 ---
+        // dedicatedBlindSpotWindow.setCamera() 需要 CameraManager 获取 previewSize
+        if (!isAvmAvoidanceActive && !reuseMain && dedicatedBlindSpotWindow != null) {
+            dedicatedBlindSpotWindow.setCamera(cameraPos);
         }
 
         // --- 副屏摄像头预览 ---
@@ -693,14 +728,15 @@ public class BlindSpotService extends Service {
                 }, 300);
             } else {
                 // 同一个摄像头或首次绑定：立即设置
-                // 使用非紧急模式（delay=100ms），利用防抖机制：
-                // 主屏 TextureView 稍后就绪时会调用 recreateSession(urgent=true)，
-                // 自动取消此处的延迟任务并立即创建包含两个 Surface 的 Session，
-                // 避免多个 urgent recreateSession 同时触发导致会话雪崩
-                AppLog.d(TAG, "副屏绑定新 Surface 并重建 Session: " + cameraPos);
+                // 首次绑定：始终使用紧急模式
+                // - 主屏通过 createCameraPreviewSession() 直接创建 session，不走 recreateSession，
+                //   因此不存在双 urgent 冲突
+                // - urgent=true 时 isConfiguring=true 的 delay=50ms（vs 非紧急的 500ms），
+                //   足够等主屏 session 完成配置后立即重建
+                AppLog.d(TAG, "副屏绑定新 Surface 并重建 Session: " + cameraPos + " (urgent=true)");
                 android.graphics.SurfaceTexture secSt = (secondaryTextureView != null && secondaryTextureView.isAvailable()) ? secondaryTextureView.getSurfaceTexture() : null;
                 secondaryCamera.setSecondaryDisplaySurface(secondaryCachedSurface, secSt);
-                secondaryCamera.recreateSession(false);
+                secondaryCamera.recreateSession(true);
             }
             BlindSpotCorrection.apply(secondaryTextureView, appConfig, cameraPos, appConfig.getSecondaryDisplayRotation());
         } else {
@@ -842,22 +878,7 @@ public class BlindSpotService extends Service {
             AppLog.d(TAG, "🚪 已取消信号保活计时器");
         }
         
-        // 确保前台服务已启动
-        AppLog.d(TAG, "🚪 启动前台服务");
-        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
-        
-        // 确保摄像头已初始化
-        AppLog.d(TAG, "🚪 初始化摄像头管理器");
-        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
-        
-        // 副屏窗口预创建（复用转向联动的配置）
-        if (appConfig.isSecondaryDisplayEnabled()) {
-            if (secondaryFloatingView == null) {
-                AppLog.d(TAG, "🚪 显示副屏");
-                showSecondaryDisplay();
-            }
-        }
-        
+        // --- 1. 尽早创建窗口 UI（addView 触发布局，与后续 IPC 并行，Surface 就绪更快） ---
         boolean reuseMain = appConfig.isTurnSignalReuseMainFloating();
         AppLog.i(TAG, "🚪 复用主屏悬浮窗: " + reuseMain + " (复用转向联动配置)");
         
@@ -895,6 +916,36 @@ public class BlindSpotService extends Service {
             dedicatedBlindSpotWindow = new BlindSpotFloatingWindowView(this, false);
             dedicatedBlindSpotWindow.setCameraPos(side);
             dedicatedBlindSpotWindow.show();
+            // setCamera 需要 CameraManager，延后到初始化之后调用
+        }
+        
+        // 副屏窗口预创建（addView 触发布局）
+        if (appConfig.isSecondaryDisplayEnabled()) {
+            if (secondaryFloatingView == null) {
+                AppLog.d(TAG, "🚪 显示副屏");
+                showSecondaryDisplay();
+            }
+        }
+        
+        // --- 2. 异步启动前台服务和初始化相机（与 UI 布局并行） ---
+        AppLog.d(TAG, "🚪 启动前台服务");
+        CameraForegroundService.start(this, "补盲运行中", "正在显示补盲画面");
+        AppLog.d(TAG, "🚪 初始化摄像头管理器");
+        com.kooo.evcam.camera.CameraManagerHolder.getInstance().getOrInit(this);
+        
+        // --- 3. 提前打开相机（与 Surface 创建并行） ---
+        {
+            MultiCameraManager cm = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
+            if (cm != null) {
+                SingleCamera cam = cm.getCamera(side);
+                if (cam != null && !cam.isCameraOpened()) {
+                    CameraForegroundService.whenReady(this, cam::openCameraDeferred);
+                }
+            }
+        }
+        
+        // --- 4. 需要 CameraManager 的操作 ---
+        if (!reuseMain && dedicatedBlindSpotWindow != null) {
             dedicatedBlindSpotWindow.setCamera(side);
             AppLog.i(TAG, "🚪 ✅ 独立补盲窗已显示");
         }
