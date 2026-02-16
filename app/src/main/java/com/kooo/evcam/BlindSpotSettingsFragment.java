@@ -66,6 +66,7 @@ public class BlindSpotSettingsFragment extends Fragment {
     private SwitchMaterial blindSpotCorrectionSwitch;
     private Button adjustBlindSpotCorrectionButton;
     private SwitchMaterial mainFloatingAspectRatioLockSwitch;
+    private SwitchMaterial mainFloatingLongPressDragSwitch;
     private Button resetMainFloatingButton;
     private Button logcatDebugButton;
     private android.widget.EditText logFilterEditText;
@@ -127,6 +128,7 @@ public class BlindSpotSettingsFragment extends Fragment {
         adjustBlindSpotCorrectionButton = view.findViewById(R.id.btn_adjust_blind_spot_correction);
 
         mainFloatingAspectRatioLockSwitch = view.findViewById(R.id.switch_main_floating_aspect_ratio_lock);
+        mainFloatingLongPressDragSwitch = view.findViewById(R.id.switch_main_floating_long_press_drag);
         resetMainFloatingButton = view.findViewById(R.id.btn_reset_main_floating);
 
         carApiStatusText = view.findViewById(R.id.tv_car_api_status);
@@ -212,6 +214,7 @@ public class BlindSpotSettingsFragment extends Fragment {
         blindSpotCorrectionSwitch.setChecked(appConfig.isBlindSpotCorrectionEnabled());
 
         mainFloatingAspectRatioLockSwitch.setChecked(appConfig.isMainFloatingAspectRatioLocked());
+        mainFloatingLongPressDragSwitch.setChecked(appConfig.isMainFloatingLongPressDragEnabled());
         
         // 车门联动配置加载
         doorLinkageSwitch.setChecked(appConfig.isDoorLinkageEnabled());
@@ -431,6 +434,10 @@ public class BlindSpotSettingsFragment extends Fragment {
 
         mainFloatingAspectRatioLockSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             appConfig.setMainFloatingAspectRatioLocked(isChecked);
+        });
+
+        mainFloatingLongPressDragSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            appConfig.setMainFloatingLongPressDragEnabled(isChecked);
         });
 
         resetMainFloatingButton.setOnClickListener(v -> {

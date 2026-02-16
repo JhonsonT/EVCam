@@ -125,6 +125,9 @@ public class AppConfig {
     // 主屏悬浮窗比例锁定
     private static final String KEY_MAIN_FLOATING_ASPECT_RATIO_LOCKED = "main_floating_aspect_ratio_locked";
 
+    // 主屏悬浮窗长按拖动
+    private static final String KEY_MAIN_FLOATING_LONG_PRESS_DRAG = "main_floating_long_press_drag";
+
     // 补盲画面矫正 (Matrix)
     private static final String KEY_BLIND_SPOT_CORRECTION_ENABLED = "blind_spot_correction_enabled";
     private static final String KEY_BLIND_SPOT_CORRECTION_PREFIX = "blind_spot_correction_";
@@ -1526,6 +1529,14 @@ public class AppConfig {
 
     public boolean isMainFloatingAspectRatioLocked() {
         return prefs.getBoolean(KEY_MAIN_FLOATING_ASPECT_RATIO_LOCKED, false);
+    }
+
+    public void setMainFloatingLongPressDragEnabled(boolean enabled) {
+        prefs.edit().putBoolean(KEY_MAIN_FLOATING_LONG_PRESS_DRAG, enabled).apply();
+    }
+
+    public boolean isMainFloatingLongPressDragEnabled() {
+        return prefs.getBoolean(KEY_MAIN_FLOATING_LONG_PRESS_DRAG, false);
     }
 
     public void setBlindSpotCorrectionEnabled(boolean enabled) {

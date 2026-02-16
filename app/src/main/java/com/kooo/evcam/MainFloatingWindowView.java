@@ -184,8 +184,12 @@ public class MainFloatingWindowView extends FrameLayout {
                 if (localY > getHeight() - RESIZE_THRESHOLD) resizeMode |= 8; // 下
                 
                 isResizing = resizeMode != 0;
-                isDragEnabled = false;
-                mainHandler.postDelayed(longPressRunnable, LONG_PRESS_DURATION);
+                if (appConfig.isMainFloatingLongPressDragEnabled()) {
+                    isDragEnabled = false;
+                    mainHandler.postDelayed(longPressRunnable, LONG_PRESS_DURATION);
+                } else {
+                    isDragEnabled = true;
+                }
                 return true;
 
             case MotionEvent.ACTION_MOVE:
