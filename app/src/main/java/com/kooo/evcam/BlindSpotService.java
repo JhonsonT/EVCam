@@ -1019,6 +1019,10 @@ public class BlindSpotService extends Service {
         }
         MultiCameraManager cameraManager = com.kooo.evcam.camera.CameraManagerHolder.getInstance().getCameraManager();
         if (cameraManager != null) {
+            if (cameraManager.isRecording()) {
+                AppLog.d(TAG, "补盲结束但正在录制中，保持相机连接");
+                return;
+            }
             AppLog.d(TAG, "补盲结束且无持久 Surface，释放相机资源");
             cameraManager.closeAllCameras();
         }
