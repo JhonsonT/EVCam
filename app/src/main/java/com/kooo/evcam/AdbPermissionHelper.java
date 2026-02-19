@@ -536,33 +536,96 @@ public class AdbPermissionHelper {
     }
 
     private void doExecuteScript(String scriptPath, Callback callback) {
-        try {
-            // 先断开重连，避免 ADB 被占用
-            resetAdbConnection(callback);
+        boolean success = attemptExecuteScript(scriptPath, callback);
 
+        if (!success) {
+            log(callback, "");
+            log(callback, "========================================");
+            log(callback, "[INFO] 首次执行未成功，等待 3 秒后自动重试...");
+            log(callback, "========================================");
+            log(callback, "");
+            try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
+            success = attemptExecuteScript(scriptPath, callback);
+        }
+
+        notifyComplete(callback, success);
+    }
+
+    /**
+     * 尝试执行一次完整的 root → remount → 脚本 流程。
+     * @return true 如果脚本输出中没有 [ERROR]
+     */
+    private boolean attemptExecuteScript(String scriptPath, Callback callback) {
+        try {
+            // ===== Phase 1: adb root =====
+            resetAdbConnection(callback);
             loadOrGenerateKeyPair();
 
             socket = tryConnect(callback);
             if (socket == null) {
-                notifyComplete(callback, false);
-                return;
+                return false;
             }
             socketIn = socket.getInputStream();
             socketOut = socket.getOutputStream();
 
             if (!performHandshake(callback)) {
-                log(callback, "\n✗ ADB 连接握手失败");
-                notifyComplete(callback, false);
-                return;
+                log(callback, "✗ ADB 连接握手失败");
+                return false;
             }
 
             log(callback, "✓ ADB 连接成功");
             log(callback, "");
 
-            // 脚本可能执行较长时间，延长超时
-            socket.setSoTimeout(60000);
+            String idResult = executeShellCommand("id");
+            boolean alreadyRoot = (idResult != null && idResult.contains("uid=0"));
 
-            // 执行脚本并流式输出
+            if (alreadyRoot) {
+                log(callback, "[INFO] adbd 已是 root，跳过 adb root");
+            } else {
+                log(callback, "[INFO] 执行 adb root ...");
+                closeSocket();
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(ADB_HOST, ADB_PORT), CONNECT_TIMEOUT_MS);
+                socket.setSoTimeout(READ_TIMEOUT_MS);
+                socketIn = socket.getInputStream();
+                socketOut = socket.getOutputStream();
+                performHandshake(callback);
+                String rootResult = executeService("root:");
+                log(callback, "[INFO]   " + rootResult);
+                closeSocket();
+                log(callback, "[INFO] 等待 adbd 以 root 身份重启...");
+                waitForAdbd(8000);
+            }
+
+            // ===== Phase 2: adb remount =====
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ADB_HOST, ADB_PORT), CONNECT_TIMEOUT_MS);
+            socket.setSoTimeout(READ_TIMEOUT_MS);
+            socketIn = socket.getInputStream();
+            socketOut = socket.getOutputStream();
+
+            if (performHandshake(callback)) {
+                log(callback, "[INFO] 执行 adb remount ...");
+                String remountResult = executeService("remount:");
+                log(callback, "[INFO]   " + remountResult);
+            } else {
+                log(callback, "[WARN] remount 握手失败，继续执行脚本");
+            }
+            closeSocket();
+            log(callback, "");
+
+            // ===== Phase 3: 执行脚本 =====
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(ADB_HOST, ADB_PORT), CONNECT_TIMEOUT_MS);
+            socket.setSoTimeout(60000);
+            socketIn = socket.getInputStream();
+            socketOut = socket.getOutputStream();
+
+            if (!performHandshake(callback)) {
+                log(callback, "✗ ADB 连接握手失败");
+                return false;
+            }
+
             boolean success = executeShellCommandStreaming("sh " + scriptPath, callback);
 
             log(callback, "");
@@ -571,19 +634,13 @@ public class AdbPermissionHelper {
             } else {
                 log(callback, "✗ 脚本执行过程中出现错误，请检查日志");
             }
+            return success;
 
-            notifyComplete(callback, success);
-
-        } catch (java.net.SocketTimeoutException e) {
-            log(callback, "");
-            log(callback, "✗ 执行超时");
-            AppLog.e(TAG, "Script execution timeout", e);
-            notifyComplete(callback, false);
         } catch (Exception e) {
             log(callback, "");
             log(callback, "✗ 错误: " + e.getMessage());
             AppLog.e(TAG, "Script execution failed", e);
-            notifyComplete(callback, false);
+            return false;
         } finally {
             closeSocket();
         }
@@ -652,6 +709,59 @@ public class AdbPermissionHelper {
 
         return !hasError;
     }
+
+    // ==================== ADB 服务调用（root / remount） ====================
+
+    private String executeService(String serviceName) throws Exception {
+        int localId = localIdCounter++;
+        byte[] openData = (serviceName + "\0").getBytes("UTF-8");
+        sendMessage(A_OPEN, localId, 0, openData);
+
+        StringBuilder output = new StringBuilder();
+        boolean streamOpen = true;
+
+        while (streamOpen) {
+            AdbMessage msg = readMessage();
+            switch (msg.command) {
+                case A_OKAY:
+                    break;
+                case A_WRTE:
+                    sendMessage(A_OKAY, localId, msg.arg0, null);
+                    if (msg.data != null) {
+                        output.append(new String(msg.data, "UTF-8"));
+                    }
+                    break;
+                case A_CLSE:
+                    sendMessage(A_CLSE, localId, msg.arg0, null);
+                    streamOpen = false;
+                    break;
+                default:
+                    streamOpen = false;
+                    break;
+            }
+        }
+        return output.toString().trim();
+    }
+
+    private void waitForAdbd(long maxWaitMs) {
+        long deadline = System.currentTimeMillis() + maxWaitMs;
+        long delay = 500;
+        while (System.currentTimeMillis() < deadline) {
+            try { Thread.sleep(delay); } catch (InterruptedException e) { break; }
+            Socket probe = null;
+            try {
+                probe = new Socket();
+                probe.connect(new InetSocketAddress(ADB_HOST, ADB_PORT), 1500);
+                probe.close();
+                return;
+            } catch (Exception e) {
+                delay = Math.min(delay * 2, 2000);
+            } finally {
+                if (probe != null) try { probe.close(); } catch (Exception ignored) {}
+            }
+        }
+    }
+
 
     // ==================== Shell 命令执行（内部） ====================
 

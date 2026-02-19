@@ -79,9 +79,29 @@ check_write_permission() {
     fi
     print_success "已获取系统权限 (uid=0)"
 
-    print_info "尝试 remount system 分区..."
-    mount -o rw,remount /system 2>/dev/null
-    mount -o rw,remount / 2>/dev/null
+    # 将 SELinux 设为宽容模式，避免 "inaccessible or not found" 错误
+    SELINUX_STATUS=$(getenforce 2>/dev/null)
+    print_info "当前 SELinux 状态: $SELINUX_STATUS"
+    if [ "$SELINUX_STATUS" = "Enforcing" ]; then
+        setenforce 0 2>/dev/null
+        NEW_STATUS=$(getenforce 2>/dev/null)
+        if [ "$NEW_STATUS" = "Permissive" ]; then
+            print_success "SELinux 已设为 Permissive（宽容模式）"
+        else
+            print_warning "SELinux 设置失败，后续操作可能受 SELinux 拦截"
+        fi
+    else
+        print_info "SELinux 已处于非 Enforcing 状态，无需修改"
+    fi
+
+    print_info "尝试 remount system/vendor 分区..."
+    if [ -x /system/bin/remount ]; then
+        print_info "调用 /system/bin/remount ..."
+        /system/bin/remount 2>/dev/null
+    fi
+
+    mount -o remount,rw / 2>/dev/null
+    mount -o remount,rw /system 2>/dev/null
 
     TEST_FILE="/system/.evcam_write_test_$$"
     if touch "$TEST_FILE" 2>/dev/null; then
@@ -89,12 +109,12 @@ check_write_permission() {
         print_success "system 分区可写"
     else
         print_error "system 分区不可写！"
-        print_error "可能需要先执行 'adb disable-verity' 并重启"
+        print_error "请先在 PC 端执行以下命令后再重试："
+        print_error "  adb root && adb remount"
         return 1
     fi
 
-    print_info "尝试 remount vendor 分区..."
-    mount -o rw,remount /vendor 2>/dev/null
+    mount -o remount,rw /vendor 2>/dev/null
 
     TEST_FILE="/vendor/.evcam_write_test_$$"
     if touch "$TEST_FILE" 2>/dev/null; then
@@ -102,6 +122,8 @@ check_write_permission() {
         print_success "vendor 分区可写"
     else
         print_error "vendor 分区不可写！"
+        print_error "请先在 PC 端执行以下命令后再重试："
+        print_error "  adb root && adb remount"
         return 1
     fi
 
