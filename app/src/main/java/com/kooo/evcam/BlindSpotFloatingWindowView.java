@@ -70,7 +70,10 @@ public class BlindSpotFloatingWindowView extends FrameLayout {
     }
 
     private void init() {
-        LayoutInflater.from(getContext()).inflate(R.layout.view_blind_spot_floating, this);
+        int layoutRes = appConfig.isMultiviewCarModel()
+                ? R.layout.view_blind_spot_floating_multiview
+                : R.layout.view_blind_spot_floating;
+        LayoutInflater.from(getContext()).inflate(layoutRes, this);
         textureView = findViewById(R.id.blind_spot_texture_view);
         View saveLayout = findViewById(R.id.layout_save_config);
         View saveButton = findViewById(R.id.btn_save_blind_spot_config);

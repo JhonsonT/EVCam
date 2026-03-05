@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:clipChildren="true"
+    android:clipToPadding="true">
+
+    <!-- 20dp圆角外边框 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="2dp"
+            android:clipChildren="true"
+            android:clipToPadding="false">
+
+            <!-- 状态栏 -->
+            <LinearLayout
+                android:id="@+id/status_bar_blind_spot"
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:background="#4D000000"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clipChildren="true"
+                android:clipToPadding="true">
+
+                <!-- 左三角标（左转时显示） -->
+                <ImageView
+                    android:id="@+id/iv_triangle_left"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="15dp"
+                    android:src="@drawable/ic_triangle_left"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/status_prefix_blind_spot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="15dp"
+                    android:text="补盲"
+                    android:textColor="#B0B0B0"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/status_text_blind_spot"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="摄像头"
+                    android:textColor="#B0B0B0"
+                    android:textSize="14sp" />
+
+                <!-- 右三角标（右转时显示） -->
+                <ImageView
+                    android:id="@+id/iv_triangle_right"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_triangle_right"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- 摄像头预览 -->
+            <TextureView
+                android:id="@+id/blind_spot_texture_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:clipToOutline="true" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 设置模式下的保存按钮容器 -->
+    <LinearLayout
+        android:id="@+id/layout_save_config"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:background="#88000000"
+        android:padding="4dp">
+
+        <Button
+            android:id="@+id/btn_rotate_blind_spot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="旋转"
+            android:backgroundTint="@color/button_accent"
+            android:textColor="@color/white"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btn_save_blind_spot_config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="保存并关闭"
+            android:backgroundTint="@color/button_accent"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+</FrameLayout>

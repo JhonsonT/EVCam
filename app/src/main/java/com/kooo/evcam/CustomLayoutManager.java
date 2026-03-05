@@ -686,6 +686,16 @@ public class CustomLayoutManager {
         tvRightYValue.setText(String.valueOf(rightValues[3]));
         tvRightRotationValue.setText(rightValues[4] + "°");
 
+        // 画框默认位置和大小（根据模式选择）
+        final int defaultLeftX = mode.equals("front") ? frontLeftX : rearLeftX;
+        final int defaultLeftY = mode.equals("front") ? frontLeftY : rearLeftY;
+        final int defaultLeftWidth = mode.equals("front") ? frontLeftWidth : rearLeftWidth;
+        final int defaultLeftHeight = mode.equals("front") ? frontLeftHeight : rearLeftHeight;
+        final int defaultRightX = mode.equals("front") ? frontRightX : rearRightX;
+        final int defaultRightY = mode.equals("front") ? frontRightY : rearRightY;
+        final int defaultRightWidth = mode.equals("front") ? frontRightWidth : rearRightWidth;
+        final int defaultRightHeight = mode.equals("front") ? frontRightHeight : rearRightHeight;
+
         // 创建弹窗
         android.app.AlertDialog dialog = builder.create();
 
@@ -708,8 +718,8 @@ public class CustomLayoutManager {
                 int rightRotation = sbRightRotation.getProgress();
 
                 // 实时应用布局到视图（画框位置和大小保持默认值）
-                setViewPosition(frameLeft, defaultLeftX, defaultLeftY, defaultLeftWidth, defaultHeight);
-                setViewPosition(frameRight, defaultRightX, defaultRightY, defaultRightWidth, defaultHeight);
+                setViewPosition(frameLeft, defaultLeftX, defaultLeftY, defaultLeftWidth, defaultLeftHeight);
+                setViewPosition(frameRight, defaultRightX, defaultRightY, defaultRightWidth, defaultRightHeight);
 
                 // 实时应用位置和大小（只调整画面和测试文字）
                 if (textureLeft != null) {

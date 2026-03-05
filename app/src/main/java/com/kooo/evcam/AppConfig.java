@@ -326,6 +326,7 @@ public class AppConfig {
     public static final String CAR_MODEL_PHONE = "phone";  // 手机
     public static final String CAR_MODEL_CUSTOM = "custom";  // 自定义车型
     public static final String CAR_MODEL_XINGHAN_7 = "xinghan_7";  // 26款星舰7
+    public static final String CAR_MODEL_MULTIVIEW = "multiview";  // 多视角布局
     
     private final SharedPreferences prefs;
     
@@ -767,6 +768,20 @@ public class AppConfig {
     }
     
     /**
+     * 是否为多视角布局
+     */
+    public boolean isMultiviewCarModel() {
+        return CAR_MODEL_MULTIVIEW.equals(getCarModel());
+    }
+    
+    /**
+     * 是否需要自定义布局管理器（自定义车型和多视角都需要）
+     */
+    public boolean needsCustomLayoutManager() {
+        return isCustomCarModel() || isMultiviewCarModel();
+    }
+    
+    /**
      * 设置摄像头数量
      * @param count 摄像头数量（4/2/1）
      */
@@ -792,6 +807,7 @@ public class AppConfig {
             case CAR_MODEL_L7_MULTI:
             case CAR_MODEL_XINGHAN_7:
                 return 4;  // 银河E5/L7/26款星舰7：4摄
+            case CAR_MODEL_MULTIVIEW:
             case CAR_MODEL_CUSTOM:
             default:
                 // 自定义车型使用用户设置的数量

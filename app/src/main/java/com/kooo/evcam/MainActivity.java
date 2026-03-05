@@ -892,6 +892,13 @@ public class MainActivity extends AppCompatActivity {
             requiredTextureCount = 4;
             AppLog.d(TAG, "使用26款星舰7配置：横屏4摄像头布局");
         }
+        // 多视角布局：自定义布局 + 圆角UI + 车辆控制
+        else if (appConfig.isMultiviewCarModel()) {
+            layoutId = R.layout.activity_main_multiview;
+            configuredCameraCount = appConfig.getCameraCount();
+            requiredTextureCount = configuredCameraCount;
+            AppLog.d(TAG, "使用多视角布局：" + configuredCameraCount + "摄像头");
+        }
         // 自定义车型：使用统一的自定义布局（支持自由操控）
         else if (appConfig.isCustomCarModel()) {
             layoutId = R.layout.activity_main_custom;
@@ -1135,7 +1142,7 @@ public class MainActivity extends AppCompatActivity {
      * 业务逻辑委托给 CustomLayoutManager 处理
      */
     private void initCustomLayoutManager() {
-        if (!appConfig.isCustomCarModel()) {
+        if (!appConfig.needsCustomLayoutManager()) {
             return;
         }
 
@@ -2413,8 +2420,8 @@ public class MainActivity extends AppCompatActivity {
                 } else if (AppConfig.CAR_MODEL_XINGHAN_7.equals(carModel)) {
                     // 26款星舰7：使用固定映射（前3后2左4右1）
                     initCamerasForXinghan7(cameraIds);
-                } else if (appConfig.isCustomCarModel()) {
-                    // 自定义车型：使用用户配置的摄像头映射
+                } else if (appConfig.needsCustomLayoutManager()) {
+                    // 自定义车型/多视角：使用用户配置的摄像头映射
                     initCamerasForCustomModel(cameraIds);
                 } else {
                     // 银河E5：使用固定映射
@@ -2654,8 +2661,8 @@ public class MainActivity extends AppCompatActivity {
      * 注意：自定义布局默认不旋转、不镜像，所有调节在自由调节界面进行
      */
     private void setCustomRotationForCameras() {
-        if (!appConfig.isCustomCarModel()) {
-            return;  // 只对自定义车型应用
+        if (!appConfig.needsCustomLayoutManager()) {
+            return;  // 只对自定义车型/多视角应用
         }
 
         // 自定义布局：默认不应用任何旋转，保持原始状态
@@ -2740,7 +2747,7 @@ public class MainActivity extends AppCompatActivity {
     private void applyPreviewSizeTransform(String cameraKey, AutoFitTextureView textureView, android.util.Size previewSize) {
         String carModel = appConfig.getCarModel();
 
-        if (appConfig.isCustomCarModel()) {
+        if (appConfig.needsCustomLayoutManager()) {
             textureView.setAspectRatio(previewSize.getWidth(), previewSize.getHeight());
             textureView.setFillContainer(true);
             AppLog.d(TAG, "设置 " + cameraKey + " 宽高比(自定义-填充): " + previewSize.getWidth() + "x" + previewSize.getHeight());

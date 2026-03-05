@@ -87,17 +87,21 @@ public class MainFloatingWindowView extends FrameLayout {
     }
 
     private void init() {
-        LayoutInflater.from(getContext()).inflate(R.layout.presentation_secondary_display, this);
+        boolean isMultiview = appConfig.isMultiviewCarModel();
+        int layoutRes = isMultiview
+                ? R.layout.presentation_secondary_display_multiview
+                : R.layout.presentation_secondary_display;
+        LayoutInflater.from(getContext()).inflate(layoutRes, this);
         textureView = findViewById(R.id.secondary_texture_view);
 
-        // 初始化状态栏控件
+        // 初始化状态栏控件（仅多视角布局有这些控件）
         statusPrefixText = findViewById(R.id.status_prefix_secondary);
         statusText = findViewById(R.id.status_text_secondary);
         triangleLeft = findViewById(R.id.iv_triangle_left);
         triangleRight = findViewById(R.id.iv_triangle_right);
 
         // 圆角裁切
-        float cornerRadius = 20 * getContext().getResources().getDisplayMetrics().density; // 20dp
+        float cornerRadius = (isMultiview ? 20 : 8) * getContext().getResources().getDisplayMetrics().density;
         setOutlineProvider(new android.view.ViewOutlineProvider() {
             @Override
             public void getOutline(View view, android.graphics.Outline outline) {
