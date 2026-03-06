@@ -3074,29 +3074,19 @@ public class AppConfig {
 
     /**
      * 重置前轮模式视图参数为默认值
-     * 默认值与普通模式相同
      */
-    public void resetFrontWheelViewParams(int defaultLeftWidth, int defaultLeftHeight, int defaultRightWidth, int defaultRightHeight, int containerHeight) {
-        int halfHeight = (containerHeight - 20) / 2;
-        int padding = 10;
-        int vehicleControlWidth = 280;
-
-        setFrontWheelLeftViewParams(defaultLeftWidth, halfHeight, padding, padding * 2 + halfHeight, 0);
-        setFrontWheelRightViewParams(defaultRightWidth, halfHeight, padding * 2 + defaultLeftWidth + vehicleControlWidth, padding * 2 + halfHeight, 0);
+    public void resetFrontWheelViewParams() {
+        setFrontWheelLeftViewParams(1120, 662, 10, 397, 270);
+        setFrontWheelRightViewParams(1211, 662, -76, 502, 90);
         AppLog.d(TAG, "前轮模式视图参数已重置为默认值");
     }
 
     /**
      * 重置后轮模式视图参数为默认值
-     * 默认值与普通模式相同
      */
-    public void resetRearWheelViewParams(int defaultLeftWidth, int defaultLeftHeight, int defaultRightWidth, int defaultRightHeight, int containerHeight) {
-        int halfHeight = (containerHeight - 20) / 2;
-        int padding = 10;
-        int vehicleControlWidth = 280;
-
-        setRearWheelLeftViewParams(defaultLeftWidth, halfHeight, padding, padding * 2 + halfHeight, 0);
-        setRearWheelRightViewParams(defaultRightWidth, halfHeight, padding * 2 + defaultLeftWidth + vehicleControlWidth, padding * 2 + halfHeight, 0);
+    public void resetRearWheelViewParams() {
+        setRearWheelLeftViewParams(1120, 662, 10, -624, 270);
+        setRearWheelRightViewParams(1298, 662, -164, -702, 90);
         AppLog.d(TAG, "后轮模式视图参数已重置为默认值");
     }
 
